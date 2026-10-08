@@ -105,10 +105,21 @@ The theme appears as soon as the files are there.
 | `bun run restart` | Reload it in the Stream Deck app (needs `streamdeck dev`) |
 | `bun run preview <theme> --open` | Render keys and touch strip to a PNG, no device needed |
 | `bun run media` | Re-render the GIFs in `docs/media/` |
+| `bun run demo on` / `off` | Pretend agents in a separate herdr session, for recordings (see below) |
 | `bun run typecheck` | Type-check |
 
 The plugin polls `herdr agent list` every second and focuses agents with `herdr agent focus`. Logs go to
 `dev.fedeya.corral.sdPlugin/logs/`.
+
+### Demo mode
+
+`bun run demo on` starts a separate herdr session, `corral-demo`, with pretend agents that look like a coding agent at
+work. They follow a script (`scripts/demo-story.ts`): they start working, some finish, some stop and ask you to confirm
+(press `1`). The plugin switches to that session, so tapping a key opens the pretend agent. Your real herdr session isn't
+touched.
+
+Open the demo in Ghostty with `herdr --session corral-demo`. Run `bun run demo on` again to restart the story, and
+`bun run demo off` when you're done.
 
 ## Credits
 

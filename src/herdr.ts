@@ -1,11 +1,19 @@
 import { execFile } from "node:child_process";
-import { basename } from "node:path";
+import { existsSync, readFileSync } from "node:fs";
+import { basename, dirname, join } from "node:path";
 import { promisify } from "node:util";
-import { demoAgents, demoFocus, isDemo } from "./demo";
 
 const run = promisify(execFile);
 const HERDR = process.env.HERDR_BIN_PATH ?? "/opt/homebrew/bin/herdr";
 const TERMINAL_APP = process.env.HERDR_TERMINAL_APP ?? "Ghostty";
+
+// Demo mode (`bun run demo on`): this file holds the socket of the pretend-agents herdr session to talk to.
+const DEMO_FLAG = join(dirname(process.argv[1] ?? "."), "../demo");
+
+function herdrEnv(): NodeJS.ProcessEnv | undefined {
+	if (!existsSync(DEMO_FLAG)) return undefined;
+	return { ...process.env, HERDR_SOCKET_PATH: readFileSync(DEMO_FLAG, "utf8").trim() };
+}
 
 export type AgentStatus = "blocked" | "done" | "working" | "idle" | "unknown";
 
@@ -38,12 +46,11 @@ function titleFor(raw: RawAgent): string {
 }
 
 async function herdrJson<T>(...args: string[]): Promise<T> {
-	const { stdout } = await run(HERDR, args, { timeout: 5000 });
+	const { stdout } = await run(HERDR, args, { timeout: 5000, env: herdrEnv() });
 	return JSON.parse(stdout).result as T;
 }
 
 export async function listAgents(): Promise<Agent[]> {
-	if (isDemo()) return demoAgents();
 	const [agentResult, workspaceResult] = await Promise.all([
 		herdrJson<{ agents?: RawAgent[] }>("agent", "list"),
 		herdrJson<{ workspaces?: { workspace_id: string; label?: string }[] }>("workspace", "list"),
@@ -67,7 +74,6 @@ export async function listAgents(): Promise<Agent[]> {
 }
 
 export async function focusAgent(paneId: string): Promise<void> {
-	if (isDemo()) return demoFocus(paneId);
-	await run(HERDR, ["agent", "focus", paneId], { timeout: 5000 });
+	await run(HERDR, ["agent", "focus", paneId], { timeout: 5000, env: herdrEnv() });
 	await run("/usr/bin/open", ["-a", TERMINAL_APP]);
 }
