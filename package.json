@@ -1,0 +1,25 @@
+{
+  "name": "corral",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "bun build src/plugin.ts --target node --format esm --outfile dev.fedeya.corral.sdPlugin/bin/plugin.js",
+    "watch": "bun run build --watch",
+    "typecheck": "tsc --noEmit",
+    "preview": "CORRAL_IMGS=dev.fedeya.corral.sdPlugin/imgs bun scripts/preview.ts",
+    "link": "streamdeck link dev.fedeya.corral.sdPlugin",
+    "restart": "streamdeck restart dev.fedeya.corral",
+    "validate": "streamdeck validate dev.fedeya.corral.sdPlugin"
+  },
+  "dependencies": {
+    "@elgato/streamdeck": "^3.0.1",
+    "@elgato/utils": "0.6.0",
+    "pngjs": "^7.0.0"
+  },
+  "devDependencies": {
+    "@elgato/cli": "^1.10.1",
+    "@types/node": "^20",
+    "@types/pngjs": "^6.0.5",
+    "typescript": "^7.0.2"
+  }
+}

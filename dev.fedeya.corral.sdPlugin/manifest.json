@@ -1,0 +1,47 @@
+{
+	"$schema": "https://schemas.elgato.com/streamdeck/plugins/manifest.json",
+	"UUID": "dev.fedeya.corral",
+	"Name": "Corral",
+	"Version": "0.1.0.0",
+	"URL": "https://github.com/fedeya/corral",
+	"Author": "Federico Minaya",
+	"Description": "Your coding agents as animated pixel-art critters: see who is working, who needs you and who is done, and jump to them.",
+	"Icon": "imgs/plugin",
+	"Category": "Corral",
+	"CategoryIcon": "imgs/category",
+	"CodePath": "bin/plugin.js",
+	"SDKVersion": 3,
+	"Software": { "MinimumVersion": "7.1" },
+	"OS": [{ "Platform": "mac", "MinimumVersion": "13" }],
+	"Nodejs": { "Version": "20" },
+	"Actions": [
+		{
+			"UUID": "dev.fedeya.corral.slot",
+			"Name": "Agent slot",
+			"Tooltip": "Shows one herdr agent (ordered by priority); press to focus it",
+			"Icon": "imgs/action-slot",
+			"Controllers": ["Keypad"],
+			"SupportedInMultiActions": false,
+			"UserTitleEnabled": false,
+			"States": [{ "Image": "imgs/key", "ShowTitle": false }]
+		},
+		{
+			"UUID": "dev.fedeya.corral.dial",
+			"Name": "Agents strip",
+			"Tooltip": "Your agents as a little scene across the touch strip; tap one to focus it, turn the last dial to switch theme",
+			"Icon": "imgs/action-dial",
+			"Controllers": ["Encoder"],
+			"SupportedInMultiActions": false,
+			"UserTitleEnabled": false,
+			"States": [{ "Image": "imgs/action-dial", "ShowTitle": false }],
+			"Encoder": {
+				"layout": "layouts/dial.json",
+				"TriggerDescription": {
+					"Rotate": "Change key page (last dial: theme)",
+					"Push": "Jump to next urgent",
+					"Touch": "Focus the tapped agent"
+				}
+			}
+		}
+	]
+}
