@@ -1,6 +1,7 @@
 import { execFile } from "node:child_process";
 import { basename } from "node:path";
 import { promisify } from "node:util";
+import { demoAgents, demoFocus, isDemo } from "./demo";
 
 const run = promisify(execFile);
 const HERDR = process.env.HERDR_BIN_PATH ?? "/opt/homebrew/bin/herdr";
@@ -42,6 +43,7 @@ async function herdrJson<T>(...args: string[]): Promise<T> {
 }
 
 export async function listAgents(): Promise<Agent[]> {
+	if (isDemo()) return demoAgents();
 	const [agentResult, workspaceResult] = await Promise.all([
 		herdrJson<{ agents?: RawAgent[] }>("agent", "list"),
 		herdrJson<{ workspaces?: { workspace_id: string; label?: string }[] }>("workspace", "list"),
@@ -65,6 +67,7 @@ export async function listAgents(): Promise<Agent[]> {
 }
 
 export async function focusAgent(paneId: string): Promise<void> {
+	if (isDemo()) return demoFocus(paneId);
 	await run(HERDR, ["agent", "focus", paneId], { timeout: 5000 });
 	await run("/usr/bin/open", ["-a", TERMINAL_APP]);
 }
