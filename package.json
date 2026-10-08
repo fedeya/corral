@@ -7,6 +7,7 @@
     "watch": "bun run build --watch",
     "typecheck": "tsc --noEmit",
     "preview": "CORRAL_IMGS=dev.fedeya.corral.sdPlugin/imgs bun scripts/preview.ts",
+    "media": "CORRAL_IMGS=dev.fedeya.corral.sdPlugin/imgs bun scripts/media.ts",
     "link": "streamdeck link dev.fedeya.corral.sdPlugin",
     "restart": "streamdeck restart dev.fedeya.corral",
     "validate": "streamdeck validate dev.fedeya.corral.sdPlugin"

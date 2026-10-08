@@ -4,7 +4,7 @@
  * To make a new theme:
  *   1. Copy this file to src/themes/<id>.ts and rename `template` / `id` / `name`.
  *   2. Register it in src/themes/index.ts by adding it to THEMES. The last dial then cycles through it.
- *   3. Preview while you work, rebuild, and restart the plugin (see README.md, "Adding a theme").
+ *   3. Preview while you work, rebuild, and restart the plugin (see docs/adding-a-theme.md).
  *
  * Sprite sheets go in dev.fedeya.corral.sdPlugin/imgs/<id>/ and are loaded with loadSheet("<id>/file.png").
  * Credit the artist in imgs/CREDITS.md. If the license forbids redistribution, git-ignore the folder and

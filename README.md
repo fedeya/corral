@@ -1,113 +1,118 @@
-# Corral
+<h1 align="center">Corral</h1>
 
-Your coding agents as a herd of animated pixel-art critters on a Stream Deck +.
+<p align="center">
+  <b>Your coding agents as a herd of pixel-art critters on a Stream Deck +.</b><br>
+  See who's working, who needs you and who's done at a glance. Tap one to jump straight to it.
+</p>
 
-Each agent from [herdr](https://herdr.dev) gets its own character: a goat, a llama, a lumberjack, a miner. The keys
-show who's working, who needs you and who's done. The touch strip shows the whole herd together in a little scene.
-Tap one to jump to that agent in your terminal. Turn the last dial to switch themes.
+<p align="center">
+  <img src="docs/media/kingdom.gif" alt="Corral's kingdom theme on a Stream Deck +: pawns chopping trees, mining gold and waiting for orders" width="848">
+</p>
 
-## Requirements
+<p align="center">
+  <img alt="MIT license" src="https://img.shields.io/badge/license-MIT-blue">
+  <img alt="Stream Deck +" src="https://img.shields.io/badge/device-Stream%20Deck%20%2B-black">
+  <img alt="macOS" src="https://img.shields.io/badge/platform-macOS-lightgrey">
+  <img alt="herdr" src="https://img.shields.io/badge/works%20with-herdr-5fab62">
+</p>
 
-- Stream Deck + and the Stream Deck app (macOS).
-- herdr, at `/opt/homebrew/bin/herdr`.
-- Ghostty as your terminal.
-- [Bun](https://bun.sh) for building.
+---
 
-The herdr path and terminal are hard-coded in `src/herdr.ts` for now.
+Each agent from [herdr](https://herdr.dev) becomes a little character that keeps the same look for its workspace, so
+you know who's who without reading. Every key is one agent. The touch strip shows the whole herd together, each critter
+standing right under its key.
 
-## Install
-
-```sh
-bun install
-bun run build
-bun run link      # registers the plugin with the Stream Deck app
-```
-
-Then add the **Agent slot** action to as many keys as you like and the **Agents strip** action to the four dials.
-
-## Use
-
-Agents are sorted: needs you (blocked) > done > working > idle, then most recent first.
-
-| Control | Action |
+| | What you see |
 |---|---|
-| Key | Focus that agent (herdr + Ghostty) |
-| Tap the touch strip | Focus the agent you tapped |
-| Push any dial | Focus the agent that needs you most |
-| Turn dials 1–3 | Page through agents when they don't fit on the keys |
-| Turn dial 4 | Switch theme (remembered across restarts) |
+| 🟤 **Working** | Busy: walking, chopping wood, mining, hammering |
+| 🔴 **Needs you** | Hopping with a blinking **!** bubble, front and centre |
+| 🟢 **Done** | Showing off its work with a **✓** and sparkles |
+| ⚫ **Idle** | Dimmed and resting, so it stays out of the way |
+
+Agents that need you come first, then finished ones, then working, then idle.
 
 ## Themes
 
-Code is MIT (see `LICENSE`). Each theme's art keeps its own license:
+Turn the last dial to switch. Your choice is remembered.
 
-| Theme | Art | License |
-|---|---|---|
-| Farm | [LPC farm animals](https://opengameart.org/content/lpc-style-farm-animals) | CC-BY 3.0 (included) |
-| Kingdom | [Tiny Swords](https://pixelfrog-assets.itch.io/tiny-swords) by Pixel Frog | Free, not redistributable |
+### Kingdom
 
-Kingdom only shows up once its sprites are in place. Download Tiny Swords (free) from itch.io and copy the pawn, tree,
-castle, house, gold stone, bush, sheep, stump, meat and wood sprites into `dev.fedeya.corral.sdPlugin/imgs/kingdom/`.
-File names are in `src/themes/kingdom.ts`. The folder is git-ignored.
+Every workspace gets a pawn with a job (lumberjack, miner, builder or butcher) and a team colour. Working pawns haul
+wood, gold and meat back to the castle, and the island changes with the time of day.
 
-## Adding a theme
+<img src="docs/media/kingdom.gif" alt="Kingdom theme" width="640">
 
-A theme is one file in `src/themes/`, plus one line in `src/themes/index.ts` to register it.
+### Farm
 
-1. **Copy the template.** Copy `src/themes/_template.ts` to `src/themes/<id>.ts`. The template is a complete theme (a
-   pixel slime drawn in code, no image files) with comments explaining every part.
-2. **Register it.** Import it in `src/themes/index.ts` and add it to `THEMES`. Dial 4 now cycles through it.
-3. **Preview it.** Run `bun run preview <id> --open`. This renders the keys plus the touch strip by day and by night to a
-   PNG, with no Stream Deck needed. It uses your live herdr agents, or sample ones if herdr isn't running.
-4. **Ship it.** Run `bun run typecheck && bun run build && bun run restart`.
+Goats, sheep, cows, pigs, llamas and chickens grazing in a field, under a sky that follows your clock, with stars at
+night.
 
-A theme provides:
+<img src="docs/media/farm.gif" alt="Farm theme" width="640">
 
-- **`drawKey(agent, frame)`**: draws a 120×120 key for each status (`working`, `blocked`, `done`, `idle`). Frames tick 8
-  times a second.
-- **`keyFrame(agent, frame)`**: the animation step. Keys with the same step are drawn once and cached, so return the
-  loop length of each animation.
-- **`scene`**: built with `createScene(skin)`, where the skin defines:
-  - `background(hour, frame)`: the static 800×100 backdrop, cached by the key it returns.
-  - `overlay(...)`: optional animated details.
-  - `drawActor(...)`: draws one agent's figure and returns the top of its head.
-- **`prepare(agents)`** (optional): sees the full agent list after each poll. Kingdom uses it to deal jobs and colours
-  evenly.
+Want to make one? See **[Adding a theme](docs/adding-a-theme.md)**. It's one file, and there's a working template to
+start from.
 
-The shared scene code (`src/scene.ts`) already handles:
+## Controls
 
-- placing each agent under its key;
-- walking new figures in, and moving working ones back and forth;
-- name tags that never overlap;
-- tap hit-testing.
+| | |
+|---|---|
+| **Press a key** | Focus that agent in herdr and bring the terminal forward |
+| **Tap the touch strip** | Focus the critter you tapped |
+| **Push any dial** | Jump to the agent that needs you most |
+| **Turn dials 1–3** | Page through agents when there are more than keys |
+| **Turn dial 4** | Switch theme |
 
-Shared drawing helpers are in `src/render.ts`:
+## Install
 
-- `drawBubble` with `BANG` / `CHECK`, for the "!" and "✓" bubbles;
-- `sparkles`;
-- `label`, for the workspace name;
-- `frameBorder`;
-- the PICO-8 palette `P`;
-- per-status colours in `THEME`.
+You need:
 
-`Canvas.blitScaled` in `src/pixel.ts` draws sprite-sheet frames at any scale, mirrored or tinted.
+- a Stream Deck + and the Stream Deck app, on macOS;
+- [herdr](https://herdr.dev);
+- [Ghostty](https://ghostty.org);
+- [Bun](https://bun.sh).
 
-Conventions that keep themes consistent:
+Then build the plugin and register it with the Stream Deck app:
 
-- Put the art in the top ~75px and the workspace name in the bottom band (`label`).
-- Use the status colour from `THEME` as the background.
-- Dim idle agents so they don't stand out.
-- Draw a white border on the focused agent.
-- Animate every status.
+```sh
+git clone https://github.com/fedeya/corral
+cd corral
+bun install
+bun run build
+bun run link
+```
 
-Put sprite sheets in `dev.fedeya.corral.sdPlugin/imgs/<id>/` and load them with `loadSheet("<id>/file.png")`.
-Credit the artist in `imgs/CREDITS.md`. If the license forbids redistribution, git-ignore the folder and register the
-theme only when the art is present, using `hasImage`, the way kingdom does.
+In the Stream Deck app, open the **Corral** category. Drag **Agent slot** onto every key you want to use, and
+**Agents strip** onto all four dials.
+
+> [!NOTE]
+> The herdr path (`/opt/homebrew/bin/herdr`) and the terminal (Ghostty) are hard-coded in `src/herdr.ts` for now.
+
+### Enabling the kingdom theme
+
+The kingdom art can't be redistributed, so it isn't in the repo:
+
+1. Download [Tiny Swords](https://pixelfrog-assets.itch.io/tiny-swords) by Pixel Frog. It's free.
+2. Copy the sprites into `dev.fedeya.corral.sdPlugin/imgs/kingdom/`: pawns for each team colour, trees, castle, houses,
+   gold stone, bushes, sheep, stump, meat and wood. The exact file names are in `src/themes/kingdom.ts`.
+
+The theme appears as soon as the files are there.
 
 ## Development
 
-- **Build:** `bun run build`.
-- **Restart the plugin:** `bun run restart`. Stream Deck developer mode (`streamdeck dev`) must be on.
-- **Logs:** `dev.fedeya.corral.sdPlugin/logs/`.
-- **How it gets data:** the plugin polls `herdr agent list` and `herdr workspace list` every second, and focuses an
-  agent with `herdr agent focus`.
+| Command | |
+|---|---|
+| `bun run build` | Bundle the plugin |
+| `bun run restart` | Reload it in the Stream Deck app (needs `streamdeck dev`) |
+| `bun run preview <theme> --open` | Render keys and touch strip to a PNG, no device needed |
+| `bun run media` | Re-render the GIFs in `docs/media/` |
+| `bun run typecheck` | Type-check |
+
+The plugin polls `herdr agent list` every second and focuses agents with `herdr agent focus`. Logs go to
+`dev.fedeya.corral.sdPlugin/logs/`.
+
+## Credits
+
+- **Farm:** [LPC farm animals](https://opengameart.org/content/lpc-style-farm-animals) by Daniel Eddeland and
+  [LPC Goat](https://opengameart.org/content/lpc-goat) by bluecarrot16, CC-BY 3.0.
+- **Kingdom:** [Tiny Swords](https://pixelfrog-assets.itch.io/tiny-swords) by Pixel Frog. Not included in the repo.
+- **Code:** [MIT](LICENSE).
