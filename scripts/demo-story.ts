@@ -1,26 +1,22 @@
 // The demo story: one pretend task per workspace, with when it starts and when it finishes or asks for you
 // (seconds after `bun run demo on`). Edit freely to change what shows up in a recording.
 
-const ESC = "\x1b[";
-const dim = (s: string) => `${ESC}2m${s}${ESC}0m`;
-const bold = (s: string) => `${ESC}1m${s}${ESC}0m`;
-const green = (s: string) => `${ESC}38;5;114m${s}${ESC}0m`;
-const add = (s: string) => `${ESC}48;5;22m${s}${ESC}0m`;
-const del = (s: string) => `${ESC}48;5;52m${s}${ESC}0m`;
+export type Step =
+	| { kind: "say"; text: string }
+	| { kind: "read"; path: string; lines: number }
+	| { kind: "search"; pattern: string; files: number }
+	| { kind: "bash"; cmd: string; out: string }
+	| { kind: "edit"; path: string; at: number; removed: string[]; added: string[] };
 
-const dot = green("⏺");
-const read = (path: string, lines: number) => [`${dot} ${bold("Read")}(${path})`, dim(`  ⎿  Read ${lines} lines`)];
-const search = (pattern: string, files: number) => [`${dot} ${bold("Search")}(pattern: "${pattern}")`, dim(`  ⎿  Found ${files} files`)];
-const bash = (cmd: string, out: string) => [`${dot} ${bold("Bash")}(${cmd})`, dim(`  ⎿  ${out}`)];
-const say = (text: string) => [`${dot} ${text}`];
-const edit = (path: string, at: number, removed: string[], added: string[]) => [
-	`${dot} ${bold("Update")}(${path})`,
-	dim(`  ⎿  Updated ${path} with ${added.length} additions and ${removed.length} removals`),
-	...removed.map((l, i) => `     ${dim(String(at + i).padStart(3))} ${del(`- ${l}`)}`),
-	...added.map((l, i) => `     ${dim(String(at + i).padStart(3))} ${add(`+ ${l}`)}`),
-];
+const say = (text: string): Step => ({ kind: "say", text });
+const read = (path: string, lines: number): Step => ({ kind: "read", path, lines });
+const search = (pattern: string, files: number): Step => ({ kind: "search", pattern, files });
+const bash = (cmd: string, out: string): Step => ({ kind: "bash", cmd, out });
+const edit = (path: string, at: number, removed: string[], added: string[]): Step => ({ kind: "edit", path, at, removed, added });
 
 export type Task = {
+	/** Which agent CLI the pane imitates. */
+	agent: "opencode" | "claude";
 	prompt: string;
 	/** Seconds after the demo starts. */
 	start: number;
@@ -29,12 +25,15 @@ export type Task = {
 	/** Number of steps played before asking; the rest play after you answer. */
 	blockedAt?: number;
 	question?: string;
-	steps: string[][];
+	/** What it asks permission for (shown in the question). */
+	asks?: Step;
+	steps: Step[];
 	summary: string;
 };
 
 export const TASKS: Record<string, Task> = {
 	"auth-refactor": {
+		agent: "opencode",
 		prompt: "Move session handling out of the auth middleware into its own module",
 		start: 1,
 		end: 26,
@@ -49,24 +48,29 @@ export const TASKS: Record<string, Task> = {
 		summary: "Moved session handling into src/auth/session.ts. The middleware is 60 lines shorter and all 38 auth tests pass.",
 	},
 	"landing-page": {
+		agent: "opencode",
 		prompt: "Make the pricing section on the landing page responsive",
 		start: 2,
 		end: 12,
 		blockedAt: 2,
 		question: "Do you want to make this edit to Pricing.tsx?",
+		asks: edit("app/(marketing)/Pricing.tsx", 23, ['<div className="grid grid-cols-3 gap-8">'], ['<div className="grid grid-cols-1 gap-6 md:grid-cols-3 md:gap-8">']),
 		steps: [
 			read("app/(marketing)/Pricing.tsx", 167),
+			say("The cards use a fixed 3-column grid. I'll stack them on small screens."),
 			edit("app/(marketing)/Pricing.tsx", 23, ['<div className="grid grid-cols-3 gap-8">'], ['<div className="grid grid-cols-1 gap-6 md:grid-cols-3 md:gap-8">']),
 			bash("bun run build", "✓ Compiled successfully"),
 		],
 		summary: "The pricing cards now stack on mobile and sit side by side from md up.",
 	},
 	"stripe-webhooks": {
+		agent: "claude",
 		prompt: "Handle duplicate Stripe webhook deliveries",
 		start: 3,
 		end: 38,
 		blockedAt: 4,
 		question: "Run the database migration add_processed_events?",
+		asks: bash("bun run db:migrate", ""),
 		steps: [
 			read("src/webhooks/stripe.ts", 142),
 			say("Stripe retries deliveries, so the same event can arrive twice. I'll record processed event IDs."),
@@ -78,6 +82,7 @@ export const TASKS: Record<string, Task> = {
 		summary: "Duplicate deliveries are now ignored: each event ID is stored and checked before processing.",
 	},
 	"flaky-tests": {
+		agent: "opencode",
 		prompt: "Figure out why the checkout e2e test fails randomly in CI",
 		start: 4,
 		end: 18,
@@ -90,6 +95,7 @@ export const TASKS: Record<string, Task> = {
 		summary: "Fixed: the test now waits for the Pay button to be ready. 50/50 runs pass.",
 	},
 	"dark-mode": {
+		agent: "claude",
 		prompt: "Add a dark mode toggle to the settings page",
 		start: 5,
 		end: 55,
@@ -105,11 +111,13 @@ export const TASKS: Record<string, Task> = {
 		summary: "Dark mode is in: toggle in Settings, follows the system by default, remembered per user.",
 	},
 	"search-index": {
+		agent: "opencode",
 		prompt: "Speed up product search",
 		start: 6,
 		end: 46,
 		blockedAt: 3,
 		question: "Rebuild the search index? It takes about 4 minutes.",
+		asks: bash("bun run search:reindex", ""),
 		steps: [
 			bash("bun run bench:search", "p95 840ms"),
 			read("src/search/query.ts", 203),
@@ -120,6 +128,7 @@ export const TASKS: Record<string, Task> = {
 		summary: "Search p95 went from 840ms to 38ms with a trigram index.",
 	},
 	docs: {
+		agent: "opencode",
 		prompt: "Document the new webhooks API",
 		start: 30,
 		end: 70,
@@ -131,6 +140,7 @@ export const TASKS: Record<string, Task> = {
 		summary: "Wrote docs/webhooks.md with setup steps, retries and an example payload.",
 	},
 	onboarding: {
+		agent: "claude",
 		prompt: "Add a welcome checklist for new teams",
 		start: 999,
 		end: 999,
@@ -138,6 +148,7 @@ export const TASKS: Record<string, Task> = {
 		summary: "",
 	},
 	analytics: {
+		agent: "opencode",
 		prompt: "Track signup funnel events",
 		start: 999,
 		end: 999,
