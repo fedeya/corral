@@ -178,7 +178,7 @@ const skin: Skin = {
 
 export const farm: Theme = {
 	id: "farm",
-	name: "GRANJA",
+	name: "FARM",
 	drawKey,
 	keyFrame,
 	scene: createScene(skin),

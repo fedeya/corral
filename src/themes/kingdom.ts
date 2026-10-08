@@ -333,7 +333,7 @@ const skin: Skin = {
 
 export const kingdom: Theme = {
 	id: "kingdom",
-	name: "REINO",
+	name: "KINGDOM",
 	drawKey,
 	keyFrame,
 	prepare,
