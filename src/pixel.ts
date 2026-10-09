@@ -269,6 +269,14 @@ export function drawTextCentered(
 	drawText(canvas, text, Math.round((canvas.width - textWidth(text, scale, font)) / 2), y, scale, color, shadow, font);
 }
 
+/** Single line, cut with ".." if it doesn't fit. */
+export function fitText(text: string, maxWidth: number, scale: number, font: Font = FONT_5X7): string {
+	if (textWidth(text, scale, font) <= maxWidth) return text;
+	let cut = text;
+	while (cut.length > 1 && textWidth(`${cut}..`, scale, font) > maxWidth) cut = cut.slice(0, -1);
+	return `${cut.trimEnd()}..`;
+}
+
 /** Wraps on '-', '/', '_' and spaces, keeping the separator at the end of the line. */
 export function wrapPixels(text: string, maxWidth: number, scale: number, maxLines: number, font: Font = FONT_5X7): string[] {
 	const tokens = text.match(/[^-/_\s]+[-/_\s]?|[-/_\s]/g) ?? [];

@@ -36,7 +36,7 @@ const SLIME = [
 const COLOURS: RGB[] = [P.green, P.orange, hex("#29adff"), hex("#ff77a8"), P.yellow];
 
 function colourFor(agent: Agent): RGB {
-	return COLOURS[pick(`template:${agent.workspace}`, COLOURS.length)]!;
+	return COLOURS[pick(`template:${agent.identity}`, COLOURS.length)]!;
 }
 
 /** Draws the slime with its feet at (cx, feet); returns the y of its top. `squash` 0..2 flattens it. */
@@ -85,7 +85,7 @@ function drawKey(agent: Agent, frame: number): Canvas {
 			break;
 	}
 
-	label(c, agent.workspace, THEME[agent.status].text);
+	label(c, agent.workspace, THEME[agent.status].text, agent.subtitle);
 	frameBorder(c, agent.focused ? P.white : shade(bg, 0.7), 3);
 	return c;
 }

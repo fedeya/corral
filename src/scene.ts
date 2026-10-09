@@ -85,7 +85,7 @@ function tag(c: Canvas, p: Placed, head: number, frame: number, part: "pin" | "l
 	const y = TAG_Y[p.row] ?? 2;
 	const style = TAG_STYLE[agent.status];
 	const maxText = Math.min(TAG_MAX_TEXT, hi - lo - 6);
-	let text = `${style.icon}${agent.workspace.toUpperCase()}`;
+	let text = `${style.icon}${(agent.subtitle ?? agent.workspace).toUpperCase()}`;
 	if (textWidth(text, 2, FONT_3X5) > maxText) {
 		while (text.length > 1 && textWidth(`${text}..`, 2, FONT_3X5) > maxText) text = text.slice(0, -1);
 		text = `${text.trimEnd()}..`;

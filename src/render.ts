@@ -1,5 +1,5 @@
 import type { AgentStatus } from "./herdr";
-import { type Canvas, drawTextCentered, FONT_3X5, hex, type RGB, wrapPixels } from "./pixel";
+import { type Canvas, drawTextCentered, FONT_3X5, fitText, hex, type RGB, wrapPixels } from "./pixel";
 
 // PICO-8 palette
 export const P = {
@@ -68,8 +68,16 @@ export function sparkles(c: Canvas, frame: number, spots: [number, number, numbe
 	}
 }
 
-/** Workspace name in the bottom band of a key (one or two lines). */
-export function label(c: Canvas, text: string, color: RGB): void {
+/**
+ * Workspace name in the bottom band of a key (wrapped to two lines), or the workspace plus a dimmer subtitle line
+ * when the workspace has several agents.
+ */
+export function label(c: Canvas, text: string, color: RGB, subtitle?: string): void {
+	if (subtitle) {
+		drawTextCentered(c, fitText(text, SIZE - 14, 2, FONT_3X5), 80, 2, color, P.black, FONT_3X5);
+		drawTextCentered(c, fitText(subtitle, SIZE - 14, 2, FONT_3X5), 94, 2, shade(color, 0.7), P.black, FONT_3X5);
+		return;
+	}
 	const lines = wrapPixels(text, SIZE - 14, 2, 2, FONT_3X5);
 	const top = lines.length === 1 ? 86 : 80;
 	lines.forEach((line, i) => drawTextCentered(c, line, top + i * 14, 2, color, P.black, FONT_3X5));

@@ -5,7 +5,7 @@ import { writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { PNG } from "pngjs";
-import { type Agent, type AgentStatus, listAgents } from "../src/herdr";
+import { type Agent, type AgentStatus, listAgents, withIdentities } from "../src/herdr";
 import type { Canvas } from "../src/pixel";
 import { prepareThemes, renderKey, type Theme, THEMES } from "../src/themes";
 
@@ -28,7 +28,7 @@ async function agents(): Promise<Agent[]> {
 	const base: Agent[] =
 		live.length >= 7
 			? live
-			: SAMPLE.map((workspace, i) => ({ paneId: `p${i}`, title: workspace, workspace, status: "idle", focused: false, seq: i }));
+			: withIdentities(SAMPLE.map((workspace, i) => ({ paneId: `p${i}`, title: workspace, workspace, status: "idle", focused: false, seq: i })));
 	prepareThemes(base);
 	theme.prepare?.(base);
 	const statuses: AgentStatus[] = ["working", "blocked", "done", "idle", "working", "idle", "working"];

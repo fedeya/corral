@@ -30,7 +30,7 @@ let roster = "";
 const dealt = new Map<string, { job: number; team: number }>();
 
 function prepare(agents: Agent[]): boolean {
-	const workspaces = [...new Set(agents.map((a) => a.workspace))].sort();
+	const workspaces = [...new Set(agents.map((a) => a.identity))].sort();
 	const key = workspaces.join("\n");
 	if (key === roster) return false;
 	roster = key;
@@ -44,7 +44,7 @@ function prepare(agents: Agent[]): boolean {
 }
 
 function deal(agent: Agent): { job: number; team: number } {
-	return dealt.get(agent.workspace) ?? { job: pick(`job:${agent.workspace}`, JOBS.length), team: pick(`team:${agent.workspace}`, TEAMS.length) };
+	return dealt.get(agent.identity) ?? { job: pick(`job:${agent.identity}`, JOBS.length), team: pick(`team:${agent.identity}`, TEAMS.length) };
 }
 
 function teamFor(agent: Agent): string {
@@ -223,7 +223,7 @@ function drawKey(agent: Agent, frame: number): Canvas {
 			break;
 	}
 
-	label(c, agent.workspace, THEME[agent.status].text);
+	label(c, agent.workspace, THEME[agent.status].text, agent.subtitle);
 	frameBorder(c, agent.focused ? P.white : isIdle(agent.status) ? hex("#1a1a20") : shade(THEME[agent.status].bg, 0.7), 3);
 	return c;
 }

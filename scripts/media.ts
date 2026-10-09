@@ -6,7 +6,7 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { PNG } from "pngjs";
-import type { Agent, AgentStatus } from "../src/herdr";
+import { type Agent, type AgentStatus, withIdentities } from "../src/herdr";
 import { Canvas, hex, type RGB } from "../src/pixel";
 import { prepareThemes, renderKey, THEMES } from "../src/themes";
 
@@ -30,14 +30,14 @@ const sample: [string, AgentStatus][] = [
 	["infra", "working"],
 	["mobile", "idle"],
 ];
-const agents: Agent[] = sample.map(([workspace, status], i) => ({
+const agents: Agent[] = withIdentities(sample.map(([workspace, status], i) => ({
 	paneId: `p${i}`,
 	title: workspace,
 	workspace,
 	status,
 	focused: false,
 	seq: i,
-}));
+})));
 // Stream Deck + with the top-left key used as "back", as in a folder.
 const slots = [[1, 0], [2, 0], [3, 0], [0, 1], [1, 1], [2, 1], [3, 1]] as const;
 const visible = agents.map((agent, i) => ({ agent, column: slots[i]![0], row: slots[i]![1] }));

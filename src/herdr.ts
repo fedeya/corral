@@ -24,6 +24,10 @@ export type Agent = {
 	title: string;
 	focused: boolean;
 	seq: number;
+	/** Set when the workspace has several agents: tells them apart (the agent's title, or "#2", "#3"...). */
+	subtitle?: string;
+	/** Stable key for per-agent looks: the workspace, or workspace + pane when it has several agents. */
+	identity: string;
 };
 
 type RawAgent = {
@@ -42,7 +46,7 @@ const PRIORITY: Record<AgentStatus, number> = { blocked: 0, done: 1, working: 2,
 function titleFor(raw: RawAgent): string {
 	if (raw.name) return raw.name;
 	const title = (raw.terminal_title_stripped ?? "").replace(/^OC \| /, "").trim();
-	return title === "OpenCode" ? "" : title;
+	return (title === "OpenCode" ? "" : title).replace(/…/g, "..");
 }
 
 async function herdrJson<T>(...args: string[]): Promise<T> {
@@ -56,7 +60,7 @@ export async function listAgents(): Promise<Agent[]> {
 		herdrJson<{ workspaces?: { workspace_id: string; label?: string }[] }>("workspace", "list"),
 	]);
 	const workspaceLabels = new Map((workspaceResult.workspaces ?? []).map((w) => [w.workspace_id, w.label ?? ""]));
-	return (agentResult.agents ?? [])
+	const agents = (agentResult.agents ?? [])
 		.map((raw) => {
 			const folder = basename((raw.cwd ?? "").replace(/`$/, "")) || raw.pane_id;
 			const label = workspaceLabels.get(raw.workspace_id) || folder;
@@ -69,8 +73,20 @@ export async function listAgents(): Promise<Agent[]> {
 				focused: raw.focused ?? false,
 				seq: raw.state_change_seq ?? 0,
 			};
-		})
-		.sort((a, b) => PRIORITY[a.status] - PRIORITY[b.status] || b.seq - a.seq);
+		});
+	return withIdentities(agents).sort((a, b) => PRIORITY[a.status] - PRIORITY[b.status] || b.seq - a.seq);
+}
+
+export function withIdentities(agents: Omit<Agent, "identity" | "subtitle">[]): Agent[] {
+	const counts = new Map<string, number>();
+	for (const a of agents) counts.set(a.workspace, (counts.get(a.workspace) ?? 0) + 1);
+	const seen = new Map<string, number>();
+	return agents.map((a) => {
+		if ((counts.get(a.workspace) ?? 0) < 2) return { ...a, identity: a.workspace };
+		const n = (seen.get(a.workspace) ?? 0) + 1;
+		seen.set(a.workspace, n);
+		return { ...a, subtitle: a.title || `#${n}`, identity: `${a.workspace}#${a.paneId}` };
+	});
 }
 
 export async function focusAgent(paneId: string): Promise<void> {

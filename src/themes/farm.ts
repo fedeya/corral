@@ -37,7 +37,7 @@ function drawKey(agent: Agent, frame: number): Canvas {
 	c.rect(0, 0, SIZE, SIZE, theme.bg);
 	frameBorder(c, isIdle(agent.status) ? hex("#1a1a20") : shade(theme.bg, 0.7), 3);
 
-	const { animal, coat } = critterFor(agent.workspace);
+	const { animal, coat } = critterFor(agent.identity);
 	ground(c, theme.bg);
 	switch (agent.status) {
 		case "working":
@@ -67,7 +67,7 @@ function drawKey(agent: Agent, frame: number): Canvas {
 			break;
 	}
 
-	label(c, agent.workspace, theme.text);
+	label(c, agent.workspace, theme.text, agent.subtitle);
 	if (agent.focused) frameBorder(c, P.white, 3);
 	return c;
 }
@@ -159,7 +159,7 @@ const skin: Skin = {
 		}
 	},
 	drawActor(c, { agent, x, feet, dir, arrived, seed }, frame) {
-		const { animal, coat } = critterFor(agent.workspace);
+		const { animal, coat } = critterFor(agent.identity);
 		const tint = isIdle(agent.status) ? dim(coat, 0.4) : coat;
 		const hop = agent.status === "blocked" && arrived ? [0, 3, 5, 3][frame % 4]! : 0;
 		if (!arrived || agent.status === "working") {

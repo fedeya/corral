@@ -22,7 +22,7 @@ export function renderKey(theme: Theme, agent: Agent | undefined, frame: number,
 	const id = error
 		? `error:${error}`
 		: agent
-			? `${theme.id}:${agent.status}:${agent.workspace}:${agent.focused}:${theme.keyFrame(agent, frame)}`
+			? `${theme.id}:${agent.status}:${agent.identity}:${agent.subtitle}:${agent.focused}:${theme.keyFrame(agent, frame)}`
 			: "empty";
 	const hit = cache.get(id);
 	if (hit) return hit;
