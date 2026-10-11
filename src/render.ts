@@ -1,5 +1,5 @@
 import type { AgentStatus } from "./herdr";
-import { type Canvas, drawTextCentered, FONT_3X5, fitText, hex, type RGB, wrapPixels } from "./pixel";
+import { type Canvas, drawText, drawTextCentered, FONT_3X5, fitText, hex, type RGB, textWidth, wrapPixels } from "./pixel";
 
 // PICO-8 palette
 export const P = {
@@ -26,6 +26,14 @@ export const THEME: Record<AgentStatus, { bg: RGB; accent: RGB; text: RGB }> = {
 };
 
 export const SIZE = 120;
+
+/** Small camera badge; fixed text only, on every key/strip segment. */
+export function showcaseMarker(c: Canvas, x = 0, y = 106, width = SIZE): void {
+	c.rect(x + 3, y, width - 6, 13, P.black);
+	c.rect(x + 7, y + 2, 9, 6, P.yellow);
+	c.rect(x + 16, y + 1, 3, 8, P.yellow);
+	drawText(c, "SHOWCASE", x + Math.round((width - textWidth("SHOWCASE", 2, FONT_3X5)) / 2), y + 1, 2, P.yellow, undefined, FONT_3X5);
+}
 
 export function shade([r, g, b]: RGB, f: number): RGB {
 	return [Math.round(r * f), Math.round(g * f), Math.round(b * f)];

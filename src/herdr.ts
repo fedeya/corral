@@ -28,6 +28,8 @@ export type Agent = {
 	subtitle?: string;
 	/** Stable key for per-agent looks: the workspace, or workspace + pane when it has several agents. */
 	identity: string;
+	/** Original workspace seed on a presentation-only projection; never draw as text. */
+	appearanceWorkspace?: string;
 };
 
 type RawAgent = {
@@ -89,7 +91,10 @@ export function withIdentities(agents: Omit<Agent, "identity" | "subtitle">[]): 
 	});
 }
 
-export async function focusAgent(paneId: string): Promise<void> {
+export async function focusAgent(paneId: string, allowed: () => boolean = () => true): Promise<void> {
+	if (!allowed()) return;
 	await run(HERDR, ["agent", "focus", paneId], { timeout: 5000, env: herdrEnv() });
+	// A camera toggle can arrive while herdr is responding. Do not activate the terminal afterwards.
+	if (!allowed()) return;
 	await run("/usr/bin/open", ["-a", TERMINAL_APP]);
 }

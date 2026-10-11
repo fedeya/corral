@@ -1,6 +1,6 @@
 import type { Agent } from "../herdr";
 import { Canvas, drawText, drawTextCentered, FONT_3X5, hasImage } from "../pixel";
-import { P, SIZE, shade } from "../render";
+import { P, SIZE, shade, showcaseMarker } from "../render";
 import { farm } from "./farm";
 import { KINGDOM_PROBE, kingdom } from "./kingdom";
 import { kingdomPocket } from "./kingdom-pocket";
@@ -25,13 +25,15 @@ export function renderKey(
 	frame: number,
 	error: string | null,
 	pinned = false,
+	showcase = false,
 ): string {
+	if (showcase && error) error = "herdr off";
 	const id = error
 		? `error:${error}`
 		: agent
-			? `${theme.id}:${agent.status}:${agent.identity}:${agent.subtitle}:${agent.focused}:${theme.keyFrame(agent, frame)}`
+			? `${theme.id}:${agent.status}:${agent.identity}:${agent.workspace}:${agent.subtitle}:${agent.focused}:${theme.keyFrame(agent, frame)}`
 			: "empty";
-	const cacheId = `${id}:pin=${pinned}`;
+	const cacheId = `${showcase}:${id}:pin=${pinned}`;
 	const hit = cache.get(cacheId);
 	if (hit) return hit;
 
@@ -54,6 +56,7 @@ export function renderKey(
 		drawText(c, "PIN", 22, 9, 2, P.yellow, undefined, FONT_3X5);
 		if (!agent && !error) drawTextCentered(c, "MISSING", 80, 2, P.silver, P.black, FONT_3X5);
 	}
+	if (showcase) showcaseMarker(c);
 	const url = c.toDataUrl();
 
 	if (cache.size > 600) cache.clear();
