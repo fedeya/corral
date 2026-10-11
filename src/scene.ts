@@ -1,6 +1,6 @@
 import type { Agent, AgentStatus } from "./herdr";
 import { Canvas, drawText, FONT_3X5, hex, type RGB, textWidth } from "./pixel";
-import { P } from "./render";
+import { P, showcaseMarker } from "./render";
 import type { Visible } from "./state";
 
 export const WIDTH = 800;
@@ -106,7 +106,7 @@ function tag(c: Canvas, p: Placed, head: number, frame: number, part: "pin" | "l
 export type Scene = {
 	/** Same skin, independent walkers and hit targets for another device. */
 	fork(): Scene;
-	render(visible: Visible[], frame: number, hour?: number): Canvas;
+	render(visible: Visible[], frame: number, hour?: number, showcase?: boolean): Canvas;
 	/** Returns the agent nearest to a tap at scene coordinate x, within the tapped segment. */
 	agentAt(x: number): Agent | undefined;
 };
@@ -168,7 +168,7 @@ export function createScene(skin: Skin): Scene {
 
 	return {
 		fork: () => createScene(skin),
-		render(visible, frame, hour = new Date().getHours()) {
+		render(visible, frame, hour = new Date().getHours(), showcase = false) {
 			simulate(visible, frame);
 			const c = new Canvas(WIDTH, HEIGHT);
 			backdrop(hour, frame).data.copy(c.data);
@@ -191,6 +191,7 @@ export function createScene(skin: Skin): Scene {
 			for (const part of ["pin", "label"] as const) {
 				placed.forEach((p, i) => tag(c, p, heads[i]!, frame, part));
 			}
+			if (showcase) for (let column = 0; column < 4; column++) showcaseMarker(c, column * SEGMENT, 89, SEGMENT);
 			return c;
 		},
 		agentAt(x) {

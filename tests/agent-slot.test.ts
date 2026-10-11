@@ -60,7 +60,7 @@ const action = (id: string, column: number) => ({
 	},
 });
 const keys = [action("k1", 0), action("k2", 1)];
-const plugin = new AgentSlot() as AgentSlot & Dispatch;
+const plugin = new AgentSlot() as unknown as Dispatch & { onWillAppear(): void; onWillDisappear(ev: any): void };
 plugin.actions = keys;
 const focuses = () => readFileSync(process.env.CORRAL_TEST_FOCUS!, "utf8");
 async function refreshFixture(): Promise<void> {
@@ -80,7 +80,7 @@ test("SDK strip updates immediately when pinning rearranges keys in the same fra
 	await refreshFixture();
 	plugin.onWillAppear();
 	const { AgentsDial } = await import("../src/actions/agents-dial");
-	const strip = new AgentsDial() as InstanceType<typeof AgentsDial> & Dispatch;
+	const strip = new AgentsDial() as unknown as Dispatch & { onWillAppear(): void; onWillDisappear(): void };
 	const dial = {
 		id: "dial",
 		device: { id: "deck" },
@@ -141,7 +141,7 @@ test("SDK disappearance releases the action pin and cancels its pending press", 
 	await plugin.dispatch("onKeyDown", keys[0]);
 	plugin.actions = [keys[1]!];
 	await plugin.dispatch("onWillDisappear", keys[0]);
-	await new Promise((resolve) => queueMicrotask(resolve));
+	await new Promise<void>((resolve) => queueMicrotask(resolve));
 	await plugin.dispatch("onKeyUp", keys[0]);
 	assert.equal(focuses(), "");
 	plugin.actions = keys;

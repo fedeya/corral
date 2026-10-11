@@ -24,6 +24,7 @@ export class AgentSlot extends SingletonAction {
 
 	override onWillDisappear(ev: WillDisappearEvent): void {
 		this.#gestures.cancel(ev.action.id);
+		this.#focusPermissions.delete(ev.action.id);
 		this.#images.delete(ev.action.id);
 		queueMicrotask(() => {
 			this.#render();
@@ -36,27 +37,36 @@ export class AgentSlot extends SingletonAction {
 	}
 
 	#gestures = new KeyGestures();
+	#focusPermissions = new Map<string, () => boolean>();
 
 	override onKeyDown(ev: KeyDownEvent): void {
 		const slot = this.#slots().findIndex((a) => a.id === ev.action.id);
 		const agent = slot < 0 ? undefined : state.agentAt(slot);
+		if (!this.#focusPermissions.has(ev.action.id)) {
+			const canFocus = state.canFocus;
+			const permission = state.focusPermission();
+			this.#focusPermissions.set(ev.action.id, () => canFocus && permission());
+		}
 		this.#gestures.down(ev.action.id, agent?.paneId);
 	}
 
 	override async onKeyUp(ev: KeyUpEvent): Promise<void> {
 		const gesture = this.#gestures.up(ev.action.id);
+		const permission = this.#focusPermissions.get(ev.action.id);
+		this.#focusPermissions.delete(ev.action.id);
 		if (!gesture) return;
 		if (gesture.kind === "pin") {
 			if (!state.togglePin(ev.action.id, gesture.paneId)) await ev.action.showAlert();
 			return;
 		}
+		if (!permission?.()) return;
 		const paneId = gesture.paneId;
 		if (!paneId || state.error || !state.agents.some((a) => a.paneId === paneId)) {
 			await ev.action.showAlert();
 			return;
 		}
 		try {
-			await focusAgent(paneId);
+			await focusAgent(paneId, permission);
 			await state.refresh();
 		} catch (err) {
 			streamDeck.logger.error(`focus ${paneId} failed: ${err}`);
@@ -87,7 +97,7 @@ export class AgentSlot extends SingletonAction {
 		);
 		const resolved = state.resolved();
 		slots.forEach((action, i) => {
-			const image = renderKey(state.theme, resolved[i]?.agent, state.frame, state.error, resolved[i]?.pinned);
+			const image = renderKey(state.theme, state.displayAgentAt(i), state.frame, state.error, resolved[i]?.pinned, state.showcase);
 			if (this.#images.get(action.id) === image) return;
 			this.#images.set(action.id, image);
 			void action.setImage(image);
