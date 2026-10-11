@@ -35,6 +35,16 @@ Agents that need you come first, then finished ones, then working, then idle.
 
 Turn the last dial to switch. Your choice is remembered.
 
+### Raid
+
+An original pixel party takes on the **Crystal Warden**. Its health only falls when an enrolled agent is observed
+changing from **working → done**, once per agent per round. Blocked agents wave for help; they never deal fake damage.
+The strip shows the round, boss health and help count, and a trophy celebrates a real defeat.
+
+Choose **RAID** with dial 4, then place the separate **Raid Round** action on a spare key. Press it to start or reset
+from a fresh successful herdr roster. Agent keys, strip taps and dial pushes still focus agents as usual.
+See **[Raid rules and controls](docs/raid-mode.md)** for enrollment, offline and reset behavior.
+
 ### Kingdom
 
 Every workspace gets a pawn with a job (lumberjack, miner, builder or butcher) and a team colour. Working pawns haul
@@ -56,7 +66,8 @@ start from.
 
 | | |
 |---|---|
-| **Press a key** | Focus that agent in herdr and bring the terminal forward |
+| **Press an Agent slot key** | Focus that agent in herdr and bring the terminal forward |
+| **Press a Raid Round key** | Start or reset the raid from a fresh successful herdr roster |
 | **Tap the touch strip** | Focus the critter you tapped |
 | **Push any dial** | Jump to the agent that needs you most |
 | **Turn dials 1–3** | Page through agents when there are more than keys |
@@ -106,6 +117,7 @@ The theme appears as soon as the files are there.
 | `bun run preview <theme> --open` | Render keys and touch strip to a PNG, no device needed |
 | `bun run media` | Re-render the GIFs in `docs/media/` |
 | `bun run demo on` / `off` | Pretend agents in a separate herdr session, for recordings (see below) |
+| `bun test` | Run raid transition, renderer, native-action and subprocess integration tests |
 | `bun run typecheck` | Type-check |
 
 The plugin polls `herdr agent list` every second and focuses agents with `herdr agent focus`. Logs go to

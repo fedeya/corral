@@ -3,6 +3,7 @@
   "type": "module",
   "private": true,
   "scripts": {
+    "test": "bun test",
     "build": "bun build src/plugin.ts --target node --format esm --outfile dev.fedeya.corral.sdPlugin/bin/plugin.js",
     "watch": "bun run build --watch",
     "typecheck": "tsc --noEmit",

@@ -16,6 +16,16 @@
 	"Nodejs": { "Version": "20" },
 	"Actions": [
 		{
+			"UUID": "dev.fedeya.corral.raid",
+			"Name": "Raid Round",
+			"Tooltip": "Start or reset a raid with the current herdr roster; one working-to-done hit per agent",
+			"Icon": "imgs/action-raid",
+			"Controllers": ["Keypad"],
+			"SupportedInMultiActions": false,
+			"UserTitleEnabled": false,
+			"States": [{ "Image": "imgs/action-raid", "ShowTitle": false }]
+		},
+		{
 			"UUID": "dev.fedeya.corral.slot",
 			"Name": "Agent slot",
 			"Tooltip": "Shows one herdr agent (ordered by priority); press to focus it",

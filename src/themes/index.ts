@@ -3,12 +3,13 @@ import { Canvas, drawTextCentered, hasImage } from "../pixel";
 import { P, SIZE, shade } from "../render";
 import { farm } from "./farm";
 import { KINGDOM_PROBE, kingdom } from "./kingdom";
+import { raid } from "./raid";
 import type { Theme } from "./types";
 
 export type { Theme } from "./types";
 
 /** Themes whose art is present; kingdom sprites are local-only (see themes/kingdom.ts). */
-export const THEMES: Theme[] = [farm, ...(hasImage(KINGDOM_PROBE) ? [kingdom] : [])];
+export const THEMES: Theme[] = [farm, ...(hasImage(KINGDOM_PROBE) ? [kingdom] : []), raid];
 
 const cache = new Map<string, string>();
 
@@ -22,7 +23,7 @@ export function renderKey(theme: Theme, agent: Agent | undefined, frame: number,
 	const id = error
 		? `error:${error}`
 		: agent
-			? `${theme.id}:${agent.status}:${agent.identity}:${agent.subtitle}:${agent.focused}:${theme.keyFrame(agent, frame)}`
+			? JSON.stringify([theme.id, agent.status, agent.identity, agent.subtitle, agent.focused, theme.keyFrame(agent, frame), theme.keyState?.(agent) ?? ""])
 			: "empty";
 	const hit = cache.get(id);
 	if (hit) return hit;

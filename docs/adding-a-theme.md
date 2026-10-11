@@ -42,6 +42,7 @@ export const robots: Theme = {
   name: "ROBOTS",
   drawKey,      // (agent, frame) => Canvas
   keyFrame,     // (agent, frame) => number
+  keyState,     // optional: (agent) => string
   prepare,      // optional: (agents) => boolean
   scene: createScene(skin),
 };
@@ -63,6 +64,10 @@ export const robots: Theme = {
 
 **`keyFrame(agent, frame)`** returns the animation step. Keys that return the same step render the same image, which
 gets drawn once and cached. Return `frame % loopLength` for each status.
+
+**`keyState(agent)`** optionally identifies additional semantic state drawn on a key, such as a round number and
+membership. Encode multiple values with `JSON.stringify([round, membership])`, not packed arithmetic. The cache
+combines this component with the agent fields and numeric animation step; existing themes need not provide it.
 
 ### Touch strip
 
