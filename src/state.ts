@@ -1,5 +1,6 @@
 import streamDeck from "@elgato/streamdeck";
 import { type Agent, listAgents } from "./herdr";
+import { Showcase } from "./showcase";
 import { prepareThemes, THEMES, type Theme } from "./themes";
 
 const POLL_MS = 1000;
@@ -18,11 +19,32 @@ let themeIndex = 0;
 let themeChangedAt = 0;
 let themeLoaded = false;
 const listeners = new Set<() => void>();
+const showcase = new Showcase();
+let focusBlockedUntil = 0;
+let focusEpoch = 0;
 
 export type Slot = { column: number; row: number };
 export type Visible = Slot & { agent: Agent };
 
 export const state = {
+	get showcase() {
+		return showcase.active;
+	},
+	get canFocus() {
+		return !showcase.active && Date.now() >= focusBlockedUntil;
+	},
+	focusPermission(): () => boolean {
+		const epoch = focusEpoch;
+		return () => epoch === focusEpoch && this.canFocus;
+	},
+	toggleShowcase() {
+		focusEpoch++;
+		showcase.toggle();
+		// Drop queued presses/taps from the camera session, including the toggle gesture.
+		focusBlockedUntil = Date.now() + 1000;
+		for (const agent of agents) showcase.project(agent);
+		notify();
+	},
 	get agents() {
 		return agents;
 	},
@@ -59,12 +81,15 @@ export const state = {
 	agentAt(slot: number): Agent | undefined {
 		return agents[page * Math.max(1, slots.length) + slot];
 	},
+	displayAgentAt(slot: number): Agent | undefined {
+		return showcase.project(this.agentAt(slot));
+	},
 	/** Agents on the current key page with their key position; falls back to 8 agents across 4 columns. */
 	visible(): Visible[] {
 		const layout = slots.length > 0 ? slots : Array.from({ length: 8 }, (_, i) => ({ column: i % 4, row: Math.floor(i / 4) }));
 		return layout.flatMap((slot, i) => {
 			const agent = slots.length > 0 ? this.agentAt(i) : agents[i];
-			return agent ? [{ ...slot, agent }] : [];
+			return agent ? [{ ...slot, agent: showcase.project(agent)! }] : [];
 		});
 	},
 	turnPage(delta: number) {
@@ -95,6 +120,7 @@ async function refresh() {
 	polling = true;
 	try {
 		agents = await listAgents();
+		for (const agent of agents) showcase.project(agent);
 		prepareThemes(agents);
 		error = null;
 	} catch (err) {

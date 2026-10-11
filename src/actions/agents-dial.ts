@@ -5,6 +5,7 @@ import streamDeck, {
 	type DialRotateEvent,
 	SingletonAction,
 	type TouchTapEvent,
+	type WillDisappearEvent,
 } from "@elgato/streamdeck";
 import { type Agent, focusAgent } from "../herdr";
 import { drawText, drawTextCentered, FONT_3X5, FONT_5X7, textWidth } from "../pixel";
@@ -24,13 +25,17 @@ export class AgentsDial extends SingletonAction {
 	#lastAgents: unknown = null;
 	#lastPage = -1;
 	#lastLook = "";
+	#lastLayout = "";
 
 	override onWillAppear(): void {
+		this.#lastStep = -1;
 		this.#unsubscribe ??= state.subscribe(() => this.#render());
 		this.#render();
 	}
 
-	override onWillDisappear(): void {
+	override onWillDisappear(ev?: WillDisappearEvent): void {
+		this.#lastStep = -1;
+		if (ev) this.#images.delete(ev.action.id);
 		queueMicrotask(() => {
 			if (this.#dials().length === 0) {
 				this.#unsubscribe?.();
@@ -47,21 +52,25 @@ export class AgentsDial extends SingletonAction {
 	}
 
 	override async onDialDown(ev: DialDownEvent): Promise<void> {
+		if (!state.canFocus) return;
 		await this.#focus(ev.action, state.mostUrgent());
 	}
 
 	override async onTouchTap(ev: TouchTapEvent): Promise<void> {
+		if (!state.canFocus) return;
+		this.#render();
 		const column = ev.action.coordinates.column;
 		await this.#focus(ev.action, state.theme.scene.agentAt(column * SEGMENT + ev.payload.tapPos[0]));
 	}
 
 	async #focus(action: DialAction<JsonObject>, agent: Agent | undefined): Promise<void> {
+		if (!state.canFocus) return;
 		if (!agent) {
 			await action.showAlert();
 			return;
 		}
 		try {
-			await focusAgent(agent.paneId);
+			await focusAgent(agent.paneId, state.focusPermission());
 			await state.refresh();
 		} catch (err) {
 			streamDeck.logger.error(`focus ${agent.paneId} failed: ${err}`);
@@ -79,22 +88,30 @@ export class AgentsDial extends SingletonAction {
 
 		// The corral animates at half the key frame rate; data changes still render immediately.
 		const step = Math.floor(state.frame / 2);
-		const look = `${state.theme.id}:${state.themeBanner}`;
-		if (step === this.#lastStep && state.agents === this.#lastAgents && state.page === this.#lastPage && look === this.#lastLook) {
+		const look = `${state.theme.id}:${state.themeBanner}:${state.showcase}:${state.error}`;
+		const visible = state.visible();
+		const layout = JSON.stringify([
+			visible.map(({ agent, column, row }) => [agent.paneId, column, row]),
+			dials.map(({ id, coordinates }) => [id, coordinates.column, coordinates.row]),
+		]);
+		if (step === this.#lastStep && state.agents === this.#lastAgents && state.page === this.#lastPage && look === this.#lastLook && layout === this.#lastLayout) {
 			return;
 		}
 		this.#lastStep = step;
 		this.#lastAgents = state.agents;
 		this.#lastPage = state.page;
 		this.#lastLook = look;
+		this.#lastLayout = layout;
 
-		const scene = state.theme.scene.render(state.error ? [] : state.visible(), step);
+		const scene = state.theme.scene.render(state.error ? [] : visible, step, undefined, state.showcase);
 		if (state.error) {
 			scene.rect(0, 30, WIDTH, 22, P.black, 0.6);
 			drawTextCentered(scene, "HERDR IS DOWN - EVERYONE WENT HOME", 36, 2, P.white, undefined, FONT_3X5);
 		} else if (state.pageCount > 1) {
 			const pager = `KEYS ${state.page + 1}/${state.pageCount}`;
-			drawText(scene, pager, WIDTH - textWidth(pager, 2, FONT_3X5) - 6, HEIGHT - 14, 2, P.silver, P.black, FONT_3X5);
+			// Keep the pager above the bottom camera badge while Showcase is active.
+			const pagerY = HEIGHT - (state.showcase ? 28 : 14);
+			drawText(scene, pager, WIDTH - textWidth(pager, 2, FONT_3X5) - 6, pagerY, 2, P.silver, P.black, FONT_3X5);
 		}
 
 		const banner = state.themeBanner;

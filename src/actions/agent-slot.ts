@@ -26,6 +26,7 @@ export class AgentSlot extends SingletonAction {
 	}
 
 	override async onKeyDown(ev: KeyDownEvent): Promise<void> {
+		if (!state.canFocus) return;
 		const slot = this.#slots().findIndex((a) => a.id === ev.action.id);
 		const agent = state.agentAt(slot);
 		if (slot < 0 || !agent) {
@@ -33,7 +34,7 @@ export class AgentSlot extends SingletonAction {
 			return;
 		}
 		try {
-			await focusAgent(agent.paneId);
+			await focusAgent(agent.paneId, state.focusPermission());
 			await state.refresh();
 		} catch (err) {
 			streamDeck.logger.error(`focus ${agent.paneId} failed: ${err}`);
@@ -56,7 +57,7 @@ export class AgentSlot extends SingletonAction {
 		const slots = this.#slots();
 		state.setSlots(slots.map((a) => ({ column: a.coordinates!.column, row: a.coordinates!.row })));
 		slots.forEach((action, i) => {
-			const image = renderKey(state.theme, state.agentAt(i), state.frame, state.error);
+			const image = renderKey(state.theme, state.displayAgentAt(i), state.frame, state.error, state.showcase);
 			if (this.#images.get(action.id) === image) return;
 			this.#images.set(action.id, image);
 			void action.setImage(image);

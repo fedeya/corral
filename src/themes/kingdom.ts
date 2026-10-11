@@ -185,7 +185,7 @@ function keyScene(c: Canvas, agent: Agent): void {
 	const turf = idle ? NIGHT_GRASS : GRASS;
 	c.rect(0, 0, SIZE, KEY_GROUND + 2, turf);
 	for (let i = 0; i < 9; i++) {
-		const h = hash(`${agent.workspace}${i}`);
+		const h = hash(`${agent.appearanceWorkspace ?? agent.workspace}${i}`);
 		c.pattern(["#.#", ".#."], 6 + (h % 104), 8 + ((h >> 8) % 62), 2, { "#": idle ? shade(turf, 1.3) : GRASS_DARK });
 	}
 	c.rect(0, KEY_GROUND + 2, SIZE, SIZE - KEY_GROUND - 2, THEME[agent.status].bg);

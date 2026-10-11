@@ -1,6 +1,6 @@
 import type { Agent } from "../herdr";
 import { Canvas, drawTextCentered, hasImage } from "../pixel";
-import { P, SIZE, shade } from "../render";
+import { P, SIZE, shade, showcaseMarker } from "../render";
 import { farm } from "./farm";
 import { KINGDOM_PROBE, kingdom } from "./kingdom";
 import type { Theme } from "./types";
@@ -18,13 +18,15 @@ export function prepareThemes(agents: Agent[]): void {
 	if (stale) cache.clear();
 }
 
-export function renderKey(theme: Theme, agent: Agent | undefined, frame: number, error: string | null): string {
+export function renderKey(theme: Theme, agent: Agent | undefined, frame: number, error: string | null, showcase = false): string {
+	if (showcase && error) error = "herdr off";
 	const id = error
 		? `error:${error}`
 		: agent
-			? `${theme.id}:${agent.status}:${agent.identity}:${agent.subtitle}:${agent.focused}:${theme.keyFrame(agent, frame)}`
+			? `${theme.id}:${agent.status}:${agent.identity}:${agent.workspace}:${agent.subtitle}:${agent.focused}:${theme.keyFrame(agent, frame)}`
 			: "empty";
-	const hit = cache.get(id);
+	const cacheId = `${showcase}:${id}`;
+	const hit = cache.get(cacheId);
 	if (hit) return hit;
 
 	let url: string;
@@ -37,12 +39,15 @@ export function renderKey(theme: Theme, agent: Agent | undefined, frame: number,
 		} else {
 			c.rect(58, 58, 4, 4, shade(P.navy, 0.8));
 		}
+		if (showcase) showcaseMarker(c);
 		url = c.toDataUrl();
 	} else {
-		url = theme.drawKey(agent, frame).toDataUrl();
+		const c = theme.drawKey(agent, frame);
+		if (showcase) showcaseMarker(c);
+		url = c.toDataUrl();
 	}
 
 	if (cache.size > 600) cache.clear();
-	cache.set(id, url);
+	cache.set(cacheId, url);
 	return url;
 }
