@@ -52,10 +52,10 @@ test("native showcase toggle changes mode without focusing and displays camera s
 	});
 	toggle.onWillAppear();
 	const off = image;
-	await toggle.onKeyDown({ action: key } as any);
+	await toggle.onKeyDown();
 	expect(state.showcase).toBe(true);
 	expect(image !== off).toBe(true);
-	await toggle.onKeyDown({ action: key } as any);
+	await toggle.onKeyDown();
 	expect(state.showcase).toBe(false);
 	expect(image === off).toBe(true);
 	expect(readFileSync(`${dir}/calls`, "utf8")).not.toContain("agent focus");
@@ -66,7 +66,7 @@ const dial = { ...key, isDial: () => true, setFeedback: async (_: unknown) => {}
 test("actual key, touch and dial handlers never focus during showcase or resume tail", async () => {
 	await state.refresh();
 	while (state.agents.length === 0) await new Promise((resolve) => setTimeout(resolve, 10));
-	state.setSlots([{ column: 0, row: 0 }]);
+	state.setSlots([{ id: key.id, deviceId: key.device.id, column: 0, row: 0 }]);
 	state.theme.scene.render(state.visible(), state.frame, 12);
 	const slots = new AgentSlot();
 	Object.defineProperty(slots, "actions", { value: [key] });
@@ -74,10 +74,12 @@ test("actual key, touch and dial handlers never focus during showcase or resume 
 	Object.defineProperty(strip, "actions", { value: [dial] });
 	state.toggleShowcase();
 	await slots.onKeyDown({ action: key } as any);
+	await slots.onKeyUp({ action: key } as any);
 	await strip.onDialDown({ action: dial } as any);
 	await strip.onTouchTap({ action: dial, payload: { tapPos: [20, 20] } } as any);
 	state.toggleShowcase();
 	await slots.onKeyDown({ action: key } as any);
+	await slots.onKeyUp({ action: key } as any);
 	await strip.onDialDown({ action: dial } as any);
 	await strip.onTouchTap({ action: dial, payload: { tapPos: [20, 20] } } as any);
 	expect(readFileSync(`${dir}/calls`, "utf8")).not.toContain("agent focus");
@@ -123,7 +125,7 @@ test("actual actions render projected keys and strip immediately on toggle", asy
 	expect(state.displayAgentAt(0)?.workspace).toBe("AGENT A");
 	expect(state.visible()[0]?.agent.title).toBe("AGENT A");
 	expect(state.agents[0]?.workspace).toBe("PRIVATE CLIENT");
-	expect(image === renderKey(state.theme, mode.project(state.agents[0]), state.frame, state.error, true)).toBe(true);
+	expect(image === renderKey(state.theme, mode.project(state.agents[0]), state.frame, state.error, false, true)).toBe(true);
 	expect(image !== original).toBe(true);
 	expect(feedback !== originalStrip).toBe(true);
 	state.toggleShowcase();
@@ -131,8 +133,49 @@ test("actual actions render projected keys and strip immediately on toggle", asy
 	expect(feedback === originalStrip).toBe(true);
 	Object.defineProperty(slots, "actions", { value: [] });
 	Object.defineProperty(strip, "actions", { value: [] });
-	slots.onWillDisappear();
+	slots.onWillDisappear({ action: key } as any);
 	strip.onWillDisappear();
+});
+test("camera holds preserve pin layout, safe aliases and both key badges through disappearance", async () => {
+	await state.refresh();
+	const { renderKey } = await import("../src/themes");
+	const roster = readFileSync(`${dir}/agents.json`, "utf8");
+	let image = "";
+	const action = { ...key, setImage: async (url: string) => { image = url; } };
+	const slots = new AgentSlot();
+	Object.defineProperty(slots, "actions", { configurable: true, value: [action] });
+	slots.onWillAppear();
+	state.toggleShowcase();
+	const focusCalls = () => readFileSync(`${dir}/calls`, "utf8").split("\n").filter((call) => call.startsWith("agent focus "));
+	const before = focusCalls();
+	try {
+		slots.onKeyDown({ action } as any);
+		await new Promise((resolve) => setTimeout(resolve, 510));
+		await slots.onKeyUp({ action } as any);
+		expect(state.resolved()[0]?.pinned).toBe(true);
+		expect(state.displayAgentAt(0)?.workspace).toBe("AGENT A");
+		expect(image).toBe(renderKey(state.theme, state.displayAgentAt(0), state.frame, null, true, true));
+		expect(focusCalls()).toEqual(before);
+		writeFileSync(`${dir}/agents.json`, "[]");
+		await state.refresh(); await state.refresh();
+		expect(state.visible("d")).toEqual([]);
+		expect(image).toBe(renderKey(state.theme, undefined, state.frame, null, true, true));
+		writeFileSync(`${dir}/agents.json`, roster);
+		await state.refresh(); await state.refresh();
+		expect(state.displayAgentAt(0)?.workspace).toBe("AGENT A");
+		expect(state.resolved()[0]?.pinned).toBe(true);
+		slots.onKeyDown({ action } as any);
+		await new Promise((resolve) => setTimeout(resolve, 510));
+		await slots.onKeyUp({ action } as any);
+		expect(state.resolved()[0]?.pinned).toBe(false);
+		expect(readFileSync(`${dir}/calls`, "utf8")).not.toContain("agent focus");
+	} finally {
+		if (state.showcase) state.toggleShowcase();
+		writeFileSync(`${dir}/agents.json`, roster);
+		Object.defineProperty(slots, "actions", { value: [] });
+		slots.onWillDisappear({ action } as any);
+		await new Promise<void>((resolve) => queueMicrotask(resolve));
+	}
 });
 test("focus cannot bring a terminal forward if showcase starts during herdr focus", async () => {
 	const { focusAgent } = await import("../src/herdr");
@@ -150,7 +193,34 @@ test("an in-flight focus permission stays revoked after showcase resumes", async
 	expect(state.canFocus).toBe(true);
 	expect(allowed()).toBe(false);
 });
+test("a key press cannot regain focus permission across a camera epoch", async () => {
+	await state.refresh();
+	state.setSlots([{ id: key.id, deviceId: key.device.id, column: 0, row: 0 }]);
+	const slots = new AgentSlot();
+	Object.defineProperty(slots, "actions", { value: [key] });
+	const now = Date.now;
+	const baseline = readFileSync(`${dir}/calls`, "utf8");
+	try {
+		for (const start of ["normal", "camera", "quarantine"]) {
+			Date.now = () => now() + 5000;
+			if (start === "camera") state.toggleShowcase();
+			if (start === "quarantine") { state.toggleShowcase(); state.toggleShowcase(); }
+			slots.onKeyDown({ action: key } as any);
+			if (start === "normal") state.toggleShowcase();
+			if (state.showcase) state.toggleShowcase();
+			// Expire only the wall-clock quarantine, not the 500 ms physical gesture.
+			Date.now = () => now() + 10000;
+			await slots.onKeyUp({ action: key } as any);
+			expect(readFileSync(`${dir}/calls`, "utf8")).toBe(baseline);
+		}
+	} finally {
+		Date.now = now;
+		if (state.showcase) state.toggleShowcase();
+		state.toggleShowcase(); state.toggleShowcase();
+	}
+});
 test("normal key, dial and touch focus paths resume after the quarantine", async () => {
+	await new Promise((resolve) => setTimeout(resolve, 1050));
 	const count = () =>
 		readFileSync(`${dir}/calls`, "utf8")
 			.split("\n")
@@ -160,9 +230,10 @@ test("normal key, dial and touch focus paths resume after the quarantine", async
 	Object.defineProperty(slots, "actions", { value: [key] });
 	const strip = new AgentsDial();
 	Object.defineProperty(strip, "actions", { value: [dial] });
-	state.setSlots([{ column: 0, row: 0 }]);
+	state.setSlots([{ id: key.id, deviceId: key.device.id, column: 0, row: 0 }]);
 	state.theme.scene.render(state.visible(), state.frame, 12);
 	await slots.onKeyDown({ action: key } as any);
+	await slots.onKeyUp({ action: key } as any);
 	await strip.onDialDown({ action: dial } as any);
 	await strip.onTouchTap({ action: dial, payload: { tapPos: [20, 20] } } as any);
 	expect(count() - before).toBe(3);
@@ -177,7 +248,7 @@ test("live polls retain aliases across page rotation, theme changes, reorder and
 	});
 	writeFileSync(`${dir}/agents.json`, JSON.stringify([raw("p"), raw("p2"), raw("p3")]));
 	await state.refresh();
-	state.setSlots([{ column: 0, row: 0 }]);
+	state.setSlots([{ id: key.id, deviceId: key.device.id, column: 0, row: 0 }]);
 	state.toggleShowcase();
 	const strip = new AgentsDial();
 	expect(state.displayAgentAt(0)?.workspace).toBe("AGENT A");
@@ -205,7 +276,7 @@ test("actual dial feedback preserves showcase badges beside a double-digit pager
 		pane_id: `pager-${i}`, workspace_id: "w", name: `PRIVATE ${i}`, agent_status: "blocked",
 	}))));
 	await state.refresh();
-	state.setSlots([{ column: 0, row: 0 }]);
+	state.setSlots([{ id: key.id, deviceId: key.device.id, column: 0, row: 0 }]);
 	state.turnPage(-state.page);
 	state.toggleShowcase();
 	const feedback = new Map<number, string>();
@@ -268,20 +339,23 @@ const { PNG } = await import("pngjs");
 const { Canvas } = await import("../src/pixel");
 const { showcaseMarker } = await import("../src/render");
 
-async function controlled(run: (notify: () => void) => Promise<void>) {
+async function controlled(run: (notify: () => void, deviceScene: () => import("../src/scene").Scene) => Promise<void>) {
 	const descriptors = Object.getOwnPropertyDescriptors(state);
 	let listener = () => {};
+	const theme = state.theme;
+	let scene = theme.scene.fork();
 	Object.defineProperties(state, {
+		theme: { configurable: true, get: () => ({ ...theme, scene: { ...theme.scene, fork: () => (scene = theme.scene.fork()) } }) },
 		frame: { configurable: true, get: () => 100 },
 		themeBanner: { configurable: true, get: () => null },
 		subscribe: { configurable: true, value: (fn: () => void) => { listener = fn; return () => { listener = () => {}; }; } },
 	});
-	try { await run(() => listener()); }
+	try { await run(() => listener(), () => scene); }
 	finally { Object.defineProperties(state, descriptors); }
 }
 function lifecycleDial(id: string, column: number, feedback: string[]) {
 	return {
-		id, coordinates: { column, row: 0 }, isDial: () => true,
+		id, device: { id: "d" }, coordinates: { column, row: 0 }, isDial: () => true,
 		setFeedback: async (f: { canvas: string }) => { feedback.push(f.canvas); },
 		showAlert: async () => {},
 	};
@@ -315,16 +389,17 @@ test("second native dial appearing in the same frame receives its SHOWCASE badge
 });
 
 test("same-frame key layout changes refresh native feedback and touch targets", async () => {
-	await controlled(async (notify) => {
+	await controlled(async (notify, deviceScene) => {
 		const agent = { paneId: "layout-pane", workspace: "Layout", title: "Layout", status: "blocked", focused: false, seq: 0, identity: "Layout" };
 		const roster = [agent];
 		Object.defineProperties(state, {
 			agents: { configurable: true, get: () => roster },
 			agentAt: { configurable: true, value: () => agent },
+			visible: { configurable: true, value: (deviceId?: string) => state.resolved().filter((slot) => deviceId === undefined || slot.deviceId === deviceId).map((slot) => ({ ...slot, agent })) },
 			canFocus: { configurable: true, get: () => true },
 			focusPermission: { configurable: true, value: () => () => false },
 		});
-		state.setSlots([{ column: 0, row: 0 }]);
+		state.setSlots([{ id: key.id, deviceId: key.device.id, column: 0, row: 0 }]);
 		const feedback: string[] = [];
 		let alerts = 0;
 		const action = { ...lifecycleDial("layout-dial", 0, feedback), showAlert: async () => { alerts++; } };
@@ -332,13 +407,13 @@ test("same-frame key layout changes refresh native feedback and touch targets", 
 		actions(strip, [action]);
 		try {
 			strip.onWillAppear();
-			expect(state.theme.scene.agentAt(50)?.paneId).toBe("layout-pane");
+			expect(deviceScene().agentAt(50)?.paneId).toBe("layout-pane");
 			const initial = feedback[0];
-			state.setSlots([{ column: 1, row: 1 }]);
+			state.setSlots([{ id: key.id, deviceId: key.device.id, column: 1, row: 1 }]);
 			notify();
 			expect(feedback.at(-1)).not.toBe(initial);
-			expect(state.theme.scene.agentAt(50)).toBeUndefined();
-			expect(state.theme.scene.agentAt(250)?.paneId).toBe("layout-pane");
+			expect(deviceScene().agentAt(50)).toBeUndefined();
+			expect(deviceScene().agentAt(250)?.paneId).toBe("layout-pane");
 			await strip.onTouchTap({ action, payload: { tapPos: [50, 20] } } as any);
 			expect(alerts).toBe(1);
 		} finally {
@@ -370,26 +445,27 @@ test("a disappeared native dial receives feedback again when its context reappea
 });
 
 test("touch handler refreshes same-frame layout before resolving an unnotified tap", async () => {
-	await controlled(async () => {
+	await controlled(async (_notify, deviceScene) => {
 		const agent = { paneId: "tap-pane", workspace: "Tap", title: "Tap", status: "blocked", focused: false, seq: 0, identity: "Tap" };
 		const roster = [agent];
 		Object.defineProperties(state, {
 			agents: { configurable: true, get: () => roster },
 			agentAt: { configurable: true, value: () => agent },
+			visible: { configurable: true, value: (deviceId?: string) => state.resolved().filter((slot) => deviceId === undefined || slot.deviceId === deviceId).map((slot) => ({ ...slot, agent })) },
 			canFocus: { configurable: true, get: () => true },
 			focusPermission: { configurable: true, value: () => () => false },
 		});
-		state.setSlots([{ column: 0, row: 0 }]);
+		state.setSlots([{ id: key.id, deviceId: key.device.id, column: 0, row: 0 }]);
 		let alerts = 0;
 		const action = { ...lifecycleDial("tap-dial", 0, []), showAlert: async () => { alerts++; } };
 		const strip = new AgentsDial(); actions(strip, [action]);
 		try {
 			strip.onWillAppear();
-			expect(state.theme.scene.agentAt(50)?.paneId).toBe("tap-pane");
-			state.setSlots([{ column: 1, row: 0 }]);
+			expect(deviceScene().agentAt(50)?.paneId).toBe("tap-pane");
+			state.setSlots([{ id: key.id, deviceId: key.device.id, column: 1, row: 0 }]);
 			await strip.onTouchTap({ action, payload: { tapPos: [50, 20] } } as any);
 			expect(alerts).toBe(1);
-			expect(state.theme.scene.agentAt(250)?.paneId).toBe("tap-pane");
+			expect(deviceScene().agentAt(250)?.paneId).toBe("tap-pane");
 		} finally {
 			actions(strip, []); strip.onWillDisappear({ action } as any);
 			await new Promise<void>((resolve) => queueMicrotask(resolve));

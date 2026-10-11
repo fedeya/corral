@@ -6,12 +6,12 @@
     "moduleResolution": "bundler",
     "moduleDetection": "force",
     "verbatimModuleSyntax": true,
-    "types": ["node"],
+    "types": ["node", "bun"],
     "noEmit": true,
     "strict": true,
     "skipLibCheck": true,
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true
   },
-  "include": ["src", "scripts"]
+  "include": ["src", "scripts", "tests"]
 }

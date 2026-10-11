@@ -1,5 +1,6 @@
 import { test, expect } from "bun:test";
 import "./art-fixture";
+import { PNG } from "pngjs";
 const { renderKey } = await import("../src/themes");
 const { farm } = await import("../src/themes/farm");
 const { Showcase } = await import("../src/showcase");
@@ -42,8 +43,8 @@ test("both real theme renderers keep appearance pixels unchanged while labels ar
 });
 test("showcase errors use a fixed safe caption, including empty keys", () => {
 	const secret = "PRIVATE CLIENT / SECRET TASK / /Users/private";
-	expect(renderKey(farm, undefined, 0, secret, true) === renderKey(farm, undefined, 0, "herdr off", true)).toBe(true);
-	expect(renderKey(farm, undefined, 0, null, true) === renderKey(farm, undefined, 0, null)).toBe(false);
+	expect(renderKey(farm, undefined, 0, secret, false, true) === renderKey(farm, undefined, 0, "herdr off", false, true)).toBe(true);
+	expect(renderKey(farm, undefined, 0, null, false, true) === renderKey(farm, undefined, 0, null)).toBe(false);
 });
 test("camera marker renders a legible double-scale SHOWCASE caption", async () => {
 	const { Canvas, drawText, textWidth, FONT_3X5 } = await import("../src/pixel");
@@ -56,4 +57,19 @@ test("camera marker renders a legible double-scale SHOWCASE caption", async () =
 	const x = Math.round((120 - w) / 2);
 	drawText(expected, "SHOWCASE", x, 107, 2, P.yellow, undefined, FONT_3X5);
 	expect(c.crop(x, 107, w, 10).data.equals(expected.crop(x, 107, w, 10).data)).toBe(true);
+});
+
+const png = (url: string) => PNG.sync.read(Buffer.from(url.split(",")[1]!, "base64"));
+test("pinned keys have a visible yellow pushpin marker including reserved empty keys", () => {
+	const plain = renderKey(farm, agent, 0, null);
+	const pinned = renderKey(farm, agent, 0, null, true);
+	expect(pinned).not.toBe(plain);
+	const empty = renderKey(farm, undefined, 0, null);
+	const reserved = renderKey(farm, undefined, 0, null, true);
+	expect(reserved).not.toBe(empty);
+	for (const url of [pinned, reserved]) {
+		const image = png(url);
+		const i = (7 * image.width + 8) * 4;
+		expect([...image.data.subarray(i, i + 3)]).toEqual([255, 236, 39]);
+	}
 });
