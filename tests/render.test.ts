@@ -23,11 +23,12 @@ test("render cache distinguishes workspace aliases with the same identity", () =
 	expect(safe).toBe(farm.drawKey(mode.project(agent)!, 0).toDataUrl());
 	expect(renderKey(farm, { ...agent, subtitle: projected.subtitle }, 0, null) === normal).toBe(true);
 });
-test("both real theme renderers keep appearance pixels unchanged while labels are safe", async () => {
+test("both included themes and optional Kingdom keep appearance pixels unchanged while labels are safe", async () => {
 	const { kingdom } = await import("../src/themes/kingdom");
+	const { kingdomPocket } = await import("../src/themes/kingdom-pocket");
 	const mode = new Showcase();
 	mode.toggle();
-	for (const theme of [farm, kingdom]) {
+	for (const theme of [farm, kingdomPocket, kingdom]) {
 		theme.prepare?.([agent]);
 		const safe = mode.project(agent)!;
 		expect([safe.workspace, safe.title, safe.subtitle]).toEqual(["AGENT A", "AGENT A", "AGENT A"]);

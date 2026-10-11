@@ -3,12 +3,13 @@ import { Canvas, drawText, drawTextCentered, FONT_3X5, hasImage } from "../pixel
 import { P, SIZE, shade, showcaseMarker } from "../render";
 import { farm } from "./farm";
 import { KINGDOM_PROBE, kingdom } from "./kingdom";
+import { kingdomPocket } from "./kingdom-pocket";
 import type { Theme } from "./types";
 
 export type { Theme } from "./types";
 
-/** Themes whose art is present; kingdom sprites are local-only (see themes/kingdom.ts). */
-export const THEMES: Theme[] = [farm, ...(hasImage(KINGDOM_PROBE) ? [kingdom] : [])];
+/** Farm and Pocket ship with the plugin; the full Kingdom requires local-only art. */
+export const THEMES: Theme[] = [farm, kingdomPocket, ...(hasImage(KINGDOM_PROBE) ? [kingdom] : [])];
 
 const cache = new Map<string, string>();
 

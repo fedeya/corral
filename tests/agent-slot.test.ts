@@ -1,7 +1,9 @@
+/// <reference types="bun" />
 import { test, mock, afterAll } from "bun:test";
 import assert from "node:assert/strict";
 import { mkdtempSync, copyFileSync, chmodSync, writeFileSync, readFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 const root = process.env.TMPDIR ?? "/root/.hermes/cache/scratch";
 const dir = mkdtempSync(join(root, "corral-pins-test-"));
 const cli = join(dir, "herdr");
@@ -10,7 +12,7 @@ chmodSync(cli, 0o755);
 process.env.HERDR_BIN_PATH = cli;
 process.env.CORRAL_TEST_FOCUS = join(dir, "focus");
 process.env.CORRAL_TEST_ROSTER = join(dir, "roster.json");
-process.env.CORRAL_IMGS = join(import.meta.dir, "../dev.fedeya.corral.sdPlugin/imgs");
+process.env.CORRAL_IMGS = fileURLToPath(new URL("../dev.fedeya.corral.sdPlugin/imgs", import.meta.url));
 writeFileSync(process.env.CORRAL_TEST_FOCUS, "");
 const roster = (ids: string[]) =>
 	writeFileSync(
@@ -60,7 +62,7 @@ const action = (id: string, column: number) => ({
 	},
 });
 const keys = [action("k1", 0), action("k2", 1)];
-const plugin = new AgentSlot() as unknown as Dispatch & { onWillAppear(): void; onWillDisappear(ev: any): void };
+const plugin = new AgentSlot() as unknown as Omit<InstanceType<typeof AgentSlot>, "actions"> & Dispatch;
 plugin.actions = keys;
 const focuses = () => readFileSync(process.env.CORRAL_TEST_FOCUS!, "utf8");
 async function refreshFixture(): Promise<void> {
@@ -80,7 +82,7 @@ test("SDK strip updates immediately when pinning rearranges keys in the same fra
 	await refreshFixture();
 	plugin.onWillAppear();
 	const { AgentsDial } = await import("../src/actions/agents-dial");
-	const strip = new AgentsDial() as unknown as Dispatch & { onWillAppear(): void; onWillDisappear(): void };
+	const strip = new AgentsDial() as unknown as Omit<InstanceType<typeof AgentsDial>, "actions"> & Dispatch;
 	const dial = {
 		id: "dial",
 		device: { id: "deck" },
