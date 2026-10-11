@@ -1,6 +1,7 @@
 import streamDeck from "@elgato/streamdeck";
 import { type Agent, listAgents } from "./herdr";
 import { raidRound } from "./raid";
+import { Showcase } from "./showcase";
 import { AgentLayout, type LayoutSlot } from "./layout";
 import { prepareThemes, THEMES, type Theme } from "./themes";
 
@@ -21,11 +22,32 @@ let themeIndex = 0;
 let themeChangedAt = 0;
 let themeLoaded = false;
 const listeners = new Set<() => void>();
+const showcase = new Showcase();
+let focusBlockedUntil = 0;
+let focusEpoch = 0;
 
 export type Slot = { column: number; row: number };
 export type Visible = Slot & { agent: Agent };
 
 export const state = {
+	get showcase() {
+		return showcase.active;
+	},
+	get canFocus() {
+		return !showcase.active && Date.now() >= focusBlockedUntil;
+	},
+	focusPermission(): () => boolean {
+		const epoch = focusEpoch;
+		return () => epoch === focusEpoch && this.canFocus;
+	},
+	toggleShowcase() {
+		focusEpoch++;
+		showcase.toggle();
+		// Drop queued presses/taps from the camera session, including the toggle gesture.
+		focusBlockedUntil = Date.now() + 1000;
+		for (const agent of agents) showcase.project(agent);
+		notify();
+	},
 	get agents() {
 		return agents;
 	},
@@ -80,9 +102,12 @@ export const state = {
 	agentAt(slot: number): Agent | undefined {
 		return layout.resolve()[slot]?.agent;
 	},
+	displayAgentAt(slot: number): Agent | undefined {
+		return showcase.project(this.agentAt(slot));
+	},
 	/** Agents on the current key page with their key position; falls back to 8 agents across 4 columns. */
 	visible(deviceId?: string): Visible[] {
-		return layout.visible(deviceId);
+		return layout.visible(deviceId).map((slot) => ({ ...slot, agent: showcase.project(slot.agent)! }));
 	},
 	turnPage(delta: number) {
 		layout.turnPage(delta);
@@ -122,6 +147,7 @@ async function poll() {
 	try {
 		agents = await listAgents();
 		raidRound.observe(agents);
+		for (const agent of agents) showcase.project(agent);
 		layout.setAgents(agents);
 		prepareThemes(agents);
 		error = null;

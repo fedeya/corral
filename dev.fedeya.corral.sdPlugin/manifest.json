@@ -26,6 +26,16 @@
 			"States": [{ "Image": "imgs/action-raid", "ShowTitle": false }]
 		},
 		{
+			"UUID": "dev.fedeya.corral.showcase",
+			"Name": "Showcase / Vidriera",
+			"Tooltip": "Camera-safe labels and no terminal focusing; press again to resume",
+			"Icon": "imgs/action-showcase",
+			"Controllers": ["Keypad"],
+			"SupportedInMultiActions": false,
+			"UserTitleEnabled": false,
+			"States": [{ "Image": "imgs/action-showcase", "ShowTitle": false }]
+		},
+		{
 			"UUID": "dev.fedeya.corral.slot",
 			"Name": "Agent slot",
 			"Tooltip": "Shows one herdr agent (ordered by priority); press to focus it",

@@ -97,6 +97,54 @@ one ordered key roster/page (device ID, then row and column); each device's stri
 animation and tap targets. A pane can be pinned once across that roster. Duplicate pane/action IDs are first-wins.
 Multi-actions and keys without physical coordinates are excluded.
 
+## Showcase / Vidriera (camera mode)
+
+Drag the optional **Showcase / Vidriera** action from the Corral category onto a spare key. Press it before filming.
+Its camera icon says **CAMERA ON**, and every agent key and touch-strip segment shows a yellow camera / **SHOWCASE**
+badge. Press the same key again to resume normal labels and controls. The toggle key does not count as an agent slot.
+
+While enabled:
+
+- Workspace, title and subtitle captions become **AGENT A**, **AGENT B**, **AGENT C**, etc. (after Z: AA, AB, …).
+  Aliases are assigned by `paneId`, not priority or key position. Paging, reordered agents, temporary disappearance,
+  status updates and toggling off/on do not rename an existing pane. New panes receive the next unused alias.
+- Both Farm and Kingdom keep their original appearance seeds, species/coats, jobs/team colours, focused borders and
+  live status animations. Polling continues against your current herdr session; this is **not** a pretend session.
+- Key holds still pin/unpin agents without focusing, and pins keep their safe aliases and **PIN** badges.
+- Agent keys, touch taps and dial pushes cannot focus agents or bring the terminal forward. Dial rotation still pages
+  and switches themes. The toggle itself never focuses. For **one second after toggling**, focus events are ignored to
+  absorb queued/trailing gestures; press deliberately again after that interval to focus.
+- A focus request already waiting for herdr is permanently invalidated by a toggle, so its completion cannot later
+  bring the terminal forward. A command already sent to herdr cannot be undone.
+- Error captions are fixed public messages (`herdr off` / `HERDR IS DOWN`), never exception text or private labels.
+
+Mode and aliases are **process-session local**, not persisted to global settings. Restarting the plugin resets aliases
+and starts with camera mode **off**; check **CAMERA ON** before each recording. Removing/re-adding the toggle or agent
+actions does not reset aliases while the plugin process is still running.
+
+This protects **Corral's built-in on-device captions and focus gestures**, not your desktop, terminal contents, logs,
+Stream Deck configuration UI, external tools or third-party themes that draw identity seeds as text. Canonical agents
+remain private, unmodified data internally; the renderer receives a separate presentation projection. Choose a capture
+region that excludes those other surfaces. Demo mode below is separate: it creates pretend agents and still allows focus.
+
+### Showcase tests (no hardware)
+
+```sh
+bun install --frozen-lockfile
+bun run test
+bun run typecheck
+bun run build
+```
+
+The test script uses Bun file isolation so the pins and Showcase SDK/CLI fixtures cannot share cached modules.
+Type-checking includes the tests as well as the plugin and scripts.
+
+Tests exercise the real action handlers, state, herdr subprocess adapter and pixel renderers. Only the unavailable
+Stream Deck SDK connection is mocked. A local fake herdr executable supplies synthetic private captions and records
+focus calls. Farm uses the shipped artwork. Kingdom uses **original procedural test sheets** in the scratch directory,
+not the unredistributable Tiny Swords assets; the real Kingdom drawing code still runs. Physical hardware delivery and
+macOS terminal activation require a separate device smoke test.
+
 ## Install
 
 You need:

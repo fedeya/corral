@@ -2,7 +2,7 @@
 import type { Agent } from "../herdr";
 import { Canvas, drawText, drawTextCentered, fitText, FONT_3X5, hex } from "../pixel";
 import { RaidRound, raidRound } from "../raid";
-import { frameBorder, label, P, SIZE, sparkles } from "../render";
+import { frameBorder, label, P, SIZE, sparkles, showcaseMarker } from "../render";
 import { HEIGHT, pick, SEGMENT, WIDTH } from "../scene";
 import type { Visible } from "../state";
 import type { Theme } from "./types";
@@ -82,7 +82,7 @@ export function createRaidTheme(round: RaidRound): Theme {
   scene: {
    // Each device owns its hit targets, but all devices observe the same raid round.
    fork: () => createRaidTheme(round).scene,
-   render(visible, frame) {
+   render(visible, frame, _hour, showcase = false) {
     placed = visible;
     const c = new Canvas(WIDTH, HEIGHT);
     const v = round.view;
@@ -102,6 +102,7 @@ export function createRaidTheme(round: RaidRound): Theme {
      hero(c, agent, x - 12, 61 + row * 4, 2, frame);
      if (round.member(agent.paneId) === "hit") drawText(c, "✓", x + 16, 75, 2, P.green, undefined, FONT_3X5);
     }
+    if (showcase) for (let column = 0; column < 4; column++) showcaseMarker(c, column * SEGMENT, 89, SEGMENT);
     return c;
    },
    agentAt(x) {
