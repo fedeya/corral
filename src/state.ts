@@ -1,6 +1,7 @@
 import streamDeck from "@elgato/streamdeck";
 import { type Agent, listAgents } from "./herdr";
 import { raidRound } from "./raid";
+import { AgentLayout, type LayoutSlot } from "./layout";
 import { prepareThemes, THEMES, type Theme } from "./themes";
 
 const POLL_MS = 1000;
@@ -9,8 +10,9 @@ const FRAME_MS = 125;
 
 let agents: Agent[] = [];
 let error: string | null = null;
-let page = 0;
-let slots: Slot[] = [];
+const layout = new AgentLayout();
+let slots: LayoutSlot[] = [];
+let layoutVersion = 0;
 let frame = 0;
 let pollTimer: NodeJS.Timeout | null = null;
 let frameTimer: NodeJS.Timeout | null = null;
@@ -31,10 +33,10 @@ export const state = {
 		return error;
 	},
 	get page() {
-		return page;
+		return layout.page;
 	},
 	get pageCount() {
-		return Math.max(1, Math.ceil(agents.length / Math.max(1, slots.length)));
+		return layout.pageCount;
 	},
 	get frame() {
 		return frame;
@@ -53,24 +55,37 @@ export const state = {
 		void streamDeck.settings.setGlobalSettings({ theme: this.theme.id });
 		notify();
 	},
-	setSlots(layout: Slot[]) {
-		slots = layout;
-		page = Math.min(page, this.pageCount - 1);
+	get layoutVersion() {
+		return layoutVersion;
+	},
+	setSlots(next: LayoutSlot[]) {
+		if (JSON.stringify(slots) === JSON.stringify(next)) return;
+		slots = next;
+		layout.setSlots(next);
+		layoutVersion++;
+		notify();
+	},
+	resolved() {
+		return layout.resolve();
+	},
+	togglePin(id: string, paneId?: string): boolean {
+		const before = layout.resolve().find((s) => s.id === id)?.pinned;
+		layout.togglePin(id, paneId);
+		const after = layout.resolve().find((s) => s.id === id)?.pinned;
+		if (before === after) return false;
+		layoutVersion++;
+		notify();
+		return true;
 	},
 	agentAt(slot: number): Agent | undefined {
-		return agents[page * Math.max(1, slots.length) + slot];
+		return layout.resolve()[slot]?.agent;
 	},
 	/** Agents on the current key page with their key position; falls back to 8 agents across 4 columns. */
-	visible(): Visible[] {
-		const layout = slots.length > 0 ? slots : Array.from({ length: 8 }, (_, i) => ({ column: i % 4, row: Math.floor(i / 4) }));
-		return layout.flatMap((slot, i) => {
-			const agent = slots.length > 0 ? this.agentAt(i) : agents[i];
-			return agent ? [{ ...slot, agent }] : [];
-		});
+	visible(deviceId?: string): Visible[] {
+		return layout.visible(deviceId);
 	},
 	turnPage(delta: number) {
-		const count = this.pageCount;
-		page = (((page + delta) % count) + count) % count;
+		layout.turnPage(delta);
 		notify();
 	},
 	mostUrgent(): Agent | undefined {
@@ -98,14 +113,16 @@ function notify() {
 }
 
 function refresh(): Promise<void> {
-	if (!polling) polling = poll().finally(() => { polling = null; });
-	return polling;
+	return (polling ??= poll().finally(() => {
+		polling = null;
+	}));
 }
 
 async function poll() {
 	try {
 		agents = await listAgents();
 		raidRound.observe(agents);
+		layout.setAgents(agents);
 		prepareThemes(agents);
 		error = null;
 	} catch (err) {
@@ -113,7 +130,6 @@ async function poll() {
 		raidRound.observe(null);
 		streamDeck.logger.warn(`herdr agent list failed: ${err}`);
 	}
-	page = Math.min(page, state.pageCount - 1);
 	notify();
 }
 
@@ -126,7 +142,9 @@ async function loadTheme() {
 	if (themeLoaded) return;
 	themeLoaded = true;
 	try {
-		const { theme } = await streamDeck.settings.getGlobalSettings<{ theme?: string }>();
+		const { theme } = await streamDeck.settings.getGlobalSettings<{
+			theme?: string;
+		}>();
 		const index = THEMES.findIndex((t) => t.id === theme);
 		if (index >= 0) themeIndex = index;
 		notify();

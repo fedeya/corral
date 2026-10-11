@@ -80,6 +80,8 @@ export function createRaidTheme(round: RaidRound): Theme {
    return c;
   },
   scene: {
+   // Each device owns its hit targets, but all devices observe the same raid round.
+   fork: () => createRaidTheme(round).scene,
    render(visible, frame) {
     placed = visible;
     const c = new Canvas(WIDTH, HEIGHT);
