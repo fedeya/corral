@@ -104,6 +104,8 @@ function tag(c: Canvas, p: Placed, head: number, frame: number, part: "pin" | "l
 }
 
 export type Scene = {
+	/** Same skin, independent walkers and hit targets for another device. */
+	fork(): Scene;
 	render(visible: Visible[], frame: number, hour?: number): Canvas;
 	/** Returns the agent nearest to a tap at scene coordinate x, within the tapped segment. */
 	agentAt(x: number): Agent | undefined;
@@ -165,6 +167,7 @@ export function createScene(skin: Skin): Scene {
 	}
 
 	return {
+		fork: () => createScene(skin),
 		render(visible, frame, hour = new Date().getHours()) {
 			simulate(visible, frame);
 			const c = new Canvas(WIDTH, HEIGHT);
