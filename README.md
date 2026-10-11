@@ -35,7 +35,16 @@ Agents that need you come first, then finished ones, then working, then idle.
 
 Turn the last dial to switch. Your choice is remembered.
 
-### Kingdom
+### Kingdom Pocket — included
+
+A little medieval kingdom that works immediately after installation: original pixel knights, shields, swords,
+flags, a castle, river and forest. Knights patrol while working, hop with an **!** when they need you, raise a flag
+when done, and dim when idle. The same knight appears on its key and in the strip; the world changes from day to dusk
+and night. All artwork is drawn in code and ships under the project's MIT license: no downloads or sprite setup.
+
+Turn the last dial to **KINGDOM POCKET**. Preview it with `bun run preview kingdom-pocket`.
+
+### Kingdom — optional Tiny Swords art
 
 Every workspace gets a pawn with a job (lumberjack, miner, builder or butcher) and a team colour. Working pawns haul
 wood, gold and meat back to the castle, and the island changes with the time of day.
@@ -107,6 +116,7 @@ The theme appears as soon as the files are there.
 | `bun run media` | Re-render the GIFs in `docs/media/` |
 | `bun run demo on` / `off` | Pretend agents in a separate herdr session, for recordings (see below) |
 | `bun run typecheck` | Type-check |
+| `bun run test` | Run rendering and theme registration tests |
 
 The plugin polls `herdr agent list` every second and focuses agents with `herdr agent focus`. Logs go to
 `dev.fedeya.corral.sdPlugin/logs/`.
@@ -125,5 +135,6 @@ Open the demo in Ghostty with `herdr --session corral-demo`. Run `bun run demo o
 
 - **Farm:** [LPC farm animals](https://opengameart.org/content/lpc-style-farm-animals) by Daniel Eddeland and
   [LPC Goat](https://opengameart.org/content/lpc-goat) by bluecarrot16, CC-BY 3.0.
+- **Kingdom Pocket:** Original procedural artwork, included under [MIT](LICENSE).
 - **Kingdom:** [Tiny Swords](https://pixelfrog-assets.itch.io/tiny-swords) by Pixel Frog. Not included in the repo.
 - **Code:** [MIT](LICENSE).

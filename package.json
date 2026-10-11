@@ -6,6 +6,7 @@
     "build": "bun build src/plugin.ts --target node --format esm --outfile dev.fedeya.corral.sdPlugin/bin/plugin.js",
     "watch": "bun run build --watch",
     "typecheck": "tsc --noEmit",
+    "test": "CORRAL_IMGS=dev.fedeya.corral.sdPlugin/imgs bun test",
     "preview": "CORRAL_IMGS=dev.fedeya.corral.sdPlugin/imgs bun scripts/preview.ts",
     "media": "CORRAL_IMGS=dev.fedeya.corral.sdPlugin/imgs bun scripts/media.ts",
     "demo": "bun scripts/demo.ts",
