@@ -10,6 +10,7 @@ import streamDeck, {
 import { type Agent, focusAgent } from "../herdr";
 import { drawText, drawTextCentered, FONT_3X5, FONT_5X7, textWidth } from "../pixel";
 import { P } from "../render";
+import { raidRound } from "../raid";
 import { HEIGHT, SEGMENT, WIDTH, type Scene } from "../scene";
 import { state } from "../state";
 
@@ -103,7 +104,7 @@ export class AgentsDial extends SingletonAction {
 
 		// The corral animates at half the key frame rate; data changes still render immediately.
 		const step = Math.floor(state.frame / 2);
-		const look = `${state.theme.id}:${state.themeBanner}:${state.layoutVersion}:${state.showcase}:${state.error}`;
+		const look = `${state.theme.id}:${state.themeBanner}:${state.layoutVersion}:${state.showcase}:${state.error}:${state.theme.id === "raid" ? raidRound.view.round : ""}`;
 		const layout = JSON.stringify(dials.map(({ id, device, coordinates }) => [id, device.id, coordinates.column, coordinates.row]));
 		if (step === this.#lastStep && state.agents === this.#lastAgents && state.page === this.#lastPage && look === this.#lastLook && layout === this.#lastLayout) {
 			return;

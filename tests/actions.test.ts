@@ -473,5 +473,3 @@ test("touch handler refreshes same-frame layout before resolving an unnotified t
 		}
 	});
 });
-
-

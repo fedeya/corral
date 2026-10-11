@@ -1,5 +1,6 @@
 import streamDeck from "@elgato/streamdeck";
 import { type Agent, listAgents } from "./herdr";
+import { raidRound } from "./raid";
 import { Showcase } from "./showcase";
 import { AgentLayout, type LayoutSlot } from "./layout";
 import { prepareThemes, THEMES, type Theme } from "./themes";
@@ -123,6 +124,12 @@ export const state = {
 			if (listeners.size === 0) stop();
 		};
 	},
+	async startRaidRound(): Promise<boolean> {
+		await refresh();
+		const started = raidRound.start();
+		notify();
+		return started;
+	},
 	refresh,
 };
 
@@ -139,12 +146,14 @@ function refresh(): Promise<void> {
 async function poll() {
 	try {
 		agents = await listAgents();
+		raidRound.observe(agents);
 		for (const agent of agents) showcase.project(agent);
 		layout.setAgents(agents);
 		prepareThemes(agents);
 		error = null;
 	} catch (err) {
 		error = "herdr off";
+		raidRound.observe(null);
 		streamDeck.logger.warn(`herdr agent list failed: ${err}`);
 	}
 	notify();

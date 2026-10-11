@@ -1,4 +1,7 @@
-import { test, mock, afterAll } from "bun:test";
+import { test, after as afterAll } from "node:test";
+// Runtime-only Bun mocking; keep tests typechecked against Node's test APIs.
+const bunTestModule = "bun:test";
+const { mock } = await import(bunTestModule);
 import assert from "node:assert/strict";
 import { mkdtempSync, copyFileSync, chmodSync, writeFileSync, readFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
@@ -10,7 +13,7 @@ chmodSync(cli, 0o755);
 process.env.HERDR_BIN_PATH = cli;
 process.env.CORRAL_TEST_FOCUS = join(dir, "focus");
 process.env.CORRAL_TEST_ROSTER = join(dir, "roster.json");
-process.env.CORRAL_IMGS = join(import.meta.dir, "../dev.fedeya.corral.sdPlugin/imgs");
+process.env.CORRAL_IMGS = join(import.meta.dirname, "../dev.fedeya.corral.sdPlugin/imgs");
 writeFileSync(process.env.CORRAL_TEST_FOCUS, "");
 const roster = (ids: string[]) =>
 	writeFileSync(
@@ -60,7 +63,7 @@ const action = (id: string, column: number) => ({
 	},
 });
 const keys = [action("k1", 0), action("k2", 1)];
-const plugin = new AgentSlot() as unknown as Dispatch & { onWillAppear(): void; onWillDisappear(ev: any): void };
+const plugin = new AgentSlot() as unknown as Omit<InstanceType<typeof AgentSlot>, "actions"> & Dispatch;
 plugin.actions = keys;
 const focuses = () => readFileSync(process.env.CORRAL_TEST_FOCUS!, "utf8");
 async function refreshFixture(): Promise<void> {
@@ -80,7 +83,7 @@ test("SDK strip updates immediately when pinning rearranges keys in the same fra
 	await refreshFixture();
 	plugin.onWillAppear();
 	const { AgentsDial } = await import("../src/actions/agents-dial");
-	const strip = new AgentsDial() as unknown as Dispatch & { onWillAppear(): void; onWillDisappear(): void };
+	const strip = new AgentsDial() as unknown as Omit<InstanceType<typeof AgentsDial>, "actions"> & Dispatch;
 	const dial = {
 		id: "dial",
 		device: { id: "deck" },
@@ -179,6 +182,32 @@ test("SDK short release never focuses a pane that vanished while pressed", async
 	assert.equal(focuses(), "");
 	assert.equal(keys[0]!.alerts, alerts + 1);
 });
+test("SDK Raid reset refreshes the strip cache immediately without waiting for animation", async () => {
+ roster(["A", "B"]);
+ await refreshFixture();
+ const { THEMES } = await import("../src/themes");
+ const { raidRound } = await import("../src/raid");
+ const { AgentsDial } = await import("../src/actions/agents-dial");
+ const original = state.theme.id;
+ state.cycleTheme(THEMES.findIndex(t => t.id === "raid") - THEMES.findIndex(t => t.id === original));
+ assert.equal(await state.startRaidRound(), true);
+ const strip = new AgentsDial() as unknown as Omit<InstanceType<typeof AgentsDial>, "actions"> & Dispatch;
+ const snapshots: { round: number; image: string }[] = [];
+ strip.actions = [{ id: "raid-dial", device: { id: "deck" }, coordinates: { column: 0 }, isDial: () => true,
+  async setFeedback(feedback: { canvas: string }) { snapshots.push({ round: raidRound.view.round, image: feedback.canvas }); }, async showAlert() {} }];
+ strip.onWillAppear();
+ const before = snapshots.at(-1)!;
+ try {
+  assert.equal(await state.startRaidRound(), true);
+  assert.equal(snapshots.at(-1)?.round, before.round + 1, "reset notification must redraw with the new round at the same frame");
+  assert.notEqual(snapshots.at(-1)?.image, before.image);
+ } finally {
+  strip.actions = [];
+  strip.onWillDisappear();
+  state.cycleTheme(THEMES.findIndex(t => t.id === original) - THEMES.findIndex(t => t.id === "raid"));
+ }
+});
+
 test("SDK two-device strips focus only agents on that device's resolved keys", async () => {
 	roster(["A", "B"]);
 	await refreshFixture();
