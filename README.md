@@ -56,11 +56,35 @@ start from.
 
 | | |
 |---|---|
-| **Press a key** | Focus that agent in herdr and bring the terminal forward |
+| **Tap a key** | On release, focus that agent in herdr and bring the terminal forward |
+| **Hold a key for at least 500 ms, then release** | Pin/unpin that agent to that physical action key, without focusing |
 | **Tap the touch strip** | Focus the critter you tapped |
 | **Push any dial** | Jump to the agent that needs you most |
 | **Turn dials 1–3** | Page through agents when there are more than keys |
 | **Turn dial 4** | Switch theme |
+
+### Pinned agents
+
+A yellow pixel pushpin and **PIN** mark a pinned key. Its agent stays there when another agent needs you, when
+status/priority changes, and when you turn pages. Unpinned keys keep the usual urgency order; pinned agents are
+excluded from those keys and from their page count, so the same pane never appears twice. The strip uses the same
+resolved layout and its tap targets update immediately after a pin or page change.
+
+If a pinned pane disappears, its key stays reserved with **PIN / MISSING** instead of silently showing another agent.
+The strip leaves that position vacant. If the same pane ID returns it reclaims its key. Hold and release the reserved
+key to free it; a short tap alerts without focusing anything. A tap captures the pane at press time, so a poll or page
+change while you press cannot redirect it to a different agent. Missing panes and focus failures alert.
+
+Pins are **session-only**, keyed by the Stream Deck action ID and herdr pane ID, not by roster position or workspace
+name. Restarting the plugin clears them. Removing an action, switching away from its profile, or disconnecting its
+device (the SDK action disappears) also releases its pin and cancels an unfinished press. No pin settings are written
+to disk.
+
+With every key pinned, paging has no free slots and does nothing; release a pin to browse other agents. With no agent
+keys configured anywhere, the strip retains its first-eight-agent preview and paging is inert. Multiple devices share
+one ordered key roster/page (device ID, then row and column); each device's strip shows only its own keys, with separate
+animation and tap targets. A pane can be pinned once across that roster. Duplicate pane/action IDs are first-wins.
+Multi-actions and keys without physical coordinates are excluded.
 
 ## Install
 
@@ -107,9 +131,15 @@ The theme appears as soon as the files are there.
 | `bun run media` | Re-render the GIFs in `docs/media/` |
 | `bun run demo on` / `off` | Pretend agents in a separate herdr session, for recordings (see below) |
 | `bun run typecheck` | Type-check |
+| `bun run test` | Run layout, gesture, real-render and SDK action-path tests |
 
 The plugin polls `herdr agent list` every second and focuses agents with `herdr agent focus`. Logs go to
 `dev.fedeya.corral.sdPlugin/logs/`.
+
+Tests exercise real layout, gestures, PNG rendering and herdr subprocess calls. Only the Stream Deck SDK dispatch /
+device transport is mocked; a test-only herdr CLI fixture supplies synthetic panes. Tests do not prove physical
+hardware timing or terminal activation (macOS `open -a` is not available in Linux CI). Runtime fixture files are
+created under `TMPDIR` and removed on completion.
 
 ### Demo mode
 
