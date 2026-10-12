@@ -64,6 +64,7 @@ export function DeskArt({ lit = true, rocketLaunched = false, plantBloom = false
         {[ [1332, 128], [1388, 164], [1356, 224], [1500, 220], [1452, 288], [1336, 302], [1480, 340], [1396, 118] ].map(([x,y], i) => <path className="desk-art-star" style={{animationDuration:`${6+i%4}s`,animationDelay:`${-i*.7}s`}} key={i} d={`M${x} ${y}h4v-4h4v4h4v4h-4v4h-4v-4h-4z`} fill={i % 3 ? '#82979a' : cream} />)}
       </g>
       <path d="M1360 184h28v4h28v24h20" stroke="#667f88" strokeWidth="2" fill="none" />
+
       <path d="M1312 420h24v-52h40v24h32v-64h40v36h24v-16h36v64h20v50h-216z" fill="#24323a" />
       {[1344,1360,1416,1432,1484,1500].map((x,i) => <g className="desk-art-apartment-light" style={{animationDuration:`${14+i*3}s`,animationDelay:`${-i*2.3}s`}} key={x} fill={i % 2 ? '#8b7c55' : '#4d6161'}><rect x={x} y={i % 2 ? 408 : 380} width="8" height="12" /><rect x={x} y="436" width="8" height="8" /></g>)}
       <g clipPath={`url(#${id}-window-glass)`}>
@@ -173,6 +174,11 @@ export function DeskArt({ lit = true, rocketLaunched = false, plantBloom = false
         <path d="M1472 652v44h12v-44z" fill="#c7ab72" />
         <path d="M1328 644h116v8h-116z" fill="#26363a" />
         <rect x="1340" y="641" width="84" height="5" fill="#c6bd9e" />
+        <g transform="rotate(-3 1370 632)">
+          <path d="M1280 618h180v28h-180z" fill="#d8c799" />
+          <text x="1290" y="630" fontSize="7" fill="#62543e">STILL FIGURING IT OUT.</text>
+          <text className="desk-art-book-signature" x="1410" y="640" fontSize="8" fontStyle="italic" fill="#62543e">— Fefe</text>
+        </g>
       </g>
 
       {/* Woven desk mat, mechanical keyboard and wired mouse. */}

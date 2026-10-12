@@ -14,6 +14,7 @@
 .desk-header .desk-install { background:#d0ad78; color:#2d2724; border-color:#d8bd94; }
 .desk-header .desk-install span { color:inherit; }
 .desk-menu { position:relative; }
+.desk-menu a { display:flex; align-items:center; text-decoration:none; font-size:10px; }
 .desk-menu summary { min-height:44px; display:flex; align-items:center; cursor:pointer; font-size:10px; color:#b8a88e; padding:0 9px; }
 .desk-menu>div { position:absolute; right:0; top:46px; width:200px; background:#302925; border:1px solid #907655; box-shadow:4px 5px #17161a; padding:8px; }
 .desk-menu a,.desk-menu button { width:100%; min-height:44px; padding:10px!important; color:#e5d7bb!important; background:transparent!important; text-align:left; border:0!important; }
