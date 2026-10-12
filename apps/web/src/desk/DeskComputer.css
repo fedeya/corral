@@ -63,7 +63,7 @@
 .desk-preview-agents button { text-align:left; display:flex; align-items:center; justify-content:space-between; gap:10px; padding:9px 11px; min-height:44px; color:#45533b; border:1px solid #c2c1a4; background:#eee9d3; }
 .desk-preview-agents button[aria-pressed=true] { background:#d4dcbd; border-color:#778663; }.desk-preview-agents small { display:block; font-size:8px; color:#747d64; margin-top:3px; }.desk-preview-status { font-size:9px; }.desk-status-blocked { color:#9b5140; }.desk-status-done { color:#376657; }
 @media(max-width:760px) {
- .desk-computer { min-height:0; flex:1; height:100%; border:6px solid #61554b; box-shadow:0 5px 0 #211d1c; }
+ .desk-computer { min-height:0; flex:1; height:100%; border:0; box-shadow:none; }
  .desk-computer-menubar { height:34px; }.desk-computer-menubar>span:last-child { display:none; }
  .desk-app-content { overflow:hidden; }.desk-computer .reveal-coding-terminal { height:100%; }
  .desk-computer .agent-herdr-frame { display:block; }.desk-computer .agent-sidebar { display:none; }.desk-computer .agent-focused-pane { height:100%; }

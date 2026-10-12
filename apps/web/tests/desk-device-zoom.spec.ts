@@ -16,6 +16,14 @@ for(const width of [1440,390]){
   await expect(page.locator('.desk-page')).toHaveAttribute('data-view','room');
   await page.getByRole('button',{name:'Zoom in on the Stream Deck',exact:true}).click();
   await page.getByRole('button',{name:'Desk key api',exact:true}).click();
+  if(width<760) {
+   await expect(page.locator('.desk-page')).toHaveAttribute('data-view','monitor');
+   await expect(page.getByRole('combobox',{name:'Focused agent',exact:true})).toHaveValue('0');
+   await expect(page.getByRole('button',{name:'Yes, keep it',exact:true})).toBeVisible();
+   await page.getByRole('button',{name:'Back to the desk ↙',exact:true}).click();
+   await expect(page.locator('.desk-page')).toHaveAttribute('data-view','room');
+   return;
+  }
   await expect(page.locator('.desk-page')).toHaveAttribute('data-view','device');
   await expect(page.getByRole('button',{name:'Desk key api',exact:true})).toHaveAttribute('aria-pressed','true');
   await expect(page.locator('.desk-page')).toHaveAttribute('data-api-status','blocked');

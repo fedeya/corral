@@ -63,7 +63,6 @@ test('mobile references remain individually tappable instead of overlapping tiny
   await page.setViewportSize({ width:320, height:844 });
   await page.goto('/?concept=desk');
   await page.getByRole('button', { name:'Skip intro', exact:true }).click();
-  await page.getByText('Things on the desk', { exact:true }).click();
   await page.getByRole('button', { name:'Inspect the source disk', exact:true }).click();
   await expect(page.getByRole('heading', { name:'Small plugin. Open source.', exact:true })).toBeVisible();
 });

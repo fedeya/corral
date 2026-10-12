@@ -2,9 +2,13 @@ import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { DESK_OBJECTS, type DeskBrowserPage, type DeskEffect } from './desk-contract';
 import type { DeskSound } from './desk-sfx';
 import './DeskObjects.css';
+import { objectTouchClip } from './desk-object-hit';
+
 
 type DeskObjectsProps = {
   scale: number;
+  mobile?: boolean;
+
   onOpenPage: (page: DeskBrowserPage) => void;
   onEffect: (effect: DeskEffect) => void;
   disabled?: boolean;
@@ -34,7 +38,7 @@ const descriptions: Record<ObjectId, string> = {
   keyboard: 'Now you have a real keyboard.',
 };
 
-export function DeskObjects({ scale, onOpenPage, onEffect, disabled = false, layout = 'scene', onMessage, onInteract, soundEnabled=true, onDuck, onArcade }: DeskObjectsProps) {
+export function DeskObjects({ mobile=false, scale, onOpenPage, onEffect, disabled = false, layout = 'scene', onMessage, onInteract, soundEnabled=true, onDuck, onArcade }: DeskObjectsProps) {
   const [message, setMessage] = useState('');
   const [playing, setPlaying] = useState(false);
   const [dismissedHint, setDismissedHint] = useState<ObjectId | null>(null);
@@ -99,13 +103,14 @@ export function DeskObjects({ scale, onOpenPage, onEffect, disabled = false, lay
   return (
     <div className="desk-objects" data-layout={layout} inert={disabled} style={{ '--desk-object-inverse': 1 / safeScale } as CSSProperties}>
       {DESK_OBJECTS.map((object) => {
+        const width=Math.max(object.width,44/safeScale),height=Math.max(object.height,44/safeScale);
         const label = object.id === 'cassette' && playing ? 'Stop the chiptune' : object.label;
         return (
           <button key={object.id} type="button" className="desk-object" aria-label={label}
             data-hint-dismissed={dismissedHint === object.id}
             onFocus={() => setDismissedHint(null)}
             aria-pressed={object.id === 'cassette' ? playing : undefined}
-            style={layout === 'scene' ? { left: object.x + object.width / 2, top: object.y + object.height / 2, width: Math.max(object.width, 44 / safeScale), height: Math.max(object.height, 44 / safeScale) } : undefined}
+            style={layout === 'scene' ? { left: object.x + object.width / 2, top: object.y + object.height / 2, width, height, clipPath:mobile ? objectTouchClip(object,width,height) : undefined } : undefined}
             onClick={() => activate(object.id)}>
             <span className="desk-object-label" aria-hidden="true">{label}</span>
           </button>

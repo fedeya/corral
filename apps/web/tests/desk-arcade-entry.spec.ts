@@ -5,7 +5,6 @@ for(const width of [1440,390]) test(`the controller opens Agent Arcade in the mo
   await page.emulateMedia({reducedMotion:'reduce'});
   await page.goto('/');
   await page.getByRole('button',{name:'Skip intro',exact:true}).click();
-  if(width===390) await page.getByText('Things on the desk',{exact:true}).click();
   await page.getByRole('button',{name:'Inspect the old game controller',exact:true}).click();
   await expect(page.locator('.desk-page')).toHaveAttribute('data-view','monitor');
   await expect(page.locator('.desk-computer')).toHaveAttribute('data-app','arcade');
