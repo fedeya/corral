@@ -1,0 +1,103 @@
+.desk-computer { color:#d3deca; background:#161e23; height:100%; width:100%; display:flex; flex-direction:column; overflow:hidden; font:12px/1.45 'IBM Plex Mono',monospace; }
+.desk-computer button { cursor:pointer; font-family:inherit; }
+.desk-computer button:focus-visible,.desk-computer a:focus-visible,.desk-computer input:focus-visible { outline:3px solid #f6d990; outline-offset:-3px; }
+.desk-computer-menubar { height:27px; flex-shrink:0; display:flex; align-items:center; justify-content:space-between; padding:0 14px; background:#35433c; color:#e1e8cd; font-size:10px; }
+.desk-computer-menubar small { color:#a6b4a0; font-size:8px; margin-left:12px; }
+.desk-computer-menubar>span:last-child { color:#adbca6; }
+.desk-app-content { flex:1; min-height:0; overflow:hidden; }
+.desk-app-window { height:100%; }
+.desk-computer [hidden] { display:none!important; }
+.desk-computer .reveal-coding-terminal { position:relative; top:auto; left:auto; transform:none; animation:none; width:100%; height:100%; margin:0; display:flex; flex-direction:column; background:#131d1e; font-family:'IBM Plex Mono',monospace; border:0; box-shadow:none; border-radius:0; }
+.desk-computer .agent-window-bar { height:26px; flex-shrink:0; padding:0 14px; font-size:10px; }
+.desk-computer .agent-herdr-frame { grid-template-columns:165px minmax(0,1fr); min-height:0; flex:1; overflow:hidden; }
+.desk-computer .agent-sidebar { overflow:auto; padding:9px 6px; }
+.desk-computer .agent-sidebar-label { font-size:9px; color:#91a792; margin:12px 7px 7px; }
+.desk-computer .agent-workspace { padding:5px 7px; font-size:11px; }
+.desk-computer .agent-sidebar-entry { min-height:40px; font-size:11px!important; padding:6px; }
+.desk-computer .agent-sidebar-entry small { font-size:8px; margin-top:3px; }
+.desk-computer .agent-focused-pane { min-height:0; }
+.desk-computer .agent-pane-bar { padding:7px 14px; font-size:11px; }
+.desk-computer .agent-pane-bar span:last-child { font-size:10px; }
+.desk-computer .agent-terminal-session { overflow:auto; padding:10px 18px; }
+.desk-computer .agent-cli-heading { flex-direction:row; align-items:baseline; justify-content:space-between; }
+.desk-computer .agent-cli-heading h2 { font:500 20px/1.2 'IBM Plex Mono',monospace; margin:0; color:#e3ceb2; }
+.desk-computer .agent-cli-heading>span { font-size:10px; }
+.desk-computer .agent-user-prompt { display:flex; gap:9px; font:12px/1.5 'IBM Plex Mono',monospace; color:#e0e6d5; background:#26302b; padding:8px 10px; margin:6px 0; }
+.desk-computer .agent-read-line { font-size:10px; margin:4px 0; }
+.desk-computer .agent-code-diff { font-size:11px; line-height:1.4; padding:5px; }
+.desk-computer .agent-decision { margin-top:10px; padding-top:8px; border-top:1px solid #46513f; }
+.desk-computer .agent-decision>p { font-size:10px; color:#d2b988; margin:0; }
+.desk-computer .agent-decision h3 { font:400 13px/1.4 'IBM Plex Mono',monospace; color:#e6e6d7; margin:5px 0 8px; }
+.desk-computer .agent-decision button { font-size:12px!important; min-height:44px; }
+.desk-computer .agent-pane-status { font-size:9px; padding:5px 12px; }
+.desk-computer .agent-demo-disclaimer { padding:4px 10px; font-size:8px; flex-shrink:0; }
+.desk-computer .agent-run-output { margin:12px 0 0; padding-top:8px; border-top:1px solid #354839; font-size:12px; }
+.desk-computer .agent-run-output p { margin:5px 0; }
+.desk-computer .agent-background-log { font-size:12px; color:#b0c19f; margin:25px 0; }
+.desk-dock { flex-shrink:0; min-height:44px; display:flex; gap:8px; justify-content:center; padding:4px 12px; background:#2b3732; border-top:1px solid #48554a; }
+.desk-dock button { min-height:36px; padding:0 16px; border:1px solid transparent; background:transparent; color:#adbaa6; font-size:11px; }
+.desk-dock button[aria-pressed=true] { background:#475342; border-color:#7b8664; color:#edf0cc; }
+.desk-dock button:hover { background:#405042; color:#f3edcc; }.desk-dock button>span { margin-right:6px; color:#d3d99b; }
+.desk-browser { height:100%; display:flex; flex-direction:column; background:#e7dfc8; color:#2c3b32; }
+.desk-browser-tabs { display:flex; flex-shrink:0; background:#314139; padding:7px 9px 0; gap:4px; }
+.desk-browser-tabs button { background:#3c4b42; color:#c7d0b8; border:0; padding:8px 17px; font-size:11px; }
+.desk-browser-tabs button[aria-pressed=true] { color:#2c3b32; background:#e7dfc8; }
+.desk-address { display:flex; gap:10px; align-items:center; flex-shrink:0; margin:8px 13px; padding:5px 10px; border:1px solid #b9b49b; color:#66715a; background:#f1ebd7; font-size:10px; }
+.desk-address>span:last-child { margin-left:auto; font-size:8px; color:#7c8270; }
+.desk-browser-document { flex:1; min-height:0; overflow:auto; padding:18px 25px 24px; overscroll-behavior:contain; }
+.desk-browser h2 { font:400 29px/1.2 'VT323',monospace; color:#283c32; margin:8px 0 14px; letter-spacing:.2px; }
+.desk-browser p { font:12px/1.8 'IBM Plex Mono',monospace; margin:8px 0 16px; max-width:650px; }
+.desk-browser a { color:#37563f; text-decoration:underline; text-underline-offset:3px; }
+.desk-browser-eyebrow { font-size:9px; letter-spacing:1px; color:#6c7259; }
+.desk-browser-note { color:#787c64; font-size:10px!important; }
+.desk-browser-link { display:inline-flex; align-items:center; min-height:44px; margin:7px 0 14px; padding:10px 15px; background:#324637; border:0; color:#ebe7c8!important; text-decoration:none!important; }
+.desk-browser .xp-install { margin-top:20px; border:1px solid #707e60; background:#25372a; color:#e2e7c4; }
+.desk-browser .xp-install-bar { display:flex; justify-content:space-between; align-items:center; padding:10px 12px; border-bottom:1px solid #657756; font-size:10px; }
+.desk-browser .xp-install-bar button { color:#edf0d4; background:#3c5238; border:1px solid #788764; min-height:44px; padding:6px 14px; }
+.desk-browser .xp-install pre { color:#d4dfb7; font-size:12px; line-height:1.9; padding:16px 14px; margin:0; overflow:auto; }
+.desk-browser .xp-install>p { padding:0 14px; color:#c1ceb0; font-size:10px; margin:5px 0; }
+.desk-preview-feature { border-bottom:1px dashed #aba889; padding:8px 0 13px; margin:0 0 14px; color:#736c4e; font-size:11px; }
+.desk-feature-ready { color:#355a3b; }.desk-search { display:flex; gap:15px; align-items:center; font-size:11px; margin:12px 0; }
+.desk-search input { flex:1; min-width:0; padding:9px 12px; border:1px solid #a4aa8c; background:#f5f0dd; color:#2b4733; font:12px 'IBM Plex Mono',monospace; }
+.desk-preview-agents { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; }
+.desk-preview-agents button { text-align:left; display:flex; align-items:center; justify-content:space-between; gap:10px; padding:9px 11px; min-height:44px; color:#45533b; border:1px solid #c2c1a4; background:#eee9d3; }
+.desk-preview-agents button[aria-pressed=true] { background:#d4dcbd; border-color:#778663; }.desk-preview-agents small { display:block; font-size:8px; color:#747d64; margin-top:3px; }.desk-preview-status { font-size:9px; }.desk-status-blocked { color:#9b5140; }.desk-status-done { color:#376657; }
+@media(max-width:760px) {
+ .desk-computer { min-height:0; flex:1; height:100%; border:6px solid #61554b; box-shadow:0 5px 0 #211d1c; }
+ .desk-computer-menubar { height:34px; }.desk-computer-menubar>span:last-child { display:none; }
+ .desk-app-content { overflow:hidden; }.desk-computer .reveal-coding-terminal { height:100%; }
+ .desk-computer .agent-herdr-frame { display:block; }.desk-computer .agent-sidebar { display:none; }.desk-computer .agent-focused-pane { height:100%; }
+ .desk-computer .agent-pane-bar { flex-wrap:wrap; padding:10px; }.desk-computer .agent-terminal-session { padding:16px 12px; overflow:auto; min-height:0; }
+ .desk-computer .agent-cli-heading { flex-direction:column; gap:4px; }.desk-computer .agent-user-prompt { margin:17px 0; }
+ .desk-computer .agent-code-diff { font-size:10px; }.desk-computer .agent-decision { margin-top:20px; padding-top:15px; }
+ .desk-computer .agent-decision h3 { font-size:14px; margin:10px 0; }
+ .desk-computer .agent-demo-disclaimer { font-size:9px; padding:8px 10px; }
+ .desk-dock button { min-height:44px; padding:0 10px; }.desk-dock { margin-top:auto; }
+ .desk-browser { min-height:0; }.desk-browser-document { overflow:auto; padding:20px 13px; }
+ .desk-browser-tabs { padding:5px 4px 0; gap:0; }.desk-browser-tabs button { padding:8px 9px; min-height:44px; font-size:10px; }
+ .desk-address>span:last-child { display:none; }.desk-preview-agents { grid-template-columns:1fr; }
+ .desk-search { flex-direction:column; align-items:stretch; gap:7px; }.desk-browser p { font-size:11px; }
+ .desk-browser .xp-install-bar { flex-wrap:wrap; gap:10px; }.desk-browser .xp-install pre { font-size:10px; padding:12px 8px; }
+}
+.desk-computer { background:#242122; color:#d8d0bf; }
+.desk-computer-menubar,.desk-dock { background:#38312c; border-color:#6c5946; color:#ddccb0; }
+.desk-computer-menubar small,.desk-computer-menubar>span:last-child { color:#baa88e; }
+.desk-computer .reveal-coding-terminal { background:#211f20; }
+.desk-computer .agent-window-bar { background:#2c2826; color:#c8baaa; border-color:#5b4f44; }
+.desk-computer .agent-sidebar { background:#282422; border-color:#655545; }
+.desk-computer .agent-workspace-selected,.desk-computer .agent-sidebar-entry[aria-pressed=true] { background:#41372c; color:#ead6b3; box-shadow:none; }
+.desk-computer .agent-pane-bar,.desk-computer .agent-pane-status { background:#302924; border-color:#62523e; color:#dbcaaf; }
+.desk-computer .agent-user-prompt { background:#302b27; color:#e9dcc7; }
+.desk-computer .agent-code-diff { background:#252523; border-color:#4c473c; }
+.desk-computer .agent-decision button { background:#d8b97d; border-color:#e6ca96; color:#332b24; }
+.desk-computer .agent-decision button:hover { background:#ead1a4; }
+.desk-computer .agent-demo-disclaimer { background:#27231f; border-color:#4e4436; color:#b0a08a; }
+.desk-dock button { color:#c5b69d; }.desk-dock button[aria-pressed=true],.desk-dock button:hover { background:#514331; border-color:#99815d; color:#f0dfbf; }.desk-dock button>span { color:#d9b678; }
+.desk-browser { background:#eee5d2; color:#43382d; }.desk-browser-tabs { background:#37312b; }.desk-browser-tabs button { background:#494037; color:#d0bd9e; }.desk-browser-tabs button[aria-pressed=true] { background:#eee5d2; color:#403328; }
+.desk-browser h2 { color:#3a2f27; }.desk-browser a { color:#755433; }.desk-browser-link { background:#58432f; color:#f3e3c6!important; }
+.desk-browser .xp-install { background:#302821; border-color:#947552; }.desk-browser .xp-install-bar { border-color:#75604a; }.desk-browser .xp-install-bar button { background:#54412e; border-color:#a68a61; }.desk-browser .xp-install pre,.desk-browser .xp-install>p { color:#e3cdab; }
+.desk-search input,.desk-preview-agents button { background:#f4ead4; border-color:#baab8c; color:#51412f; }.desk-preview-agents button[aria-pressed=true] { background:#e6d1a9; border-color:#a08051; }
+.desk-browser-credits { padding:8px 14px; font-size:9px; border-top:1px solid #bdac8d; flex-shrink:0; }
+.desk-dock button[data-invited=true] { border-color:#c6a46e; animation:desk-browser-invite 2s 3; }
+@keyframes desk-browser-invite { 50% { background:#66513a; box-shadow:0 0 0 2px #d6b57955; color:#fff0cf; } }
+@media(prefers-reduced-motion:reduce) { .desk-dock button[data-invited=true] { animation:none; } }

@@ -1,0 +1,16 @@
+.desk-objects { position: absolute; inset: 0; pointer-events: none; }
+.desk-object { position: absolute; transform: translate(-50%, -50%); appearance: none; border: 0; border-radius: 10px; background: transparent; padding: 0; color: #fff0cf; cursor: pointer; pointer-events: auto; }
+.desk-object:hover { background: rgb(255 223 151 / 7%); }
+.desk-object:focus-visible { outline: 2px solid #ffe0a0; outline-offset: 3px; background: rgb(255 223 151 / 9%); z-index: 3; }
+.desk-object-label { position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%) scale(var(--desk-object-inverse)); transform-origin: bottom center; width: max-content; max-width: 210px; padding: 6px 9px; background: #292320; border: 1px solid #b09878; border-radius: 4px; font: 12px/1.4 ui-monospace, monospace; opacity: 0; visibility: hidden; pointer-events: none; }
+.desk-object:hover, .desk-object:focus-visible { z-index: 3; }
+.desk-object:hover .desk-object-label, .desk-object:focus .desk-object-label { opacity: 1; visibility: visible; }
+.desk-objects[data-layout=scene] .desk-object[data-hint-dismissed=true] .desk-object-label { opacity:0; visibility:hidden; }
+.desk-objects-status { position: absolute; left: 800px; top: 620px; transform: translateX(-50%) scale(var(--desk-object-inverse)); transform-origin: top center; width: max-content; max-width: 290px; color: #fff0cf; background: #292320; border: 1px solid #b09878; border-radius: 4px; padding: 8px 12px; font: 12px/1.5 ui-monospace, monospace; text-align: center; pointer-events: none; z-index: 4; }
+.desk-objects-status:empty { padding: 0; border: 0; }
+.desk-objects[inert] .desk-object { pointer-events: none; }
+.desk-objects[inert] .desk-objects-status { visibility:hidden; }
+.desk-objects[data-layout=list] { position:relative; inset:auto; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; }
+.desk-objects[data-layout=list] .desk-object { position:static; transform:none; border:1px solid #896d50; border-radius:0; min-height:44px; padding:9px; background:#3b3028; }
+.desk-objects[data-layout=list] .desk-object-label { position:static; transform:none; width:auto; max-width:none; opacity:1; visibility:visible; border:0; padding:0; background:transparent; font:10px/1.6 'IBM Plex Mono',monospace; }
+.desk-objects[data-layout=list] .desk-objects-status { position:static; transform:none; width:auto; max-width:none; grid-column:1/-1; margin-top:6px; font:11px/1.6 'IBM Plex Mono',monospace; }

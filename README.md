@@ -120,12 +120,12 @@ region that excludes those other surfaces. Demo mode below is separate: it creat
 
 ```sh
 bun install --frozen-lockfile
-bun run test
-bun run typecheck
-bun run build
+bun run test:plugin
+bun run --cwd apps/plugin typecheck
+bun run build:plugin
 ```
 
-The test script uses Bun file isolation so the pins and Showcase SDK/CLI fixtures cannot share cached modules.
+The plugin test script uses Bun file isolation so the pins and Showcase SDK/CLI fixtures cannot share cached modules.
 Type-checking includes the tests as well as the plugin and scripts.
 
 Tests exercise the real action handlers, state, herdr subprocess adapter and pixel renderers. Only the unavailable
@@ -141,7 +141,7 @@ You need:
 - a Stream Deck + and the Stream Deck app, on macOS;
 - [herdr](https://herdr.dev);
 - [Ghostty](https://ghostty.org);
-- [Bun](https://bun.sh).
+- [Bun 1.4.3](https://bun.sh).
 
 Then build the plugin and register it with the Stream Deck app:
 
@@ -149,7 +149,7 @@ Then build the plugin and register it with the Stream Deck app:
 git clone https://github.com/fedeya/corral
 cd corral
 bun install
-bun run build
+bun run build:plugin
 bun run link
 ```
 
@@ -157,32 +157,52 @@ In the Stream Deck app, open the **Corral** category. Drag **Agent slot** onto e
 **Agents strip** onto all four dials.
 
 > [!NOTE]
-> The herdr path (`/opt/homebrew/bin/herdr`) and the terminal (Ghostty) are hard-coded in `src/herdr.ts` for now.
+> The herdr path (`/opt/homebrew/bin/herdr`) and the terminal (Ghostty) are hard-coded in `apps/plugin/src/herdr.ts` for now.
 
 ### Enabling the kingdom theme
 
 The kingdom art can't be redistributed, so it isn't in the repo:
 
 1. Download [Tiny Swords](https://pixelfrog-assets.itch.io/tiny-swords) by Pixel Frog. It's free.
-2. Copy the sprites into `dev.fedeya.corral.sdPlugin/imgs/kingdom/`: pawns for each team colour, trees, castle, houses,
-   gold stone, bushes, sheep, stump, meat and wood. The exact file names are in `src/themes/kingdom.ts`.
+2. Copy the sprites into `apps/plugin/dev.fedeya.corral.sdPlugin/imgs/kingdom/`: pawns for each team colour, trees, castle, houses,
+   gold stone, bushes, sheep, stump, meat and wood. The exact file names are in `apps/plugin/src/themes/kingdom.ts`.
 
 The theme appears as soon as the files are there.
 
+## Website
+
+The Desk landing page lives in `apps/web`. From the repository root, run `bun run dev` to start it locally
+or `bun run build:web` to produce the static site in `apps/web/dist/`.
+
+The website includes `public/favicon.svg` and a 1200×630 `public/og.png`. Set `CORRAL_SITE_URL` to the
+public deployment URL when building so the Open Graph and Twitter image tags contain an absolute URL
+(for example, `CORRAL_SITE_URL=https://your-domain.example/ bun run build:web`). Without it, local previews
+use `/og.png`; no production domain is assumed. The browser scene and agent conversations are simulated.
+
 ## Development
+
+This Bun monorepo contains `@corral/plugin` in `apps/plugin` and the website in `apps/web`. Install dependencies
+once with `bun install` at the repository root. All commands below run from that root; plugin wrappers set the
+plugin working directory and forward arguments.
 
 | Command | |
 |---|---|
-| `bun run build` | Bundle the plugin |
+| `bun run build` | Build both workspaces |
+| `bun run build:plugin` | Bundle the Stream Deck plugin |
+| `bun run build:web` | Build the website |
+| `bun run watch` | Rebuild the plugin on changes |
 | `bun run restart` | Reload it in the Stream Deck app (needs `streamdeck dev`) |
 | `bun run preview <theme> --open` | Render keys and touch strip to a PNG, no device needed |
 | `bun run media` | Re-render the GIFs in `docs/media/` |
 | `bun run demo on` / `off` | Pretend agents in a separate herdr session, for recordings (see below) |
-| `bun run typecheck` | Type-check |
-| `bun run test` | Run layout, gesture, real-render and SDK action-path tests |
+| `bun run typecheck` | Type-check both workspaces |
+| `bun run test` | Run both workspace suites (not root test autodiscovery) |
+| `bun run test:plugin` | Run isolated layout, gesture, real-render and SDK action-path tests |
+| `bun run test:web` | Run website tests |
+| `bun run validate` | Validate the Stream Deck plugin |
 
 The plugin polls `herdr agent list` every second and focuses agents with `herdr agent focus`. Logs go to
-`dev.fedeya.corral.sdPlugin/logs/`.
+`apps/plugin/dev.fedeya.corral.sdPlugin/logs/`.
 
 Tests exercise real layout, gestures, PNG rendering and herdr subprocess calls. Only the Stream Deck SDK dispatch /
 device transport is mocked; a test-only herdr CLI fixture supplies synthetic panes. Tests do not prove physical
@@ -192,7 +212,7 @@ created under `TMPDIR` and removed on completion.
 ### Demo mode
 
 `bun run demo on` starts a separate herdr session, `corral-demo`, with pretend agents that look like a coding agent at
-work. They follow a script (`scripts/demo-story.ts`): they start working, some finish, some stop and ask you to confirm
+work. They follow a script (`apps/plugin/scripts/demo-story.ts`): they start working, some finish, some stop and ask you to confirm
 (press `1`). The plugin switches to that session, so tapping a key opens the pretend agent. Your real herdr session isn't
 touched.
 

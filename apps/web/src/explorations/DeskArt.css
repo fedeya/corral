@@ -1,0 +1,86 @@
+.desk-art {
+  display: block;
+  width: 1600px;
+  height: 1100px;
+  overflow: visible;
+  pointer-events: none;
+  user-select: none;
+  shape-rendering: crispEdges;
+  image-rendering: pixelated;
+}
+
+.desk-art text {
+  font-family: monospace;
+  font-weight: 600;
+  text-rendering: geometricPrecision;
+}
+.desk-art-visitor { opacity:0; transform:translateY(100px); transition:opacity .3s,transform .65s steps(8,end); }
+.desk-art-visitor[data-visible=true] { opacity:1; transform:translateY(0); }
+
+.desk-art-wall-warmth {
+  opacity: 0;
+  transition: opacity 600ms ease;
+}
+
+.desk-art-lamp-halo {
+  opacity: 0;
+  transition: opacity 400ms ease;
+}
+
+.desk-art-bulb {
+  opacity: .35;
+  transition: opacity 300ms ease;
+}
+
+.desk-art--lit .desk-art-wall-warmth { opacity: .045; }
+.desk-art--lit .desk-art-lamp-halo { opacity: .065; }
+.desk-art--lit .desk-art-bulb { opacity: 1; }
+
+.desk-art-rocket {
+  transform: translateY(0);
+  transition: transform 1100ms cubic-bezier(.25, .7, .2, 1);
+}
+
+.desk-art--launched .desk-art-rocket { transform: translateY(-380px); }
+.desk-art-rocket-flame { opacity: 0; }
+.desk-art--launched .desk-art-rocket-flame {
+  opacity: 1;
+  animation: desk-art-thrust 240ms steps(2, end) infinite;
+}
+
+.desk-art-flower {
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 500ms ease, transform 500ms steps(4, end);
+}
+
+.desk-art--bloom .desk-art-flower { opacity: 1; transform: translateY(0); }
+.desk-art-steam { opacity: 0; transition: opacity 250ms ease; }
+.desk-art--steam .desk-art-steam { opacity: .6; }
+.desk-art--steam .desk-art-steam path { animation: desk-art-steam-rise 2200ms steps(6, end) infinite; }
+.desk-art--steam .desk-art-steam path:nth-child(2) { animation-delay: -700ms; }
+.desk-art--steam .desk-art-steam path:nth-child(3) { animation-delay: -1400ms; }
+
+@keyframes desk-art-steam-rise {
+  0% { opacity: 0; transform: translateY(8px); }
+  25% { opacity: .8; }
+  75% { opacity: .5; }
+  100% { opacity: 0; transform: translateY(-20px); }
+}
+
+@keyframes desk-art-thrust {
+  0% { opacity: .9; }
+  100% { opacity: .5; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .desk-art-visitor { transition:none; }
+  .desk-art .desk-art-rocket,
+  .desk-art .desk-art-wall-warmth,
+  .desk-art .desk-art-lamp-halo,
+  .desk-art .desk-art-bulb,
+  .desk-art .desk-art-flower,
+  .desk-art .desk-art-steam { transition: none; }
+  .desk-art .desk-art-steam path,
+  .desk-art .desk-art-rocket-flame { animation: none; }
+}

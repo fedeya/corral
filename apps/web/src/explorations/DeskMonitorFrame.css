@@ -1,0 +1,12 @@
+.desk-monitor-frame { position:absolute; left:330px; top:95px; width:910px; height:555px; border:0; background:transparent; padding:0; pointer-events:none; }
+.desk-monitor-frame>span { position:absolute; pointer-events:auto; cursor:zoom-in; }
+.desk-monitor-frame[aria-label^='Zoom out']>span { cursor:zoom-out; }
+.desk-monitor-frame:disabled>span { pointer-events:none; }
+.desk-monitor-frame>[data-edge=top] { left:0; top:calc(24px - var(--frame-hit)); width:100%; height:var(--frame-hit); }
+.desk-monitor-frame>[data-edge=left] { top:0; left:calc(28px - var(--frame-hit)); height:100%; width:var(--frame-hit); }
+.desk-monitor-frame>[data-edge=right] { top:0; left:calc(100% - 28px); height:100%; width:var(--frame-hit); }
+.desk-monitor-frame>[data-edge=bottom] { top:520px; left:0; width:100%; height:var(--frame-hit); }
+.desk-monitor-frame:focus-visible { outline:3px solid #e4c895; outline-offset:4px; }
+.desk-monitor-frame[data-suggested=true]>[data-edge=bottom] { animation:desk-monitor-invite 1.9s 2; }
+@keyframes desk-monitor-invite { 50% { box-shadow:inset 0 -2px #cfba86; } }
+@media(prefers-reduced-motion:reduce) { .desk-monitor-frame[data-suggested=true]>[data-edge=bottom] { animation:none; } }

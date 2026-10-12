@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="32" height="32" shape-rendering="crispEdges">
+  <title>Corral pixel cat key</title>
+  <path fill="#252223" d="M2 0h12v1h1v1h1v12h-1v1h-1v1H2v-1H1v-1H0V2h1V1h1z"/>
+  <path fill="#d0ad78" d="M2 1h12v1h1v12h-1v1H2v-1H1V2h1zm1 2v10h10V3z" fill-rule="evenodd"/>
+  <path fill="#77926b" d="M3 11h10v2H3z"/>
+  <path fill="#eee0c4" d="M4 4h2v2h4V4h2v6h-1v1H5v-1H4z"/>
+  <path fill="#252223" d="M5 7h1v1H5zm5 0h1v1h-1zM7 9h2v1H7z"/>
+</svg>

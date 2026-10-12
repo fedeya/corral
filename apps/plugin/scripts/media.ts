@@ -19,7 +19,7 @@ const STRIP_GAP = 24;
 const W = PAD * 2 + 4 * SEG;
 const H = PAD * 2 + 2 * KEY + ROW_GAP + STRIP_GAP + 100;
 const BODY = hex("#17171b");
-const OUT = join(dirname(fileURLToPath(import.meta.url)), "../docs/media");
+const OUT = join(dirname(fileURLToPath(import.meta.url)), "../../../docs/media");
 
 const sample: [string, AgentStatus][] = [
 	["api", "working"],
