@@ -8,4 +8,10 @@
 @keyframes desk-keyboard-crack-right { 0% { opacity:1; transform:translateX(0); } 65% { opacity:1; transform:translateX(24px); } 100% { opacity:0; transform:translateX(34px); } }
 @keyframes desk-keyboard-form { 0% { opacity:0; transform:scale(.93); } 60% { opacity:1; transform:scale(1.02); } 100% { opacity:1; transform:scale(1); } }
 @keyframes desk-keyboard-sparks { 0%,100% { opacity:0; } 25%,65% { opacity:1; } }
+.desk-keyboard[data-rejoining=true] .desk-keyboard-flat-left { animation:desk-keyboard-join-left .7s steps(7,end) both; }
+.desk-keyboard[data-rejoining=true] .desk-keyboard-flat-right { animation:desk-keyboard-join-right .7s steps(7,end) both; }
+.desk-keyboard[data-rejoining=true] .desk-keyboard-split { transform-origin:265px 75px; animation:desk-keyboard-unform .35s steps(4,end) both; }
+@keyframes desk-keyboard-join-left { 0% { opacity:0; transform:translateX(-34px); } 40% { opacity:1; transform:translateX(-24px); } 100% { opacity:1; transform:translateX(0); } }
+@keyframes desk-keyboard-join-right { 0% { opacity:0; transform:translateX(34px); } 40% { opacity:1; transform:translateX(24px); } 100% { opacity:1; transform:translateX(0); } }
+@keyframes desk-keyboard-unform { from { opacity:1; transform:scale(1); } to { opacity:0; transform:scale(.93); } }
 @media(prefers-reduced-motion:reduce) { .desk-keyboard .desk-keyboard-flat-left,.desk-keyboard .desk-keyboard-flat-right,.desk-keyboard .desk-keyboard-split,.desk-keyboard .desk-keyboard-evolution { animation:none!important; } }

@@ -12,6 +12,8 @@ type DeskObjectsProps = {
   onMessage?: (text: string, speaker: string) => void;
   onInteract?: (cue:DeskSound) => void;
   soundEnabled?:boolean;
+  onDuck?: () => void;
+  onArcade?: () => void;
 };
 type ObjectId = (typeof DESK_OBJECTS)[number]['id'];
 
@@ -32,7 +34,7 @@ const descriptions: Record<ObjectId, string> = {
   keyboard: 'Now you have a real keyboard.',
 };
 
-export function DeskObjects({ scale, onOpenPage, onEffect, disabled = false, layout = 'scene', onMessage, onInteract, soundEnabled=true }: DeskObjectsProps) {
+export function DeskObjects({ scale, onOpenPage, onEffect, disabled = false, layout = 'scene', onMessage, onInteract, soundEnabled=true, onDuck, onArcade }: DeskObjectsProps) {
   const [message, setMessage] = useState('');
   const [playing, setPlaying] = useState(false);
   const [dismissedHint, setDismissedHint] = useState<ObjectId | null>(null);
@@ -83,6 +85,8 @@ export function DeskObjects({ scale, onOpenPage, onEffect, disabled = false, lay
     if (disabled) return;
     setDismissedHint(id);
     if(id !== 'cassette') onInteract?.(id);
+    if(id === 'duck' && onDuck) { onDuck(); return; }
+    if(id === 'controller' && onArcade) { onArcade(); return; }
     if (id === 'window') { onEffect('window'); return; }
     if (id === 'keyboard') { onEffect('keyboard'); return; }
     if (id === 'cassette') { void toggleTune(); return; }

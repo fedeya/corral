@@ -8,6 +8,7 @@ export interface DeskArtProps {
   plantBloom?: boolean;
   steam?: boolean;
   visitorVisible?: boolean;
+  windowGift?: boolean;
   keyboardEvolved?: boolean;
 }
 
@@ -16,8 +17,14 @@ const cream = '#e0d6b2';
 const olive = '#77926b';
 
 /** Original pixel illustration. All coordinates share the parent's 1600 × 1100 world. */
-export function DeskArt({ lit = true, rocketLaunched = false, plantBloom = false, steam = false, visitorVisible = false, keyboardEvolved = false }: DeskArtProps) {
+export function DeskArt({ lit = true, rocketLaunched = false, plantBloom = false, steam = false, visitorVisible = false, windowGift = false, keyboardEvolved = false }: DeskArtProps) {
   const id = useId().replace(/:/g, '');
+  const keyboardPort=keyboardEvolved?560:710;
+  const cables=[
+    {id:'keyboard',d:`M1030 620v64l-8 8h-60l-8 8v64l-8 8H${keyboardPort+8}l-8 8v33`},
+    {id:'mouse',d:'M1050 620v76l-8 8h-48l-8 8v64l8 8h14l8 8v62'},
+    {id:'device',d:'M1070 620v86l8 8h62l8 8v22l8 8h206l8 8v24'},
+  ];
   return (
     <svg className={`desk-art${lit ? ' desk-art--lit' : ''}${rocketLaunched ? ' desk-art--launched' : ''}${plantBloom ? ' desk-art--bloom' : ''}${steam ? ' desk-art--steam' : ''}`} viewBox="0 0 1600 1100" width="1600" height="1100" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
       <defs>
@@ -49,13 +56,18 @@ export function DeskArt({ lit = true, rocketLaunched = false, plantBloom = false
       <path d="M1300 80h240v8h12v390h-12v12h-240v-12h-12V88h12z" fill="#1a242c" />
       <rect x="1308" y="96" width="224" height="366" fill="#131f2c" />
       <path d="M1316 104h208v156h-208z" fill="#1c2b39" />
-      <path d="M1464 132h28v8h8v28h-8v8h-28v-8h-8v-28h8z" fill="#d3ceb0" />
-      <path d="M1480 132h12v8h8v28h-8v8h-12v-8h-8v-28h8z" fill="#1c2b39" />
-      {[ [1332, 128], [1388, 164], [1356, 224], [1500, 220], [1452, 288], [1336, 302], [1480, 340], [1396, 118] ].map(([x,y], i) => <path key={i} d={`M${x} ${y}h4v-4h4v4h4v4h-4v4h-4v-4h-4z`} fill={i % 3 ? '#82979a' : cream} />)}
+      <g clipPath={`url(#${id}-window-glass)`}>
+        <g className="desk-art-moon">
+          <path d="M1464 132h28v8h8v28h-8v8h-28v-8h-8v-28h8z" fill="#d3ceb0" />
+          <path d="M1480 132h12v8h8v28h-8v8h-12v-8h-8v-28h8z" fill="#1c2b39" />
+        </g>
+        {[ [1332, 128], [1388, 164], [1356, 224], [1500, 220], [1452, 288], [1336, 302], [1480, 340], [1396, 118] ].map(([x,y], i) => <path className="desk-art-star" style={{animationDuration:`${6+i%4}s`,animationDelay:`${-i*.7}s`}} key={i} d={`M${x} ${y}h4v-4h4v4h4v4h-4v4h-4v-4h-4z`} fill={i % 3 ? '#82979a' : cream} />)}
+      </g>
       <path d="M1360 184h28v4h28v24h20" stroke="#667f88" strokeWidth="2" fill="none" />
       <path d="M1312 420h24v-52h40v24h32v-64h40v36h24v-16h36v64h20v50h-216z" fill="#24323a" />
-      {[1344,1360,1416,1432,1484,1500].map((x,i) => <g key={x} fill={i % 2 ? '#8b7c55' : '#4d6161'}><rect x={x} y={i % 2 ? 408 : 380} width="8" height="12" /><rect x={x} y="436" width="8" height="8" /></g>)}
+      {[1344,1360,1416,1432,1484,1500].map((x,i) => <g className="desk-art-apartment-light" style={{animationDuration:`${14+i*3}s`,animationDelay:`${-i*2.3}s`}} key={x} fill={i % 2 ? '#8b7c55' : '#4d6161'}><rect x={x} y={i % 2 ? 408 : 380} width="8" height="12" /><rect x={x} y="436" width="8" height="8" /></g>)}
       <g clipPath={`url(#${id}-window-glass)`}>
+        {windowGift && <path className="desk-art-window-gift" d="m1370 344 8-20 8 20 22 2-16 14 5 22-19-12-19 12 5-22-16-14z" fill="none" stroke="#e0c591" strokeWidth="4" opacity=".85" />}
         <g className="desk-art-visitor" data-visible={visitorVisible}>
           <path d="M1440 460v-48h16v-20h48v20h16v48z" fill="#3e525d" />
           <path d="M1452 356h12v-16h8v16h20v-16h8v16h12v40h-12v12h-48v-12h-8v-32h8z" fill="#8caa9f" />
@@ -106,6 +118,14 @@ export function DeskArt({ lit = true, rocketLaunched = false, plantBloom = false
       <path d="M84 1088h64v12H84zM1444 1088h64v12h-64z" fill="#172229" />
       <path d="M636 752h302v16H636z" fill="#76553c" />
 
+      {/* USB hub connections tuck behind the monitor; loose stepped bends stay on the desk. */}
+      <path d="M404 792h656v8h12v158h-12v8H404v-8h-12V800h12z" fill="#6c634b" />
+      <rect x="400" y="800" width="664" height="158" fill={`url(#${id}-mat)`} />
+      <path d="M416 810h624M416 946h624" stroke="#77806b" strokeWidth="2" strokeDasharray="4 8" />
+      <g className="desk-art-cables" fill="none" strokeLinejoin="round">
+        {cables.map(cable=><g key={cable.id}><path d={cable.d} stroke="#121e23" strokeWidth="4" /><path data-cable={cable.id} d={cable.d} stroke="#364247" strokeWidth="2" /></g>)}
+      </g>
+
       {/* Heavy physical monitor; aperture is EXACTLY 362,125 → 1208,607. */}
       <path d="M720 644h144v76H720z" fill="#18232b" />
       <path d="M736 650h108v60H736z" fill="#4d5958" />
@@ -135,14 +155,15 @@ export function DeskArt({ lit = true, rocketLaunched = false, plantBloom = false
       <path d="M176 444h12v28h-20v8h-12v-12h8v-16h12z" fill="#aeb598" />
       <path className="desk-art-bulb" d="M160 484h80v8h-80z" fill="#f0d699" />
       <rect x="220" y="734" width="12" height="8" fill="#46534c" />
-      <path d="M136 754H96v28h184v-16h44" stroke="#4b4637" strokeWidth="4" fill="none" />
+      <rect x="68" y="692" width="24" height="32" fill="#53605b" /><rect x="76" y="708" width="8" height="10" fill="#17242a" />
+      <path d="M144 750h-36l-8-8H88l-8-8v-20" stroke="#252e2f" strokeWidth="5" fill="none" />
 
       {/* Books lean into the room's character without borrowed covers. */}
       <g>
         <path d="M1256 712h264v20h-264z" fill="#223032" />
-        <path d="M1264 714h248v10h-248z" fill="#c2b794" />
+        <path d="M1264 714h248v16h-248z" fill="#c2b794" />
         <path d="M1260 704h260v10h-260z" fill="#77816a" />
-        <text x="1290" y="720" fontSize="10" fill="#414e46">BORGES · LABYRINTHS</text>
+        <text x="1290" y="722" dominantBaseline="middle" fontSize="9" fill="#414e46">BORGES · LABYRINTHS</text>
         <path d="M1280 680h224v24h-224z" fill="#ac7554" />
         <path d="M1288 684h204v12h-204z" fill="#dac7a2" />
         <text x="1320" y="694" fontSize="11" fill="#634e3d">UNIX / FIELD NOTES</text>
@@ -155,12 +176,8 @@ export function DeskArt({ lit = true, rocketLaunched = false, plantBloom = false
       </g>
 
       {/* Woven desk mat, mechanical keyboard and wired mouse. */}
-      <path d="M404 792h656v8h12v158h-12v8H404v-8h-12V800h12z" fill="#6c634b" />
-      <rect x="400" y="800" width="664" height="158" fill={`url(#${id}-mat)`} />
-      <path d="M416 810h624M416 946h624" stroke="#77806b" strokeWidth="2" strokeDasharray="4 8" />
-      <path d="M460 807v-16h224v-23h100" stroke="#222e30" strokeWidth="5" fill="none" />
       <DeskKeyboard evolved={keyboardEvolved} />
-      <path d="M1016 852v-36h-16v-32h-54v-16h-88" stroke="#223031" strokeWidth="4" fill="none" />
+      <rect x={keyboardPort-6} y="809" width="12" height="8" fill="#222e30" /><rect x={keyboardPort-3} y="811" width="6" height="3" fill="#748078" />
       <path d="M1004 854h24v8h8v40h-8v8h-24v-8h-8v-40h8z" fill="#b7b499" />
       <path d="M1016 856v22M1000 878h32" stroke="#6f786b" strokeWidth="3" />
       <rect x="1012" y="862" width="8" height="10" fill="#46574e" />

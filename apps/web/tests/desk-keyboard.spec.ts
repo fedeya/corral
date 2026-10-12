@@ -15,6 +15,21 @@ test('the keyboard splits and evolves without a lingering hover label',async({pa
   await expect(page.locator('.desk-keyboard')).toHaveAttribute('data-evolved','false');
 });
 
+test('the split keyboard animates its halves back together only after evolving',async({page})=>{
+  await page.goto('/');
+  await page.getByRole('button',{name:'Skip intro',exact:true}).click();
+  const left=page.locator('.desk-keyboard-flat-left');
+  await expect(left).toHaveCSS('animation-name','none');
+  const key=page.getByRole('button',{name:'Evolve the keyboard',exact:true});
+  await key.click();
+  await expect(page.locator('.desk-keyboard-split')).toHaveCSS('opacity','1');
+  await key.click();
+  await expect(left).toHaveCSS('animation-name','desk-keyboard-join-left');
+  await expect(page.locator('.desk-keyboard-flat-right')).toHaveCSS('animation-name','desk-keyboard-join-right');
+  await expect(left).toHaveCSS('opacity','1');
+  await expect(page.locator('.desk-keyboard-split')).toHaveCSS('opacity','0');
+});
+
 test('keyboard evolution is keyboard accessible and respects reduced motion',async({page})=>{
   await page.emulateMedia({reducedMotion:'reduce'});
   await page.goto('/?concept=desk');
