@@ -14,7 +14,7 @@ export const DESK_OBJECTS = [
   { id: 'floppy', label: 'Inspect the source disk', x: 970, y: 990, width: 90, height: 70 },
   { id: 'controller', label: 'Inspect the old game controller', x: 120, y: 1000, width: 180, height: 65 },
   { id: 'cassette', label: 'Play a short chiptune', x: 1055, y: 1000, width: 110, height: 70 },
-  { id: 'books', label: 'Read the desk books', x: 1260, y: 640, width: 260, height: 92 },
+  { id: 'books', label: 'Read the desk books', x: 1260, y: 615, width: 260, height: 117 },
   { id: 'poster', label: 'Read the space poster', x: 80, y: 70, width: 190, height: 220 },
   { id: 'physics', label: 'Read the physics notes', x: 90, y: 340, width: 195, height: 190 },
   { id: 'window', label: 'Look through the window', x:1280, y:80, width:296, height:406 },

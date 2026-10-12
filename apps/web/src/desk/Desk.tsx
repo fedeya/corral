@@ -118,7 +118,7 @@ export function Desk() {
   const changeEffect = (effect: DeskEffect) => {
     if (effect === 'window') {
       if(effects.window) { setWindowGift(true); say('Back to the stars. Your neighbour left a little star on the glass. For the next night shift.', 'THE NIGHT WINDOW'); }
-      else say(windowGift ? 'You’re back. Your neighbour waves at the star. Same sky, same little desk.' : 'Someone is watching the night shift. A little wave. Seems to be rooting for you.', 'THE NIGHT WINDOW');
+      else say(windowGift ? 'You’re back. Your neighbour waves at the star. Different city. Same sky. — Fefe' : 'Someone is watching the night shift. A little wave. Different city. Same sky. — Fefe', 'THE NIGHT WINDOW');
     }
     if (effect === 'keyboard') say(effects.keyboard ? 'Back to stock. Your wrists will remember this.' : 'Now you have a real keyboard.', 'KEYBOARD / ADVANTAGE 360');
     setEffects(current => ({ ...current, [effect]: effect === 'rocket' ? true : !current[effect] }));
@@ -133,7 +133,7 @@ export function Desk() {
     <header className="desk-header"><a className="desk-brand" href="./">CORRAL</a><p>A little life on your desk.</p><nav aria-label="Desk navigation">
       <button type="button" className="desk-sound" aria-label={voice.enabled ? 'Mute desk sound' : 'Enable desk sound'} aria-pressed={voice.enabled} onClick={() => { void voice.toggle().then(enabled => { if(enabled && view!=='entry') setLine(current => current ? { ...current, id:++lineCounter.current } : view==='closeup' ? { id:++lineCounter.current, ...openingLine } : null); }); }}>{voice.unavailable ? 'No audio' : voice.enabled ? 'Sound on' : 'Sound off'}</button>
       <button type="button" className="desk-replay" aria-label="Replay" title="Restart the scene" onClick={replay}>↺</button>
-      <details className="desk-menu"><summary aria-label="Desk menu">Menu</summary><div><button type="button" onClick={() => openPage('about')}>About & credits</button><button type="button" onClick={() => openPage('source')}>Source & themes</button></div></details>
+      <details className="desk-menu"><summary aria-label="Desk menu">Menu</summary><div><button type="button" onClick={() => openPage('about')}>About & credits</button><button type="button" onClick={() => openPage('source')}>Source & themes</button><a href="https://fedeminaya.com" target="_blank" rel="noreferrer">Made by Fefe ↗</a></div></details>
       {!shown && <button className="desk-skip" type="button" aria-label="Skip intro" title="Skip intro" onClick={showRoom}>Skip intro</button>}
       <button type="button" className="desk-install" aria-label="Open install guide" onClick={() => openPage('install')}>Install Corral <span aria-hidden="true">↓</span></button>
     </nav></header>
@@ -151,7 +151,7 @@ export function Desk() {
             {!mobile && <DeskObjects scale={scale} onOpenPage={openPage} onEffect={changeEffect} onMessage={say} onInteract={voice.play} onDuck={askDuck} onArcade={openArcade} soundEnabled={voice.enabled && !voice.unavailable} disabled={!shown || view === 'monitor' || view==='device'} />}
           </div>
           <h1 className="desk-sr-only">Corral — a pixel-art home for coding agents on Stream Deck +</h1>
-          {view==='entry' && <section className="desk-entry" aria-label="Enter the desk"><div><span className="desk-entry-eyebrow">YOUR AGENTS HAVE A LITTLE HOME HERE</span><h2>A little life<br />on your desk.</h2><button type="button" aria-label="Step inside" onClick={enter}>Step inside <span aria-hidden="true">→</span></button><p>Leave the terminals to them. Make yourself at home.</p></div></section>}
+          {view==='entry' && <section className="desk-entry" aria-label="Enter the desk"><div><span className="desk-entry-eyebrow">YOUR AGENTS HAVE A LITTLE HOME HERE</span><h2>A little life<br />on your desk.</h2><button type="button" aria-label="Step inside" onClick={enter}>Step inside <span aria-hidden="true">→</span></button><p>Your coding agents, on Stream Deck +.<br />See who needs you. Tap to jump in.</p></div></section>}
         </div>
         {shown && <p className="desk-room-notice desk-sr-only" role="status" aria-live="polite">{notice}</p>}
         {shown && (mobile || view==='monitor' || view==='device') && <div className="desk-camera-controls"><button type="button" onClick={zoomMonitor}>{view === 'monitor' || view==='device' ? 'Back to the desk ↙' : 'Focus monitor ↗'}</button></div>}
