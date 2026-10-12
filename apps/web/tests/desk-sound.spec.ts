@@ -89,7 +89,7 @@ test('bounded effects preserve separate cassette and stopEffects silences every 
   test.skip(!!process.env.CORRAL_WEB_PRODUCTION && !harness, 'Offline synthesis uses the dev module or isolated harness');
   await page.goto(harness ?? '/?concept=desk');
   const result = await page.evaluate(async () => {
-    const path = '/src/explorations/desk-sfx.ts';
+    const path = '/src/desk/desk-sfx.ts';
     const module = await import(/* @vite-ignore */ path);
     const c = new OfflineAudioContext(1, 144000, 48000);
     const synth = module.createDeskSynth(c, c.destination);
@@ -114,7 +114,7 @@ test('all thirteen props render distinct quiet procedural waveforms', async ({ p
   test.skip(!!process.env.CORRAL_WEB_PRODUCTION && !harness, 'Offline synthesis uses the dev module or isolated harness');
   await page.goto(harness ?? '/?concept=desk');
   const metrics = await page.evaluate(async () => {
-    const path = '/src/explorations/desk-sfx.ts';
+    const path = '/src/desk/desk-sfx.ts';
     const { createDeskSynth } = await import(/* @vite-ignore */ path);
     const results: { cue: string; peak: number; rms: number; seconds: number; signature: number }[] = [];
     for (const cue of ['lamp', 'coffee', 'duck', 'rocket', 'plant', 'floppy', 'controller', 'cassette', 'books', 'poster', 'physics', 'window', 'keyboard']) {
@@ -152,7 +152,7 @@ test('procedural duck renders real quiet non-silent PCM', async ({ page }) => {
   test.skip(!!process.env.CORRAL_WEB_PRODUCTION && !harness, 'Offline synthesis uses the dev module or isolated harness');
   await page.goto(harness ?? '/?concept=desk');
   const metrics = await page.evaluate(async () => {
-    const path = '/src/explorations/desk-sfx.ts';
+    const path = '/src/desk/desk-sfx.ts';
     const module = await import(/* @vite-ignore */ path);
     const context = new OfflineAudioContext(1, 48000, 48000);
     const synth = module.createDeskSynth(context, context.destination);

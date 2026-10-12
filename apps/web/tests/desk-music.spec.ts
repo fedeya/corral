@@ -106,7 +106,7 @@ test('factory fades out, resets without stacking voices, and dispose cancels eve
   test.skip(!!process.env.CORRAL_WEB_PRODUCTION, 'Production preview does not expose the dev-only music factory module for offline rendering.');
   await page.goto('/?concept=desk');
   const metrics = await page.evaluate(async () => {
-    const path = '/src/explorations/desk-music.ts';
+    const path = '/src/desk/desk-music.ts';
     const { createDeskMusic } = await import(/* @vite-ignore */ path);
     const rate = 24000;
     const c = new OfflineAudioContext(1, rate * 2, rate);
@@ -155,8 +155,8 @@ test('actual rendered PCM is quiet, non-silent and seamless across a complete lo
   test.skip(!!process.env.CORRAL_WEB_PRODUCTION, 'Production preview does not serve TypeScript source modules; offline PCM factory imports are dev-only. Integrated source/lifecycle probes still run in production.');
   await page.goto('/?concept=desk');
   const metrics = await page.evaluate(async () => {
-    const musicPath = '/src/explorations/desk-music.ts';
-    const sfxPath = '/src/explorations/desk-sfx.ts';
+    const musicPath = '/src/desk/desk-music.ts';
+    const sfxPath = '/src/desk/desk-sfx.ts';
     const { createDeskMusic } = await import(/* @vite-ignore */ musicPath);
     const { createDeskSynth } = await import(/* @vite-ignore */ sfxPath);
     const rate = 24000;

@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { DESK_OBJECTS } from '../src/explorations/desk-contract';
+import { DESK_OBJECTS } from '../src/desk/desk-contract';
 
 const harness = process.env.DESK_BASE_URL?.includes('4187');
 
