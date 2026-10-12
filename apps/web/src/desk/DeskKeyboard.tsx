@@ -1,4 +1,4 @@
-import {useId} from 'react';
+import {useEffect,useId,useState} from 'react';
 import './DeskKeyboard.css';
 
 function FlatKeyboard() {
@@ -33,7 +33,9 @@ function ErgoHalf() {
 
 export function DeskKeyboard({evolved=false}:{evolved?:boolean}) {
   const id=useId().replace(/:/g,'');
-  return <g className="desk-keyboard" data-evolved={evolved} transform="translate(445 805)">
+  const [hasEvolved,setHasEvolved]=useState(evolved);
+  useEffect(()=>{if(evolved) setHasEvolved(true);},[evolved]);
+  return <g className="desk-keyboard" data-evolved={evolved} data-rejoining={!evolved && hasEvolved} transform="translate(445 805)">
     <defs><clipPath id={`${id}-left`}><rect x="0" y="0" width="265" height="145" /></clipPath><clipPath id={`${id}-right`}><rect x="265" y="0" width="265" height="145" /></clipPath></defs>
     <g className="desk-keyboard-flat-left"><g clipPath={`url(#${id}-left)`}><FlatKeyboard /></g></g>
     <g className="desk-keyboard-flat-right"><g clipPath={`url(#${id}-right)`}><FlatKeyboard /></g></g>

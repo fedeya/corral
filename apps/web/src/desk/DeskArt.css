@@ -17,6 +17,22 @@
 .desk-art-visitor { opacity:0; transform:translateY(100px); transition:opacity .3s,transform .65s steps(8,end); }
 .desk-art-visitor[data-visible=true] { opacity:1; transform:translateY(0); }
 
+.desk-art-star { animation:desk-star-shimmer 7s ease-in-out infinite alternate; }
+.desk-art-moon { animation:desk-moon-glow 18s ease-in-out infinite alternate; }
+.desk-art-apartment-light { animation:desk-apartment-light 20s steps(1,end) infinite; }
+@keyframes desk-star-shimmer {
+  from { opacity:.5; transform:translate(0,0); filter:drop-shadow(0 0 0px #e0d6b200); }
+  to { opacity:1; transform:translate(2px,-3px); filter:drop-shadow(0 0 3px #e0d6b290); }
+}
+@keyframes desk-moon-glow {
+  from { transform:translateY(0); filter:drop-shadow(0 0 2px #e0d6b220); }
+  to { transform:translateY(-4px); filter:drop-shadow(0 0 7px #e0d6b270); }
+}
+@keyframes desk-apartment-light {
+  0%,22%,76%,100% { opacity:.3; filter:none; }
+  23%,75% { opacity:1; filter:drop-shadow(0 0 3px #d8ae6770); }
+}
+
 .desk-art-wall-warmth {
   opacity: 0;
   transition: opacity 600ms ease;
@@ -74,6 +90,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .desk-art-star,.desk-art-moon,.desk-art-apartment-light { animation:none; }
   .desk-art-visitor { transition:none; }
   .desk-art .desk-art-rocket,
   .desk-art .desk-art-wall-warmth,

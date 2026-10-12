@@ -9,6 +9,19 @@ export function DeskDialogue({line,onDismiss,onBlip}:{line:DeskLine;onDismiss:()
   useEffect(()=>{const query=window.matchMedia('(prefers-reduced-motion: reduce)'); const change=()=>setReduced(query.matches);query.addEventListener('change',change);return()=>query.removeEventListener('change',change);},[]);
   const count=reduced ? line.text.length : progress.id===line.id ? progress.count : 0;
   const typing=count<line.text.length;
+  const advance=()=>typing ? setProgress({id:line.id,count:line.text.length}) : onDismiss();
+  useEffect(()=>{
+    const keydown=(event:KeyboardEvent)=>{
+      if(event.key !== ' ' || event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey) return;
+      const target=event.target instanceof Element ? event.target : null;
+      // Keep native controls, typing and the runner's jump binding intact.
+      if(target?.closest('input,textarea,select,[contenteditable]:not([contenteditable="false"]),.desk-computer,.desk-header,.desk-dialogue-close')) return;
+      event.preventDefault();
+      if(!event.repeat) advance();
+    };
+    window.addEventListener('keydown',keydown);
+    return()=>window.removeEventListener('keydown',keydown);
+  },[line.id,line.text,typing,onDismiss]);
   useEffect(()=>{
     if(reduced || !typing) return;
     const timer=setTimeout(()=>{const next=count+1;setProgress({id:line.id,count:next});if(next%3===0 && /\S/.test(line.text[next-1])) onBlip(next);},32);
@@ -18,7 +31,7 @@ export function DeskDialogue({line,onDismiss,onBlip}:{line:DeskLine;onDismiss:()
     <div className="desk-dialogue-portrait" aria-hidden="true">{line.portrait ? <Critter species={line.portrait} size={84} animated={typing} /> : <span className="desk-dialogue-spark">✦</span>}</div>
     <div className="desk-dialogue-body"><span className="desk-dialogue-speaker">{line.speaker}</span>
       <span className="desk-sr-only desk-dialogue-message" role="status" aria-live="polite" aria-atomic="true">{line.text}</span>
-      <button type="button" className="desk-dialogue-text" aria-label={typing ? 'Complete dialogue' : 'Dismiss dialogue'} onClick={()=>typing ? setProgress({id:line.id,count:line.text.length}) : onDismiss()}>
+      <button type="button" className="desk-dialogue-text" aria-label={typing ? 'Complete dialogue' : 'Dismiss dialogue'} onClick={advance}>
         <span className="desk-dialogue-typed" data-typing={typing} aria-hidden="true">{line.text.slice(0,count)}{typing && <i className="desk-dialogue-cursor" />}</span><span className="desk-dialogue-continue" aria-hidden="true">{typing ? '···' : '▾'}</span>
       </button>
     </div><button type="button" className="desk-dialogue-close" aria-label="Close dialogue" onClick={onDismiss}>×</button>

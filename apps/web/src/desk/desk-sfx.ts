@@ -1,5 +1,5 @@
 /** Original procedural desk foley: no samples, network assets or familiar tunes. */
-export type DeskSound = 'lamp' | 'coffee' | 'duck' | 'rocket' | 'plant' | 'floppy' | 'controller' | 'cassette' | 'books' | 'poster' | 'physics' | 'window' | 'keyboard' | 'cassette-stop' | 'attention' | 'tap' | 'answer' | 'monitor' | 'browser' | 'dial' | 'install' | 'reset' | 'select';
+export type DeskSound = 'lamp' | 'coffee' | 'duck' | 'rocket' | 'plant' | 'floppy' | 'controller' | 'cassette' | 'books' | 'poster' | 'physics' | 'window' | 'keyboard' | 'cassette-stop' | 'attention' | 'celebrate' | 'tap' | 'answer' | 'monitor' | 'browser' | 'dial' | 'install' | 'reset' | 'select';
 
 type Source = OscillatorNode | AudioBufferSourceNode;
 type Voice = { gain: GainNode; sources: Set<Source>; nodes: AudioNode[]; stopped: boolean };
@@ -93,6 +93,7 @@ export function createDeskSynth(context: BaseAudioContext, destination: AudioNod
       case 'poster': tone(v, 220, 0, .3, .025, 'sine', 440); tone(v, 1175, .18, .22, .035, 'sine', 1568); break;
       case 'window': tone(v, 490, 0, .13, .045, 'sine', 690); tone(v, 650, .15, .17, .035, 'sine', 580); break;
       case 'attention': tone(v, 659, 0, .17, .05); tone(v, 880, .22, .23, .045); break;
+      case 'celebrate': [440,554,659].forEach(hz=>tone(v,hz,0,.42,.025,'triangle')); tone(v,880,.23,.25,.03,'sine'); break;
       case 'cassette':
         // A tiny original modal phrase; melody and bass occupy one stoppable channel.
         [392, 523, 494, 330, 440, 587, 523, 392].forEach((hz, i) => tone(v, hz, i * .28, i === 7 ? .4 : .22, .032, 'square'));

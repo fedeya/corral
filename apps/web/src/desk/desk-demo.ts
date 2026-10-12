@@ -40,21 +40,35 @@ export const DEMO_AGENTS: DemoAgent[] = [
   ].map(([id, workspace, cli, task]) => ({ id, workspace, cli, task, branch: 'main', file: '', question: '', testCommand: '', testResult: '', diff: [] })),
 ];
 
-type Running = { startedAt: number; step: 'editing' | 'testing' };
-export type DemoState = { revealed: boolean; focused: number; statuses: DemoStatus[]; running: Record<number, Running> };
+type Running = { startedAt: number; step: 'editing' | 'testing'; finishAfterMs?:number };
+export type DemoState = { revealed: boolean; focused: number; statuses: DemoStatus[]; running: Record<number, Running>; completed:number[] };
 export type DemoTiming = { testingAfterMs:number; finishAfterMs:number };
-type Event = { type: 'reveal' | 'reset' | 'urgent' } | { type: 'focus'; index: number } | { type:'answer'; now:number } | { type:'advance'; now:number; timing?:DemoTiming };
+type Event = { type: 'reset' } | {type:'reveal'|'urgent';now?:number} | { type: 'focus'; index: number;now?:number } | { type:'answer'; now:number } | { type:'advance'; now:number; timing?:DemoTiming };
 export function initialDemoState(): DemoState {
-  return { revealed: false, focused: 0, statuses: ['blocked', 'working', 'working', 'working', 'working', 'working', 'working', 'idle'], running: {} };
+  return { revealed: false, focused: 0, statuses: ['blocked', 'working', 'working', 'working', 'working', 'working', 'working', 'idle'], running: {},completed:[] };
+}
+function enterScene(state:DemoState,now:number):DemoState {
+  if(state.revealed) return state;
+  const running={...state.running};
+  state.statuses.forEach((status,index)=>{
+    if(status==='working') running[index]={startedAt:now,step:'editing',finishAfterMs:index===1?58000:24000+(index-2)*7000};
+  });
+  return {...state,revealed:true,running};
 }
 export function demoReducer(state: DemoState, event: Event): DemoState {
   switch (event.type) {
     case 'reset': return initialDemoState();
-    case 'reveal': return { ...state, revealed: true, focused: 0 };
-    case 'focus': return event.index >= 0 && event.index < DEMO_AGENTS.length ? { ...state, revealed: true, focused: event.index } : state;
+    case 'reveal': return { ...enterScene(state,event.now??0), focused: 0 };
+    case 'focus': {
+      if(event.index<0 || event.index>=DEMO_AGENTS.length) return state;
+      const next=enterScene(state,event.now??0);
+      const statuses=[...next.statuses];
+      if(statuses[event.index]==='done') statuses[event.index]='idle';
+      return {...next,statuses,focused:event.index};
+    }
     case 'urgent': {
       const index = state.statuses.findIndex(status => status === 'blocked');
-      return index < 0 ? state : { ...state, revealed: true, focused: index };
+      return index < 0 ? state : { ...enterScene(state,event.now??0), focused: index };
     }
     case 'answer': {
       if (state.statuses[state.focused] !== 'blocked') return state;
@@ -66,17 +80,20 @@ export function demoReducer(state: DemoState, event: Event): DemoState {
       let changed = false;
       const statuses = [...state.statuses];
       const running = { ...state.running };
+      const completed=[...state.completed];
       for (const [key, progress] of Object.entries(state.running)) {
         const index = Number(key);
         const elapsed = event.now - progress.startedAt;
-        if (elapsed >= (event.timing?.finishAfterMs ?? 3200)) {
+        if(statuses[index]!=='working') { delete running[index]; continue; }
+        if (elapsed >= (progress.finishAfterMs ?? event.timing?.finishAfterMs ?? 3200)) {
           statuses[index] = 'done'; delete running[index]; changed = true;
-          if (index === 0 && statuses[1] === 'working' && !running[1]) statuses[1] = 'blocked';
-        } else if (elapsed >= (event.timing?.testingAfterMs ?? 1300) && progress.step !== 'testing') {
+          if(!completed.includes(index)) completed.push(index);
+          if (index === 0 && statuses[1] === 'working') { statuses[1] = 'blocked'; delete running[1]; }
+        } else if (elapsed >= (progress.finishAfterMs ? progress.finishAfterMs-4500 : event.timing?.testingAfterMs ?? 1300) && progress.step !== 'testing') {
           running[index] = { ...progress, step: 'testing' }; changed = true;
         }
       }
-      return changed ? { ...state, statuses, running } : state;
+      return changed ? { ...state, statuses, running,completed } : state;
     }
   }
 }
@@ -93,9 +110,9 @@ export function useDeskDemo(timing:DemoTiming = { testingAfterMs:6500, finishAft
   const phase = !state.revealed ? 'world' : status === 'blocked' ? 'question' : status === 'done' ? 'done' : 'working';
   return {
     ...state, phase, status, agent: DEMO_AGENTS[state.focused], progress: state.running[state.focused]?.step,
-    reveal: () => dispatch({ type: 'reveal' }),
-    focus: (index: number) => dispatch({ type: 'focus', index }),
-    urgent: () => dispatch({ type: 'urgent' }),
+    reveal: () => dispatch({ type: 'reveal',now:performance.now() }),
+    focus: (index: number) => dispatch({ type: 'focus', index,now:performance.now() }),
+    urgent: () => dispatch({ type: 'urgent',now:performance.now() }),
     answer: () => dispatch({ type: 'answer', now: performance.now() }),
     replay: () => dispatch({ type: 'reset' }),
   };

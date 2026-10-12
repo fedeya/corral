@@ -26,16 +26,25 @@ export function Desk() {
   const [tour,setTour] = useState<'first-help'|'preview'|'attention'|'free'>('first-help');
   const [previewVisited,setPreviewVisited] = useState(false);
   const previousStatuses = useRef(demo.statuses);
+  const celebrated = useRef(false);
+  const [celebrating,setCelebrating] = useState(false);
   const voice = useDeskVoice();
   const [line, setLine] = useState<DeskLine | null>(null);
   const openingPending=useRef(false);
   const lineCounter = useRef(0);
+  const duckStep = useRef(0);
+  const askDuck = () => {
+    const lines = ['What had you expected to happen, and where did reality first disagree?', 'What’s the smallest thing you can test?', 'You already know what to try, don’t you?'];
+    say(lines[duckStep.current % lines.length], 'RUBBER DUCK');
+    duckStep.current++;
+  };
   const say = (text:string, speaker='DESK NOTES') => setLine({ id:++lineCounter.current, speaker, text });
   const [view, setView] = useState<View>('entry');
-  const [app, setApp] = useState<'terminal' | 'browser'>('terminal');
+  const [app, setApp] = useState<'terminal' | 'browser' | 'arcade'>('terminal');
   const [browserPage, setBrowserPage] = useState<DeskBrowserPage>('preview');
   const [theme, setTheme] = useState<ThemeId>('farm');
   const [effects, setEffects] = useState({ lamp: true, rocket: false, plant: false, coffee: false, window:false, keyboard:false });
+  const [windowGift,setWindowGift] = useState(false);
   const viewport = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ width: 1600, height: 1000 });
   const mobile = size.width <= 760;
@@ -43,8 +52,16 @@ export function Desk() {
   useEffect(() => {
     const previous=previousStatuses.current;
     previousStatuses.current=demo.statuses;
-    if(previous[0] !== 'done' && demo.statuses[0] === 'done') {setTour(current=>current==='preview'?'attention':current);voice.play('attention');}
+    if(previous[0] !== 'done' && demo.statuses[0] === 'done') {
+      setTour(current=>current==='preview'?'attention':current);
+      if(!celebrated.current) { celebrated.current=true; setCelebrating(true); voice.play('celebrate'); }
+    }
   },[demo.statuses,voice.play]);
+  useEffect(() => {
+    if(!celebrating) return;
+    const timer=setTimeout(()=>setCelebrating(false),1600);
+    return ()=>clearTimeout(timer);
+  },[celebrating]);
   useEffect(() => {
     if(app==='browser' && browserPage==='preview' && tour!=='first-help') setPreviewVisited(true);
   },[app,browserPage,tour]);
@@ -87,7 +104,8 @@ export function Desk() {
   const showRoom = () => { openingPending.current=false;demo.reveal(); setView('room'); setLine(null); };
   const focus = (index: number) => { voice.play('tap'); demo.focus(index); setApp('terminal'); setLine(null); if(view!=='device') setView(!shown && !mobile?'room':'monitor'); if(!shown && !mobile) say('There I am, in herdr. Tap the monitor for a closer look.', 'API / CLAUDE CODE'); };
   const nextAgent = () => {voice.play('dial'); demo.urgent(); setApp('terminal'); setLine(null); if(view!=='device') setView(!shown && !mobile?'room':'monitor'); };
-  const openApp = (next:'terminal'|'browser') => {voice.play(next==='browser'?'browser':'tap');setApp(next); setLine(null);};
+  const openApp = (next:'terminal'|'browser'|'arcade') => {voice.play(next==='browser'?'browser':'tap');if(next==='terminal') demo.focus(demo.focused);setApp(next); setLine(null);};
+  const openArcade = () => { setApp('arcade'); setView('monitor'); setLine(null); };
   const zoomMonitor = () => {voice.play('monitor');setView(view==='monitor'||view==='device'?'room':'monitor'); setLine(null);};
   const zoomDevice = () => {voice.play('monitor');setView('device');setLine(null);};
   const answer = () => {
@@ -98,15 +116,18 @@ export function Desk() {
   };
   const openPage = (page: DeskBrowserPage) => { if (!shown) showRoom(); if (mobile || view==='device') { setView('monitor'); setLine(null); } setBrowserPage(page); setApp('browser'); };
   const changeEffect = (effect: DeskEffect) => {
-    if (effect === 'window') say(effects.window ? 'Back to the stars. Your curious neighbour has gone home.' : 'Someone is watching the night shift. Seems to be rooting for you.', 'THE NIGHT WINDOW');
+    if (effect === 'window') {
+      if(effects.window) { setWindowGift(true); say('Back to the stars. Your neighbour left a little star on the glass. For the next night shift.', 'THE NIGHT WINDOW'); }
+      else say(windowGift ? 'You’re back. Your neighbour waves at the star. Same sky, same little desk.' : 'Someone is watching the night shift. A little wave. Seems to be rooting for you.', 'THE NIGHT WINDOW');
+    }
     if (effect === 'keyboard') say(effects.keyboard ? 'Back to stock. Your wrists will remember this.' : 'Now you have a real keyboard.', 'KEYBOARD / ADVANTAGE 360');
     setEffects(current => ({ ...current, [effect]: effect === 'rocket' ? true : !current[effect] }));
   };
-  const replay = () => {openingPending.current=false; voice.stopEffects(); demo.replay(); setTour('first-help'); setPreviewVisited(false); setView('closeup'); setApp('terminal'); setBrowserPage('preview'); setLine({ id:++lineCounter.current, ...openingLine }); };
+  const replay = () => {openingPending.current=false; celebrated.current=false; setCelebrating(false); voice.stopEffects(); demo.replay(); setTour('first-help'); setPreviewVisited(false); setView('closeup'); setApp('terminal'); setBrowserPage('preview'); setLine({ id:++lineCounter.current, ...openingLine }); };
   const blocked = demo.statuses.flatMap((status, index) => status === 'blocked' ? [DEMO_AGENTS[index].id] : []);
   const done = demo.statuses.flatMap((status, index) => status === 'done' ? [DEMO_AGENTS[index].id] : []);
   const notice = [...done.map(id => `${id} finished`), ...blocked.map(id => `${id} needs you`)].join(' · ');
-  const computer = <DeskComputer app={app} page={browserPage} focused={demo.focused} statuses={demo.statuses} progress={demo.progress} onFocus={focus} onAnswer={answer} onApp={openApp} onPage={setBrowserPage} suggestPreview={tour==='preview' && !previewVisited} />;
+  const computer = <DeskComputer completed={demo.completed} app={app} arcadeActive={view==='monitor' || !mobile && view==='room'} onSound={voice.play} page={browserPage} focused={demo.focused} statuses={demo.statuses} progress={demo.progress} onFocus={focus} onAnswer={answer} onApp={openApp} onPage={setBrowserPage} suggestPreview={tour==='preview' && !previewVisited} />;
 
   return <div className="desk-page" data-view={view} data-api-status={demo.statuses[0]} data-theme={theme} data-talk={!!line} data-tour={tour}>
     <header className="desk-header"><a className="desk-brand" href="./">CORRAL</a><p>A little life on your desk.</p><nav aria-label="Desk navigation">
@@ -122,12 +143,12 @@ export function Desk() {
           {(view==='monitor' && !mobile || view==='device') && <DeskMonitorSurround cameraKey={`${view}:${scale}:${size.width}:${size.height}`} style={surroundStyle} onExit={zoomMonitor} label={view==='device'?'Back to the desk from the Stream Deck surround':undefined} />}
           <div className="desk-ambient-wall" aria-hidden="true" style={{position:'absolute',inset:0,background:'#29353d'}} />
           <div className="desk-scene" style={sceneStyle} inert={view==='entry'}>
-            <DeskArt lit={effects.lamp} rocketLaunched={effects.rocket} plantBloom={effects.plant} steam={effects.coffee} visitorVisible={effects.window} keyboardEvolved={effects.keyboard} />
+            <DeskArt lit={effects.lamp} rocketLaunched={effects.rocket} plantBloom={effects.plant} steam={effects.coffee} visitorVisible={effects.window} windowGift={windowGift} keyboardEvolved={effects.keyboard} />
             {!mobile && view==='room' && <DeskMonitorFrame scale={scale} disabled={!shown} zoomed={false} suggested={tour==='first-help' && shown} onToggle={zoomMonitor} />}
             {!mobile && <div className="desk-screen-aperture" inert={!shown || view==='device'}>{shown && computer}</div>}
-            <DeskDevice statuses={demo.statuses} focused={demo.focused} theme={theme} closeup={!shown} interactive={view!=='monitor' && (!mobile || !shown || view==='device')} scale={scale} onFocus={focus} onUrgent={nextAgent} onTheme={() => setTheme(current => current === 'farm' ? 'kingdom' : 'farm')} onZoom={!mobile && view==='room'?zoomDevice:undefined} />
+            <DeskDevice celebrating={celebrating} statuses={demo.statuses} focused={demo.focused} theme={theme} closeup={!shown} interactive={view!=='monitor' && (!mobile || !shown || view==='device')} scale={scale} onFocus={focus} onUrgent={nextAgent} onTheme={() => setTheme(current => current === 'farm' ? 'kingdom' : 'farm')} onZoom={!mobile && view==='room'?zoomDevice:undefined} />
             {mobile && view==='room' && <button className="desk-mobile-device-hit" type="button" onClick={zoomDevice} style={{ width: Math.max(300, 44 / scale), height: Math.max(210,44 / scale) }} aria-label="Zoom in on the Stream Deck" />}
-            {!mobile && <DeskObjects scale={scale} onOpenPage={openPage} onEffect={changeEffect} onMessage={say} onInteract={voice.play} soundEnabled={voice.enabled && !voice.unavailable} disabled={!shown || view === 'monitor' || view==='device'} />}
+            {!mobile && <DeskObjects scale={scale} onOpenPage={openPage} onEffect={changeEffect} onMessage={say} onInteract={voice.play} onDuck={askDuck} onArcade={openArcade} soundEnabled={voice.enabled && !voice.unavailable} disabled={!shown || view === 'monitor' || view==='device'} />}
           </div>
           <h1 className="desk-sr-only">Corral — a pixel-art home for coding agents on Stream Deck +</h1>
           {view==='entry' && <section className="desk-entry" aria-label="Enter the desk"><div><span className="desk-entry-eyebrow">YOUR AGENTS HAVE A LITTLE HOME HERE</span><h2>A little life<br />on your desk.</h2><button type="button" aria-label="Step inside" onClick={enter}>Step inside <span aria-hidden="true">→</span></button><p>Leave the terminals to them. Make yourself at home.</p></div></section>}
@@ -136,7 +157,7 @@ export function Desk() {
         {shown && (mobile || view==='monitor' || view==='device') && <div className="desk-camera-controls"><button type="button" onClick={zoomMonitor}>{view === 'monitor' || view==='device' ? 'Back to the desk ↙' : 'Focus monitor ↗'}</button></div>}
         {line && <DeskDialogue line={line} onDismiss={() => setLine(null)} onBlip={voice.blip} />}
       </section>
-      {mobile && shown && <details className="desk-mobile-explore" hidden={view === 'monitor'||view==='device'}><summary>Things on the desk</summary><DeskObjects layout="list" scale={1} onOpenPage={openPage} onEffect={changeEffect} onMessage={say} onInteract={voice.play} soundEnabled={voice.enabled && !voice.unavailable} disabled={view === 'monitor'||view==='device'} /></details>}
+      {mobile && shown && <details className="desk-mobile-explore" hidden={view === 'monitor'||view==='device'}><summary>Things on the desk</summary><DeskObjects layout="list" scale={1} onOpenPage={openPage} onEffect={changeEffect} onMessage={say} onInteract={voice.play} onDuck={askDuck} onArcade={openArcade} soundEnabled={voice.enabled && !voice.unavailable} disabled={view === 'monitor'||view==='device'} /></details>}
       {mobile && view === 'monitor' && <section className="desk-mobile-workspace" aria-label="Readable mobile monitor"><label className="desk-mobile-select">Agent<select aria-label="Focused agent" value={demo.focused} onChange={event => focus(Number(event.target.value))}>{DEMO_AGENTS.map((agent,index) => <option key={agent.id} value={index}>{agent.id} / {demo.statuses[index]}</option>)}</select></label>{computer}</section>}
     </main>
   </div>;

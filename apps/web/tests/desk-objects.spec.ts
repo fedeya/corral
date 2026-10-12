@@ -15,7 +15,8 @@ for (const [label, response, effect] of [
   test(`${label} gives a small useful response`, async ({ page }) => {
     await explore(page);
     await page.getByRole('button', { name: label, exact: true }).click();
-    await expect(page.locator('.desk-objects-status')).toContainText(response);
+    if(!harness && label === 'Inspect the old game controller') await expect(page.getByRole('heading',{name:'AGENT ARCADE',exact:true})).toBeVisible();
+    else await expect(page.locator(!harness && label === 'Ask the rubber duck' ? '.desk-dialogue' : '.desk-objects-status')).toContainText(response);
     if (harness && effect) await expect(page.getByTestId('effect')).toHaveText(effect);
   });
 }

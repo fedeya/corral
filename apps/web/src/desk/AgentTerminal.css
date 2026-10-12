@@ -60,5 +60,16 @@
 @media(max-width:1100px) { .reveal-page .reveal-coding-terminal { width: 445px; left: calc(50% + 12px); } .agent-herdr-frame { grid-template-columns: 112px minmax(0,1fr); } .agent-sidebar-entry { font-size: 9px!important; } .agent-sidebar-entry small { font-size: 6px; } .agent-terminal-session { padding: 18px 12px; } .agent-code-diff { font-size: 9px; } .agent-pane-bar { font-size: 8px; padding: 11px 9px; } .agent-pane-bar span:last-child { font-size: 7px; } }
 @media(max-width:980px) { .reveal-page .reveal-coding-terminal { width: min(580px,calc(100% - 36px)); left: 50%; top: 39%; transform: translateX(-50%); animation: reveal-terminal-mobile .6s 1s both; } .agent-herdr-frame { grid-template-columns: 134px minmax(0,1fr); min-height: 460px; } .agent-code-diff { font-size: 10px; } .agent-terminal-session { padding: 19px 17px; } }
 @media(max-width:600px) { .reveal-page .reveal-coding-terminal { top: 32%; } .agent-herdr-frame { grid-template-columns: minmax(0,1fr); min-height: 0; } .agent-sidebar { display: none; } .agent-window-bar { height: 33px; font-size: 10px; } .agent-pane-bar { padding: 10px 12px; font-size: 10px; } .agent-pane-bar span:last-child { font-size: 9px; } .agent-terminal-session { padding: 17px 14px; } .reveal-page .agent-user-prompt { margin: 18px 0 15px; font-size: 11px; padding: 10px; } .agent-code-diff { font-size: 10px; padding: 10px 7px; } .reveal-page .agent-decision { margin-top: 16px; padding-top: 13px; } .agent-pane-status { font-size: 8px; } .agent-demo-disclaimer { font-size: 8px; } }
+/* Earlier exchanges share the terminal scrollport with the current task. */
+.reveal-coding-terminal .agent-history { color: #c7b89e; font: 11px/1.65 'IBM Plex Mono', monospace; }
+.reveal-coding-terminal .agent-history-messages { list-style: none; margin: 14px 0 16px; padding: 0 0 12px; border-bottom: 1px solid #514638; }
+.reveal-coding-terminal .agent-history-messages li { display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 8px; margin: 0; padding: 5px 0; }
+.reveal-coding-terminal .agent-history-speaker { color: #d9b678; font-size: 10px; }
+.reveal-coding-terminal .agent-history-text { overflow-wrap: anywhere; }
+.reveal-coding-terminal .agent-history-messages [data-speaker=Agent] .agent-history-speaker { color: #a8bc99; }
+.reveal-coding-terminal .agent-history-messages [data-speaker=Agent] .agent-history-text { color: #b9c3ab; }
+.desk-computer .reveal-coding-terminal .agent-terminal-session { min-height: 0; overscroll-behavior: contain; }
+.reveal-coding-terminal .agent-terminal-session:focus-visible { outline: 2px solid #f6d990; outline-offset: -2px; }
+
 @media(prefers-reduced-motion:reduce) { .agent-run-cursor { animation: none; } .reveal-page .reveal-coding-terminal { animation: none; } }
 @media(max-width:980px) and (prefers-reduced-motion:reduce) { .reveal-page .reveal-coding-terminal { transform: translateX(-50%); } }
