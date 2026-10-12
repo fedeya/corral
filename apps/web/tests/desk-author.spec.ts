@@ -10,7 +10,6 @@ for(const width of [1440,390]) test(`Fefe has a menu link and signed book note a
   await expect(author).toHaveAttribute('target','_blank');
   await page.getByLabel('Desk menu',{exact:true}).click();
   await page.getByRole('button',{name:'Skip intro',exact:true}).click();
-  if(width===390) await page.getByText('Things on the desk',{exact:true}).click();
   await page.getByRole('button',{name:'Read the desk books',exact:true}).click();
   await expect(page.locator('.desk-author-note')).toContainText('Still trying to understand how everything works.');
   await expect(page.locator('.desk-author-note')).toContainText('Fefe');

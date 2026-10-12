@@ -39,10 +39,12 @@ export function useDeskVoice() {
     return () => { mounted.current = false; close(); };
   }, [close]);
 
-  const unlock = useCallback((): Promise<boolean> => {
+  const unlock = useCallback((fromGesture = false): Promise<boolean> => {
     if (!mounted.current || !desired.current || !armed.current) return Promise.resolve(false);
-    if (pendingResume.current) return pendingResume.current;
-    if (context.current?.state === 'running') { startMusic(); return Promise.resolve(true); }
+    // WebKit may leave an early resume pending until touchend/click. A fresh
+    // trusted activation must call resume synchronously, not await that promise.
+    if (pendingResume.current && !fromGesture) return pendingResume.current;
+    if (context.current?.state === 'running') { setReady(true); setUnavailable(false); startMusic(); return Promise.resolve(true); }
     if (typeof window.AudioContext !== 'function') { setUnavailable(true); return Promise.resolve(false); }
     let current: AudioContext;
     try {
@@ -50,15 +52,20 @@ export function useDeskVoice() {
       synth.current ??= createDeskSynth(current, current.destination);
       music.current ??= createDeskMusic(current, current.destination);
     } catch { close(); setReady(false); setUnavailable(true); return Promise.resolve(false); }
-    const resume = current.resume().then(() => {
+    let timeout: ReturnType<typeof setTimeout>;
+    // A blocked WebKit resume can stay pending rather than reject. Let the
+    // entrance proceed silently after a bounded wait, retaining the context so
+    // the next real gesture can still unlock sound.
+    const deadline = new Promise<void>(resolve => { timeout = setTimeout(resolve, 1000); });
+    const resume = Promise.race([current.resume(), deadline]).then(() => {
       if (!mounted.current || context.current !== current || !desired.current) return false;
-      const running = current.state === 'running'; setReady(running); setUnavailable(false);
+      const running = current.state === 'running'; setReady(running); setUnavailable(!running);
       if (running) startMusic();
       return running;
     }).catch(() => {
       if (mounted.current && context.current === current) { close(); setReady(false); setUnavailable(true); }
       return false;
-    }).finally(() => { if (pendingResume.current === resume) pendingResume.current = null; });
+    }).finally(() => { clearTimeout(timeout); if (pendingResume.current === resume) pendingResume.current = null; });
     pendingResume.current = resume;
     return resume;
   }, [close, startMusic]);
@@ -68,7 +75,7 @@ export function useDeskVoice() {
       if (!event.isTrusted || event.target instanceof Element && event.target.closest('.desk-sound')) return;
       if (event instanceof KeyboardEvent && ['Tab', 'Shift', 'Control', 'Alt', 'Meta', 'Escape'].includes(event.key)) return;
       armed.current = true;
-      void unlock();
+      void unlock(true);
     };
     const visibility = () => {
       if (document.hidden) {
@@ -76,11 +83,12 @@ export function useDeskVoice() {
         synth.current?.stopEffects(); music.current?.stop(true);
       } else if (context.current && armed.current && desired.current) void unlock();
     };
-    window.addEventListener('pointerdown', gesture);
-    window.addEventListener('keydown', gesture);
+    // Capture completion before React's click changes/removes the entry target.
+    const gestures = ['pointerdown', 'touchend', 'click', 'keydown'];
+    for (const type of gestures) window.addEventListener(type, gesture, true);
     document.addEventListener('visibilitychange', visibility);
     return () => {
-      window.removeEventListener('pointerdown', gesture); window.removeEventListener('keydown', gesture);
+      for (const type of gestures) window.removeEventListener(type, gesture, true);
       document.removeEventListener('visibilitychange', visibility);
     };
   }, [unlock]);
@@ -88,8 +96,10 @@ export function useDeskVoice() {
     desired.current = !desired.current; setEnabled(desired.current);
     if (!desired.current) { close(); setReady(false); return false; }
     // The explicit enable control is itself a browser activation, not autoplay.
-    armed.current = navigator.userActivation?.isActive ?? false;
-    return unlock();
+    // Older Safari has Web Audio but no navigator.userActivation. This callback
+    // is invoked directly by the explicit enable button's activation handler.
+    armed.current = navigator.userActivation?.isActive ?? true;
+    return unlock(true);
   }, [close, unlock]);
 
   const play = useCallback((cue: DeskSound): void => {

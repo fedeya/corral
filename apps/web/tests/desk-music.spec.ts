@@ -87,9 +87,14 @@ test('a pending resume never starts music before running or after mute', async (
   await page.goto('/?concept=desk');
   await page.evaluate(() => {
     const resume = AudioContext.prototype.resume;
+    const nativeState = Object.getOwnPropertyDescriptor(BaseAudioContext.prototype, 'state')!.get!;
     AudioContext.prototype.resume = function () {
+      // Native Chromium may auto-run a context created inside a gesture. A
+      // genuinely pending resume must also model a suspended context, including
+      // the Safari retry path, while still exposing native close on mute.
+      Object.defineProperty(this, 'state', { configurable:true, get:()=>nativeState.call(this)==='closed' ? 'closed' : 'suspended' });
       return new Promise<void>(resolve => {
-        (window as unknown as { musicProbe: MusicProbe }).musicProbe.release = () => { void resume.call(this).then(resolve).catch(resolve); };
+        (window as unknown as { musicProbe: MusicProbe }).musicProbe.release = () => { Reflect.deleteProperty(this,'state'); void resume.call(this).then(resolve).catch(resolve); };
       });
     };
   });
