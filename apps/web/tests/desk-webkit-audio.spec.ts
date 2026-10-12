@@ -64,7 +64,10 @@ test('an indefinitely pending audio resume cannot hide the opening text', async 
   await probe(page, 'pending-all');
   await page.goto('/?concept=desk');
   await page.getByRole('button', { name: 'Step inside', exact: true }).tap();
-  await expect(page.locator('.desk-dialogue-typed')).toContainText('Psst', { timeout: 3000 });
+  // Assert the bounded entrance fallback, not the typewriter's timer cadence
+  // while a deliberately stalled AudioContext throttles headless WebKit.
+  await expect(page.locator('.desk-dialogue-message')).toContainText('Psst', { timeout: 3000 });
+  await expect(page.locator('.desk-dialogue-typed')).toContainText(/\S/, { timeout: 3000 });
   await expect(page.locator('.desk-dialogue-typed')).toBeVisible();
   await page.evaluate(() => { (window as unknown as { safariAudio: Probe }).safariAudio.blocked = false; });
   await page.getByRole('button', { name: 'Complete dialogue', exact: true }).tap();

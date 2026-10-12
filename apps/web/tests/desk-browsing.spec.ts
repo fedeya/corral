@@ -27,8 +27,7 @@ test('notes support keyboard browsing, saving and a clear empty state',async({pa
   await page.setViewportSize({width:390,height:844});
   await page.goto('/?concept=desk');
   await page.getByRole('button',{name:'Step inside',exact:true}).click();
-  await page.getByRole('button',{name:'Zoom in on the Stream Deck',exact:true}).click();
-  await page.getByRole('button',{name:'Desk key api',exact:true}).click();
+  await page.getByRole('button',{name:'Help agent api',exact:true}).click();
   await page.getByRole('button',{name:'Open browser',exact:true}).click();
   const first=page.getByRole('button',{name:'Read Falling sideways',exact:true});
   await first.focus();await page.keyboard.press('ArrowDown');
