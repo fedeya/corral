@@ -1,0 +1,10 @@
+@import url('https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=VT323&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+:root { font-family:'IBM Plex Mono',monospace; font-synthesis:none; color:#ded2bc; background:#242328; }
+* { box-sizing:border-box; }
+body { margin:0; }
+a { color:inherit; text-decoration:none; }
+button { font:inherit; cursor:pointer; }
+button,a { -webkit-tap-highlight-color:transparent; }
+a:focus-visible,button:focus-visible { outline:3px solid #f1d49b; outline-offset:4px; }
+::selection { background:#8b7349; color:#f4e6cc; }

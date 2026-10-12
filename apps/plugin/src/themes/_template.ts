@@ -2,12 +2,13 @@
  * Theme template: a minimal but working theme that needs no image files (it draws a pixel slime).
  *
  * To make a new theme:
- *   1. Copy this file to src/themes/<id>.ts and rename `template` / `id` / `name`.
- *   2. Register it in src/themes/index.ts by adding it to THEMES. The last dial then cycles through it.
+ * Paths below are relative to the repository root:
+ *   1. Copy this file to apps/plugin/src/themes/<id>.ts and rename `template` / `id` / `name`.
+ *   2. Register it in apps/plugin/src/themes/index.ts by adding it to THEMES. The last dial then cycles through it.
  *   3. Preview while you work, rebuild, and restart the plugin (see docs/adding-a-theme.md).
  *
- * Sprite sheets go in dev.fedeya.corral.sdPlugin/imgs/<id>/ and are loaded with loadSheet("<id>/file.png").
- * Credit the artist in imgs/CREDITS.md. If the license forbids redistribution, git-ignore the folder and
+ * Sprite sheets go in apps/plugin/dev.fedeya.corral.sdPlugin/imgs/<id>/ and are loaded with loadSheet("<id>/file.png").
+ * Credit the artist in apps/plugin/dev.fedeya.corral.sdPlugin/imgs/CREDITS.md. If the license forbids redistribution, git-ignore the folder and
  * register the theme only when its art is present (see how kingdom uses hasImage in index.ts).
  */
 import type { Agent, AgentStatus } from "../herdr";

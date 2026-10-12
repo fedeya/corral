@@ -1,0 +1,12 @@
+.desk-dialogue { position:absolute; bottom:14px; left:50%; translate:-50% 0; width:min(900px,calc(100% - 36px)); height:120px; display:flex; gap:18px; padding:15px 48px 15px 15px; background:#292522; color:#efe4cf; border:3px solid #bda47c; box-shadow:0 0 0 3px #211c1b,5px 6px #15131588,inset 0 0 0 2px #4d4035; z-index:12; }
+.desk-dialogue-portrait { display:grid; place-items:center; width:84px; height:84px; flex-shrink:0; background:#3b322b; border:2px solid #76624e; overflow:hidden; }
+.desk-dialogue-spark { color:#d9b77c; font:46px 'VT323',monospace; }
+.desk-dialogue-body { flex:1; min-width:0; display:flex; flex-direction:column; }
+.desk-dialogue-speaker { font:10px 'IBM Plex Mono',monospace; letter-spacing:1.6px; color:#d0ad75; margin:0 0 6px; }
+.desk-dialogue-text { position:relative; border:0; background:transparent; padding:0 25px 0 0; color:#f3e9d5; text-align:left; flex:1; width:100%; min-height:44px; cursor:pointer; font:24px/1.15 'VT323',monospace; }
+.desk-dialogue-continue { position:absolute; bottom:0; right:0; color:#cdae7a; font-size:24px; }
+.desk-dialogue-cursor { display:inline-block; width:8px; height:16px; background:#bda47c; margin-left:4px; vertical-align:baseline; }
+.desk-dialogue-close { position:absolute; right:3px; top:3px; width:44px; height:44px; border:0; background:transparent; color:#ad997d; font:23px 'VT323',monospace; cursor:pointer; }
+.desk-sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+@media(max-width:760px) { .desk-dialogue { width:calc(100% - 24px); height:164px; bottom:10px; gap:10px; padding:12px 40px 12px 10px; }.desk-dialogue-portrait { width:48px; height:62px; align-self:center; }.desk-dialogue-portrait .xp-critter { transform:scale(.7); }.desk-dialogue-speaker { font-size:8px; letter-spacing:1px; }.desk-dialogue-text { font-size:19px; line-height:1.15; padding-right:10px; }.desk-dialogue-close { width:44px; height:44px; }.desk-dialogue-continue { font-size:20px; } }
+@media(max-height:580px) and (min-width:761px) { .desk-dialogue { height:110px; }.desk-dialogue-text { font-size:19px; }.desk-dialogue-portrait { width:44px; height:54px; }.desk-dialogue-speaker { font-size:8px; } }

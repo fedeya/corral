@@ -1,0 +1,14 @@
+.xp-critter { display:inline-block; flex-shrink:0; image-rendering:pixelated; background-repeat:no-repeat; }
+.xp-critter-animated { animation:xp-walk 1s steps(4) infinite; }
+@keyframes xp-walk { from { background-position-x:0; } to { background-position-x:calc(var(--critter-size) * -4); } }
+.xp-install { font-family:'IBM Plex Mono',monospace; border:1px solid currentColor; text-align:left; }
+.xp-install-bar { padding:10px 16px; display:flex; align-items:center; justify-content:space-between; gap:12px; border-bottom:1px solid currentColor; font-size:10px; }
+.xp-install-bar button { min-height:44px; padding:6px 12px; border:1px solid currentColor; background:transparent; color:inherit; font-size:10px; }
+.xp-install pre { padding:22px; margin:0; line-height:2; overflow-x:auto; font-size:12px; }
+.xp-install [role='status'] { font-size:11px; line-height:1.6; padding:0 22px 16px; }
+.xp-install [role='status']:empty { display:none; }
+.xp-setup-notes { font-size:12px; line-height:1.9; }
+.xp-setup-notes a,.xp-art-credits a { text-decoration:underline; text-underline-offset:3px; }
+.xp-art-credits { font-family:'IBM Plex Mono',monospace; font-size:9px; line-height:1.8; }
+@media(max-width:480px) { .xp-install pre { font-size:10px; padding:16px; } }
+@media(prefers-reduced-motion:reduce) { .xp-critter-animated { animation:none; } }

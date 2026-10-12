@@ -1,21 +1,22 @@
 # Adding a theme
 
-A theme is one file in `src/themes/` plus one line to register it. Corral already handles the herdr data, sorting,
+A theme is one file in `apps/plugin/src/themes/` plus one line to register it. Corral already handles the herdr data, sorting,
 paging, taps, dials, name tags, theme switching and caching. A theme only decides how things look.
+Run the commands below from the repository root after `bun install`.
 
 ## Quick start
 
 1. **Copy the template.**
 
    ```sh
-   cp src/themes/_template.ts src/themes/robots.ts
+   cp apps/plugin/src/themes/_template.ts apps/plugin/src/themes/robots.ts
    ```
 
    The template is a complete, working theme: a pixel slime drawn in code, so no image files are needed. Every part is
    commented. Rename the exported constant, and change `id` and `name` (`name` is what flashes on the touch strip when
    you switch to it).
 
-2. **Register it.** Import it in `src/themes/index.ts` and add it to `THEMES`. The last dial now cycles through it.
+2. **Register it.** Import it in `apps/plugin/src/themes/index.ts` and add it to `THEMES`. The last dial now cycles through it.
 
 3. **Preview it without a Stream Deck.**
 
@@ -29,7 +30,7 @@ paging, taps, dials, name tags, theme switching and caching. A theme only decide
 4. **Try it on the device.**
 
    ```sh
-   bun run typecheck && bun run build && bun run restart
+   bun run --cwd apps/plugin typecheck && bun run build:plugin && bun run restart
    ```
 
 5. **Add it to the README.** Run `bun run media` to render `docs/media/<id>.gif`.
@@ -66,7 +67,7 @@ gets drawn once and cached. Return `frame % loopLength` for each status.
 
 ### Touch strip
 
-**`scene`** is built with `createScene(skin)`. The shared scene code (`src/scene.ts`) already:
+**`scene`** is built with `createScene(skin)`. The shared scene code (`apps/plugin/src/scene.ts`) already:
 
 - places each visible agent under its key;
 - walks new figures in from the edge, and moves working ones back and forth;
@@ -96,21 +97,21 @@ The strip animates 4 times a second.
 **`prepare(agents)`** sees the full agent list after each poll. Return `true` when key images need redrawing. Kingdom
 uses it to deal jobs and team colours evenly across all workspaces.
 
-For a simple stable choice, use `` pick(`mytheme:${agent.workspace}`, options) `` from `src/scene.ts`.
+For a simple stable choice, use `` pick(`mytheme:${agent.workspace}`, options) `` from `apps/plugin/src/scene.ts`.
 
 ## Toolbox
 
 | Helper | Where | What it does |
 |---|---|---|
-| `Canvas` | `src/pixel.ts` | `rect`, `pattern` (ASCII art), `set` and `crop` |
-| `Canvas.blitScaled` | `src/pixel.ts` | Draws a sprite-sheet frame at any scale (also below 1), with `flip`, `tint` and `alpha` |
-| `loadSheet` / `hasImage` | `src/pixel.ts` | Loads and checks images in `dev.fedeya.corral.sdPlugin/imgs/` |
-| `drawBubble` + `BANG` / `CHECK` | `src/render.ts` | The "!" and "✓" speech bubbles |
-| `sparkles` | `src/render.ts` | Blinking sparkles for done states |
-| `label` | `src/render.ts` | The workspace name in a key's bottom band |
-| `frameBorder` | `src/render.ts` | Key borders, including the white one for the focused agent |
-| `P`, `THEME`, `shade`, `isIdle` | `src/render.ts` | PICO-8 palette, per-status colours, colour helpers |
-| `period(hour)` | `src/scene.ts` | `"day"`, `"dusk"` or `"night"` |
+| `Canvas` | `apps/plugin/src/pixel.ts` | `rect`, `pattern` (ASCII art), `set` and `crop` |
+| `Canvas.blitScaled` | `apps/plugin/src/pixel.ts` | Draws a sprite-sheet frame at any scale (also below 1), with `flip`, `tint` and `alpha` |
+| `loadSheet` / `hasImage` | `apps/plugin/src/pixel.ts` | Loads and checks images in `apps/plugin/dev.fedeya.corral.sdPlugin/imgs/` |
+| `drawBubble` + `BANG` / `CHECK` | `apps/plugin/src/render.ts` | The "!" and "✓" speech bubbles |
+| `sparkles` | `apps/plugin/src/render.ts` | Blinking sparkles for done states |
+| `label` | `apps/plugin/src/render.ts` | The workspace name in a key's bottom band |
+| `frameBorder` | `apps/plugin/src/render.ts` | Key borders, including the white one for the focused agent |
+| `P`, `THEME`, `shade`, `isIdle` | `apps/plugin/src/render.ts` | PICO-8 palette, per-status colours, colour helpers |
+| `period(hour)` | `apps/plugin/src/scene.ts` | `"day"`, `"dusk"` or `"night"` |
 
 ## Conventions
 
@@ -125,8 +126,8 @@ These keep themes consistent with each other:
 
 ## Art and licenses
 
-- Put sprite sheets in `dev.fedeya.corral.sdPlugin/imgs/<id>/` and load them with `loadSheet("<id>/file.png")`.
-- Credit the artist in `dev.fedeya.corral.sdPlugin/imgs/CREDITS.md`.
+- Put sprite sheets in `apps/plugin/dev.fedeya.corral.sdPlugin/imgs/<id>/` and load them with `loadSheet("<id>/file.png")`.
+- Credit the artist in `apps/plugin/dev.fedeya.corral.sdPlugin/imgs/CREDITS.md`.
 - CC0 and CC-BY art can be committed.
 - If the license forbids redistribution, as with Tiny Swords:
   - git-ignore the folder;

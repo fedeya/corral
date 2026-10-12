@@ -1,0 +1,11 @@
+.desk-entry { position:absolute; inset:0; z-index:10; display:grid; place-items:center; padding:24px; background:#17151baa; text-align:center; }
+.desk-entry>div { max-width:500px; padding:32px 20px; }
+.desk-entry-eyebrow { color:#d2bc91; font:9px/1.8 'IBM Plex Mono',monospace; letter-spacing:2px; }
+.desk-entry h2 { font:72px/.95 'VT323',monospace; font-weight:400; color:#f0dfbc; margin:24px 0 32px; text-shadow:3px 3px #19151c; }
+.desk-entry button { display:inline-flex; align-items:center; justify-content:center; gap:25px; background:#d2af77; border:2px solid #ecd2a1; color:#352b25; min-height:58px; padding:12px 28px; font:27px 'VT323',monospace; box-shadow:4px 4px #17151b; cursor:pointer; }
+.desk-entry button:hover { background:#e5c78e; }
+.desk-entry button span { animation:desk-entry-invite 2.4s steps(2,end) infinite; }
+.desk-entry p { color:#c8bca6; font:11px/1.8 'IBM Plex Mono',monospace; margin:24px 0 0; }
+@keyframes desk-entry-invite { 50% { opacity:.45; } }
+@media(max-width:760px) { .desk-entry { padding:16px; }.desk-entry h2 { font-size:58px; }.desk-entry-eyebrow { letter-spacing:1px; font-size:8px; }.desk-entry p { font-size:10px; } }
+@media(prefers-reduced-motion:reduce) { .desk-entry button span { animation:none; } }

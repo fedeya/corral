@@ -2,28 +2,23 @@
   "name": "corral",
   "type": "module",
   "private": true,
+  "packageManager": "bun@1.4.3",
+  "workspaces": ["apps/plugin", "apps/web"],
   "scripts": {
-    "test": "bun test --isolate",
-    "build": "bun build src/plugin.ts --target node --format esm --outfile dev.fedeya.corral.sdPlugin/bin/plugin.js",
-    "watch": "bun run build --watch",
-    "typecheck": "tsc --noEmit",
-    "preview": "CORRAL_IMGS=dev.fedeya.corral.sdPlugin/imgs bun scripts/preview.ts",
-    "media": "CORRAL_IMGS=dev.fedeya.corral.sdPlugin/imgs bun scripts/media.ts",
-    "demo": "bun scripts/demo.ts",
-    "link": "streamdeck link dev.fedeya.corral.sdPlugin",
-    "restart": "streamdeck restart dev.fedeya.corral",
-    "validate": "streamdeck validate dev.fedeya.corral.sdPlugin"
-  },
-  "dependencies": {
-    "@elgato/streamdeck": "^3.0.1",
-    "@elgato/utils": "0.6.0",
-    "pngjs": "^7.0.0"
-  },
-  "devDependencies": {
-    "@elgato/cli": "^1.10.1",
-    "@types/bun": "^1.4.2",
-    "@types/node": "^20",
-    "@types/pngjs": "^6.0.5",
-    "typescript": "^7.0.2"
+    "dev": "bun run --cwd apps/web dev",
+    "test": "bun run test:plugin && bun run test:web",
+    "test:plugin": "bun run --cwd apps/plugin test",
+    "test:web": "bun run --cwd apps/web test",
+    "build": "bun run --filter '*' build",
+    "build:plugin": "bun run --cwd apps/plugin build",
+    "build:web": "bun run --cwd apps/web build",
+    "watch": "bun run --cwd apps/plugin watch",
+    "typecheck": "bun run --filter '*' typecheck",
+    "preview": "bun run --cwd apps/plugin preview",
+    "media": "bun run --cwd apps/plugin media",
+    "demo": "bun run --cwd apps/plugin demo",
+    "link": "bun run --cwd apps/plugin link",
+    "restart": "bun run --cwd apps/plugin restart",
+    "validate": "bun run --cwd apps/plugin validate"
   }
 }

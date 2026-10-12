@@ -1,5 +1,8 @@
 node_modules
-dev.fedeya.corral.sdPlugin/bin
-dev.fedeya.corral.sdPlugin/logs
-dev.fedeya.corral.sdPlugin/imgs/kingdom
-dev.fedeya.corral.sdPlugin/demo
+apps/plugin/dev.fedeya.corral.sdPlugin/bin
+apps/plugin/dev.fedeya.corral.sdPlugin/logs
+apps/plugin/dev.fedeya.corral.sdPlugin/imgs/kingdom
+apps/plugin/dev.fedeya.corral.sdPlugin/demo
+apps/web/dist
+apps/web/test-results
+apps/web/playwright-report

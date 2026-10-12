@@ -1,0 +1,11 @@
+.desk-keyboard-flat-left,.desk-keyboard-flat-right { opacity:1; }
+.desk-keyboard-split,.desk-keyboard-evolution { opacity:0; }
+.desk-keyboard[data-evolved=true] .desk-keyboard-flat-left { opacity:0; animation:desk-keyboard-crack-left .6s steps(6,end) both; }
+.desk-keyboard[data-evolved=true] .desk-keyboard-flat-right { opacity:0; animation:desk-keyboard-crack-right .6s steps(6,end) both; }
+.desk-keyboard[data-evolved=true] .desk-keyboard-split { opacity:1; animation:desk-keyboard-form .5s .4s steps(5,end) both; transform-origin:265px 75px; }
+.desk-keyboard[data-evolved=true] .desk-keyboard-evolution { animation:desk-keyboard-sparks .9s steps(5,end) both; }
+@keyframes desk-keyboard-crack-left { 0% { opacity:1; transform:translateX(0); } 65% { opacity:1; transform:translateX(-24px); } 100% { opacity:0; transform:translateX(-34px); } }
+@keyframes desk-keyboard-crack-right { 0% { opacity:1; transform:translateX(0); } 65% { opacity:1; transform:translateX(24px); } 100% { opacity:0; transform:translateX(34px); } }
+@keyframes desk-keyboard-form { 0% { opacity:0; transform:scale(.93); } 60% { opacity:1; transform:scale(1.02); } 100% { opacity:1; transform:scale(1); } }
+@keyframes desk-keyboard-sparks { 0%,100% { opacity:0; } 25%,65% { opacity:1; } }
+@media(prefers-reduced-motion:reduce) { .desk-keyboard .desk-keyboard-flat-left,.desk-keyboard .desk-keyboard-flat-right,.desk-keyboard .desk-keyboard-split,.desk-keyboard .desk-keyboard-evolution { animation:none!important; } }
