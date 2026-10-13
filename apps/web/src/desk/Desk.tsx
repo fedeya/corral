@@ -126,6 +126,32 @@ export function Desk() {
     setView('closeup');
   };
   const showRoom = () => { openingPending.current=false;setOpeningCameraReady(true);demo.reveal(); setView('room'); setLine(null); };
+  useLayoutEffect(() => {
+    // Bubble after local controls (including the arcade), never capture their Escape.
+    const keydown = (event: KeyboardEvent) => {
+      if(event.key !== 'Escape' || event.defaultPrevented || event.repeat || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey || event.isComposing) return;
+      // Reserve Escape while native select popups own focus.
+      const target = event.target instanceof Element ? event.target : null;
+      if(target?.closest('select')) return;
+      const menu = viewport.current?.closest('.desk-page')?.querySelector<HTMLDetailsElement>('.desk-menu[open]');
+      if(menu) {
+        event.preventDefault();
+        menu.open=false;
+        menu.querySelector('summary')?.focus();
+        return;
+      }
+      if(line) { event.preventDefault(); setLine(null); return; }
+      if(view==='monitor' || view==='device' || view==='closeup') {
+        event.preventDefault();
+        openingPending.current=false;
+        setOpeningCameraReady(true);
+        demo.reveal();
+        setView('room');
+      }
+    };
+    window.addEventListener('keydown', keydown);
+    return () => window.removeEventListener('keydown', keydown);
+  }, [line, view, demo.reveal]);
   const focus = (index: number) => { voice.play('tap'); demo.focus(index); setApp('terminal'); setLine(null); if(mobile || view!=='device') setView(!shown && !mobile?'room':'monitor'); if(!shown && !mobile) say('There I am, in herdr. Tap the monitor for a closer look.', 'API / CLAUDE CODE'); };
   const nextAgent = () => {voice.play('dial'); demo.urgent(); setApp('terminal'); setLine(null); if(mobile || view!=='device') setView(!shown && !mobile?'room':'monitor'); };
   const openApp = (next:'terminal'|'browser'|'arcade') => {voice.play(next==='browser'?'browser':'tap');if(next==='terminal') demo.focus(demo.focused);setApp(next); setLine(null);};
