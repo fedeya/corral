@@ -9,6 +9,7 @@ for(const width of [1440,390]) test(`the controller opens Agent Arcade in the mo
   await expect(page.locator('.desk-page')).toHaveAttribute('data-view','monitor');
   await expect(page.locator('.desk-computer')).toHaveAttribute('data-app','arcade');
   await expect(page.getByRole('link',{name:'agent-arcade on GitHub'})).toHaveAttribute('href','https://github.com/fedeya/agent-arcade');
+  await expect(page.locator('.desk-dialogue')).toHaveCount(0);
   const bounds=await page.locator('.desk-app-content').boundingBox();
   for(const selector of ['.desk-arcade-controls','.desk-arcade-footer']) {
     const child=await page.locator(selector).boundingBox();
