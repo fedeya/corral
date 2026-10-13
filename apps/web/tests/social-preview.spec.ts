@@ -6,6 +6,9 @@ test('the root landing ships its favicon and social preview assets',async({page,
   await expect(page.locator('link[rel="icon"]')).toHaveAttribute('href',/\/favicon\.svg$/);
   const favicon=await request.get('/favicon.svg');expect(favicon.ok()).toBe(true);expect(await favicon.text()).toContain('<svg');
   await expect(page.locator('meta[property="og:image"]')).toHaveAttribute('content',/\/og\.png$/);
+  await expect(page.locator('meta[property="og:image"]')).toHaveAttribute('content','https://corral.fedeya.sh/og.png');
+  await expect(page.locator('meta[name="twitter:image"]')).toHaveAttribute('content','https://corral.fedeya.sh/og.png');
+  await expect(page.locator('meta[property="og:url"]')).toHaveAttribute('content','https://corral.fedeya.sh/');
   await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute('content','summary_large_image');
   await expect(page.locator('meta[name="twitter:creator"]')).toHaveAttribute('content','@fedeminaya');
   const image=await request.get('/og.png');expect(image.ok()).toBe(true);
