@@ -4,7 +4,7 @@ import { join } from 'node:path';
 
 export default defineConfig({
   testDir: '.',
-  testMatch: ['desk-portraits-room.spec.ts','desk-cables.spec.ts'],
+  testMatch: ['desk-portraits-room.spec.ts','desk-cables.spec.ts','desk-keyboard.spec.ts'],
   outputDir: join(tmpdir(), 'corral-desk-portraits-room'),
   workers: 1,
   timeout: 60_000,
