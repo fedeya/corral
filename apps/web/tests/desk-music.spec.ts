@@ -62,6 +62,25 @@ test('music waits for a trusted activation, shares the master across props and R
   await expect.poll(() => page.evaluate(() => (window as unknown as { musicProbe: MusicProbe }).musicProbe.live)).toBe(1);
 });
 
+test('blocked workers still produce music through the same gesture-unlocked master', async ({ page }) => {
+  await page.addInitScript(() => {
+    window.Worker = class { constructor() { throw new Error('Worker blocked by policy'); } } as unknown as typeof Worker;
+  });
+  await page.goto('/?concept=desk');
+  await page.getByRole('button', { name: 'Skip intro', exact: true }).click();
+  await expect.poll(() => page.evaluate(() => (window as unknown as { musicProbe: MusicProbe }).musicProbe.live), { timeout:15000 }).toBe(1);
+  const samples = await page.evaluate(() => {
+    const audio = (window as unknown as { musicProbe: MusicProbe }).musicProbe;
+    const pcm = audio.loops[0].buffer!.getChannelData(0);
+    let peak=0; for (const value of pcm) peak=Math.max(peak,Math.abs(value));
+    return { peak, contexts:audio.contexts.length, duration:audio.loops[0].buffer!.duration };
+  });
+  expect(samples.peak).toBeGreaterThan(.001);
+  expect(samples.contexts).toBe(1); expect(samples.duration).toBe(24);
+  await page.getByRole('button', { name: 'Mute desk sound', exact: true }).click();
+  expect(await page.evaluate(() => (window as unknown as { musicProbe: MusicProbe }).musicProbe.live)).toBe(0);
+});
+
 test('visibility pauses every music source and resumes on the same armed context', async ({ page }) => {
   await page.goto('/?concept=desk');
   await page.getByRole('button', { name: 'Skip intro', exact: true }).click();
@@ -117,7 +136,7 @@ test('factory fades out, resets without stacking voices, and dispose cancels eve
     const { createDeskMusic } = await import(/* @vite-ignore */ path);
     const rate = 24000;
     const c = new OfflineAudioContext(1, rate * 2, rate);
-    const music = createDeskMusic(c, c.destination); music.start();
+    const music = createDeskMusic(c, c.destination); await music.prepare(); music.start();
     const pause = c.suspend(.5).then(async () => { music.stop(); await c.resume(); });
     const pcm = (await c.startRendering()).getChannelData(0); await pause;
     let beforePeak = 0, afterPeak = 0;
@@ -144,7 +163,7 @@ test('factory fades out, resets without stacking voices, and dispose cancels eve
     }) as typeof window.setTimeout;
     window.clearTimeout = ((id?: number) => { if (id !== undefined) pending.delete(id); nativeClear(id); }) as typeof window.clearTimeout;
     try {
-      const reset = createDeskMusic(liveContext, liveContext.destination);
+      const reset = createDeskMusic(liveContext, liveContext.destination); await reset.prepare();
       for (let i = 0; i < 30; i++) { reset.start(); reset.stop(); }
       reset.dispose(); reset.start();
       return { beforePeak, afterPeak, live, peakLive, disconnected, pendingTimers: pending.size };
@@ -172,7 +191,7 @@ test('actual rendered PCM is quiet, non-silent and seamless across a complete lo
     const source = c.createBufferSource.bind(c), oscillator = c.createOscillator.bind(c);
     c.createBufferSource = () => { sources++; return source(); };
     c.createOscillator = () => { oscillators++; return oscillator(); };
-    const music = createDeskMusic(c, c.destination); music.start(); music.start();
+    const music = createDeskMusic(c, c.destination); await music.prepare(); music.start(); music.start();
     const pcm = (await c.startRendering()).getChannelData(0);
     let peak = 0, energy = 0, loopError = 0, maxStep = 0;
     for (let i = rate * 2; i < pcm.length; i++) {

@@ -44,7 +44,7 @@ async function loadSprite(source: typeof SPRITES[number]): Promise<LoadedSprite>
 }
 let spritePromise: Promise<LoadedSprite[]> | undefined;
 
-export function TitleWorld({ title = false, variant = 0, needsHelp = false, resting = false, theme = 'farm' }: { title?: boolean; variant?: number; needsHelp?: boolean; resting?: boolean; theme?: ThemeId }) {
+export function TitleWorld({ active = true, title = false, variant = 0, needsHelp = false, resting = false, theme = 'farm' }: { active?: boolean; title?: boolean; variant?: number; needsHelp?: boolean; resting?: boolean; theme?: ThemeId }) {
   const canvas = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
     const screen = canvas.current;
@@ -53,6 +53,7 @@ export function TitleWorld({ title = false, variant = 0, needsHelp = false, rest
     const ctx = context;
     let cancelled = false;
     let frameRequest = 0;
+    let refresh: (() => void) | undefined;
     let previous = -100;
     const motion = matchMedia('(prefers-reduced-motion: reduce)');
     const background = document.createElement('canvas');
@@ -119,9 +120,9 @@ export function TitleWorld({ title = false, variant = 0, needsHelp = false, rest
         ctx.globalAlpha = 1;
       }
       function render(now: number) {
-        if (cancelled) return;
-        frameRequest = requestAnimationFrame(render);
-        if (now - previous < 1000 / 12 || document.hidden) return;
+        if (cancelled || document.hidden) return;
+        frameRequest = active && !motion.matches ? requestAnimationFrame(render) : 0;
+        if (now - previous < 1000 / 12) return;
         previous = now;
         const time = motion.matches ? 0 : now / 1000;
         const frame = resting || motion.matches ? 0 : Math.floor(time * 5) % 4;
@@ -155,9 +156,22 @@ export function TitleWorld({ title = false, variant = 0, needsHelp = false, rest
         }
         screen!.dataset.ready = 'true';
       }
-      frameRequest = requestAnimationFrame(render);
+      refresh = () => {
+        cancelAnimationFrame(frameRequest); frameRequest = 0; previous = -Infinity;
+        // Paint a static scene under reduced motion, without a recurring RAF.
+        render(performance.now());
+      };
+      motion.addEventListener('change', refresh);
+      document.addEventListener('visibilitychange', refresh);
+      refresh();
     }).catch(error => console.error('Could not load Corral demo sprites', error));
-    return () => { cancelled = true; cancelAnimationFrame(frameRequest); };
-  }, [title, variant, needsHelp, resting, theme]);
+    return () => {
+      cancelled = true; cancelAnimationFrame(frameRequest);
+      if (refresh) {
+        motion.removeEventListener('change', refresh);
+        document.removeEventListener('visibilitychange', refresh);
+      }
+    };
+  }, [active, title, variant, needsHelp, resting, theme]);
   return <canvas ref={canvas} width="180" height="180" className="reveal-world-screen" role="img" data-theme={theme} aria-label={title ? `CORRAL built from grassy pixel letters, with ${theme === 'farm' ? 'farm characters' : 'illustrative pawns'} working and resting on them.` : `A ${theme} demo agent in its small island world.`} />;
 }
