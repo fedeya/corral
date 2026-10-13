@@ -129,3 +129,7 @@
   .desk-art .desk-art-steam path,
   .desk-art .desk-art-rocket-flame { animation: none; }
 }
+
+/* The SVG viewport and camera contract stay 1600 × 1100 on desktop. */
+.desk-art-underdesk,.desk-art-mobile-floor { display:none; }
+@media(max-width:760px) { .desk-art-underdesk,.desk-art-mobile-floor { display:inline; } }

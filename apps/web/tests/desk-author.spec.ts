@@ -23,7 +23,7 @@ test('the night window stays uncluttered without losing its visitor and star kee
   await expect(page.locator('.desk-art-book-signature')).toContainText('Fefe');
   const window=page.getByRole('button',{name:'Look through the window',exact:true});
   await window.click();
-  await expect(page.locator('.desk-dialogue')).toContainText('Different city. Same sky.');
+  await expect(page.locator('.desk-dialogue')).toContainText('Another late night. At least you’re not the only one awake.');
   await expect(page.locator('.desk-dialogue')).not.toContainText('Necochea');
   await expect(page.locator('.desk-art-visitor')).toHaveAttribute('data-visible','true');
   await window.click();

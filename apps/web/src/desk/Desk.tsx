@@ -38,10 +38,10 @@ export function Desk() {
   const duckStep = useRef(0);
   const askDuck = () => {
     const lines = ['What had you expected to happen, and where did reality first disagree?', 'What’s the smallest thing you can test?', 'You already know what to try, don’t you?'];
-    say(lines[duckStep.current % lines.length], 'RUBBER DUCK');
+    say(lines[duckStep.current % lines.length], 'RUBBER DUCK', 'duck');
     duckStep.current++;
   };
-  const say = (text:string, speaker='DESK NOTES') => setLine({ id:++lineCounter.current, speaker, text });
+  const say = (text:string, speaker='DESK NOTES', object?:import('./DeskPropArt').DeskObjectId) => setLine({ id:++lineCounter.current, speaker, text, object, objectLit:effects.lamp, keyboardEvolved:object==='keyboard'?!effects.keyboard:effects.keyboard, portrait:!object && (speaker.includes('CLAUDE CODE') || speaker==='CORRAL')?'goat':undefined });
   const [view, setView] = useState<View>('entry');
   const [app, setApp] = useState<'terminal' | 'browser' | 'arcade'>('terminal');
   const [browserPage, setBrowserPage] = useState<DeskBrowserPage>('preview');
@@ -110,7 +110,7 @@ export function Desk() {
     width: Math.max(1600, 1260 + size.width / (2 * fit)) + 80 - backdropLeft,
     height: Math.max(1100, 889 + size.height / (2 * fit)) + 80 - backdropTop };
   const scale = view === 'device' ? Math.min(size.width * (mobile ? .9 : .58) / 300,size.height*.65/210) : view === 'closeup' ? Math.min(size.width * (mobile ? .78 : .52) / 300, size.height * .53 / 210) : view === 'monitor' ? Math.min(size.width * (mobile ? .94 : .86) / 846, size.height * .85 / 482) : fit;
-  const target = view==='device'?{x:1260,y:889}: view === 'closeup' ? { x: 1260, y: 848 } : view === 'monitor' ? { x: 785, y: 365 } : { x: 800, y: mobileRoom ? 380 : 550 };
+  const target = view==='device'?{x:1260,y:889}: view === 'closeup' ? { x: 1260, y: 848 } : view === 'monitor' ? { x: 785, y: 365 } : { x: 800, y: mobileRoom ? 720 : 550 };
   const sceneStyle = { transform: `scale(${scale}) translate(${-target.x}px, ${-target.y}px)`, '--desk-world-scale': scale } as CSSProperties;
   const zoomTarget=view==='device'?DESK_GEOMETRY.device:DESK_GEOMETRY.screen;
   const screenLeft=size.width/2+(zoomTarget.x-target.x)*scale;
@@ -140,15 +140,15 @@ export function Desk() {
   };
   const openPage = (page: DeskBrowserPage) => { if (!shown) showRoom(); if (mobile || view==='device') { setView('monitor'); setLine(null); } setBrowserPage(page); setApp('browser'); };
   const changeEffect = (effect: DeskEffect) => {
-    if (effect === 'lamp') say(effects.lamp ? 'Lights out. The screens keep watch while the rain passes.' : 'Lights on. A little warmth for the next idea.', 'DESK NOTES');
+    if (effect === 'lamp') say(effects.lamp ? 'Lights out. The screens keep watch while the rain passes.' : 'Lights on. A little warmth for the next idea.', 'DESK NOTES', 'lamp');
     if (effect === 'window' && !effects.lamp) {
-      say(effects.window ? 'The silhouette slips back into the rain. Just you, the screen, and the night shift.' : 'A quiet silhouette waits beyond the glass. Probably another night-shift neighbour sheltering from the rain.', 'THE NIGHT WINDOW');
+      say(effects.window ? 'The silhouette slips back into the rain. Just you, the screen, and the night shift.' : 'A quiet silhouette waits beyond the glass. Probably another night-shift neighbour sheltering from the rain.', 'THE NIGHT WINDOW', 'window');
     }
     if (effect === 'window' && effects.lamp) {
-      if(effects.window) { setWindowGift(true); say('Back to the stars. Your neighbour left a little star on the glass. For the next night shift.', 'THE NIGHT WINDOW'); }
-      else say(windowGift ? 'You’re back. Your neighbour waves at the star. Different city. Same sky. — Fefe' : 'Someone is watching the night shift. A little wave. Different city. Same sky. — Fefe', 'THE NIGHT WINDOW');
+      if(effects.window) { setWindowGift(true); say('Back to the stars. Your neighbour left a little star on the glass. For the next night shift.', 'THE NIGHT WINDOW', 'window'); }
+      else say(windowGift ? 'You’re back. Your neighbour waves at the star. Another late night. At least you’re not the only one awake.' : 'Another late night. At least you’re not the only one awake.', 'THE NIGHT WINDOW', 'window');
     }
-    if (effect === 'keyboard') say(effects.keyboard ? 'Back to stock. Your wrists will remember this.' : 'Now you have a real keyboard.', 'KEYBOARD / ADVANTAGE 360');
+    if (effect === 'keyboard') say(effects.keyboard ? 'Back to stock. Your wrists will remember this.' : 'Now you have a real keyboard.', 'KEYBOARD / ADVANTAGE 360', 'keyboard');
     setEffects(current => ({ ...current, [effect]: effect === 'rocket' ? true : !current[effect] }));
   };
   const replay = () => {openingPending.current=false; celebrated.current=false; setCelebrating(false); voice.stopEffects(); demo.replay(); setTour('first-help'); setPreviewVisited(false); setApp('terminal'); setBrowserPage('preview'); enter(); };
@@ -172,7 +172,7 @@ export function Desk() {
           {(view==='monitor' && !mobile || view==='device') && <DeskMonitorSurround cameraKey={`${view}:${scale}:${size.width}:${size.height}`} style={surroundStyle} onExit={zoomMonitor} label={view==='device'?'Back to the desk from the Stream Deck surround':undefined} />}
           <div className="desk-ambient-wall" aria-hidden="true" style={{position:'absolute',inset:0,background:'#29353d'}} />
           <div className="desk-world"><div className="desk-scene" style={sceneStyle} inert={view==='entry'}>
-            <DeskArt onLightning={voice.lightning} backdrop={backdrop} lit={effects.lamp} rocketLaunched={effects.rocket} plantBloom={effects.plant} steam={effects.coffee} visitorVisible={effects.window} windowGift={windowGift} keyboardEvolved={effects.keyboard} />
+            <DeskArt mobile={mobile} onLightning={voice.lightning} backdrop={backdrop} lit={effects.lamp} rocketLaunched={effects.rocket} plantBloom={effects.plant} steam={effects.coffee} visitorVisible={effects.window} windowGift={windowGift} keyboardEvolved={effects.keyboard} />
             {view==='room' && !mobile && <DeskMonitorFrame scale={scale} disabled={!shown} zoomed={false} suggested={tour==='first-help' && shown} onToggle={zoomMonitor} />}
             {(!mobile || view==='room') && <div className="desk-screen-aperture" inert={mobile || !shown || view==='device'}>{shown && computer}</div>}
             {mobileRoom && <button className="desk-mobile-monitor-hit" type="button" aria-label="Focus illustrated monitor" onClick={zoomMonitor} style={{left:DESK_GEOMETRY.screen.x,top:DESK_GEOMETRY.screen.y,width:DESK_GEOMETRY.screen.width,height:DESK_GEOMETRY.screen.height}} />}

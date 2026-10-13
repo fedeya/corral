@@ -13,7 +13,7 @@ type DeskObjectsProps = {
   onEffect: (effect: DeskEffect) => void;
   disabled?: boolean;
   layout?: 'scene' | 'list';
-  onMessage?: (text: string, speaker: string) => void;
+  onMessage?: (text: string, speaker: string, object: ObjectId) => void;
   onInteract?: (cue:DeskSound) => void;
   soundEnabled?:boolean;
   onDuck?: () => void;
@@ -45,10 +45,10 @@ export function DeskObjects({ mobile=false, scale, onOpenPage, onEffect, disable
   const tune = useRef<ReturnType<typeof setTimeout> | null>(null);
   const safeScale = Number.isFinite(scale) && scale > 0 ? scale : 1;
   const messageRef = useRef('');
-  function say(text: string, speaker = 'DESK NOTES') {
+  function say(text: string, speaker = 'DESK NOTES', object:ObjectId='cassette') {
     messageRef.current = text;
     setMessage(text);
-    onMessage?.(text, speaker);
+    onMessage?.(text, speaker, object);
   }
 
   useEffect(() => () => {
@@ -90,14 +90,16 @@ export function DeskObjects({ mobile=false, scale, onOpenPage, onEffect, disable
     setDismissedHint(id);
     if(id !== 'cassette') onInteract?.(id);
     if(id === 'duck' && onDuck) { onDuck(); return; }
-    if(id === 'controller' && onArcade) { onArcade(); return; }
+    if(id === 'controller' && onArcade) { onArcade(); say(descriptions.controller,'PLAYER ONE',id); return; }
     if (id === 'window') { onEffect('window'); return; }
     if (id === 'keyboard') { onEffect('keyboard'); return; }
     if (id === 'cassette') { void toggleTune(); return; }
-    say(descriptions[id], id === 'duck' ? 'RUBBER DUCK' : id === 'coffee' ? 'MATE BREAK' : 'DESK NOTES');
+    if(id==='lamp') say(descriptions.lamp,'DESK NOTES',id);
     if (id === 'lamp' || id === 'coffee' || id === 'rocket' || id === 'plant') onEffect(id);
     if (id === 'floppy') onOpenPage('source');
     if (id === 'books') onOpenPage('about');
+    // Publish after app/camera callbacks so navigation cannot erase the portrait.
+    if(id!=='lamp') say(descriptions[id], id === 'duck' ? 'RUBBER DUCK' : id === 'coffee' ? 'MATE BREAK' : 'DESK NOTES', id);
   }
 
   return (
