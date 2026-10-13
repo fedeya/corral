@@ -11,6 +11,7 @@ test('the keyboard splits and evolves without a lingering hover label',async({pa
   await expect(page.locator('.desk-keyboard-split')).toHaveCSS('opacity','1');
   await expect(page.locator('.desk-keyboard-flat-left')).toHaveCSS('opacity','0');
   await expect(key.locator('.desk-object-label')).not.toBeVisible();
+  await page.getByRole('button',{name:'Close dialogue',exact:true}).click();
   await key.click();
   await expect(page.locator('.desk-keyboard')).toHaveAttribute('data-evolved','false');
 });
@@ -23,6 +24,7 @@ test('the split keyboard animates its halves back together only after evolving',
   const key=page.getByRole('button',{name:'Evolve the keyboard',exact:true});
   await key.click();
   await expect(page.locator('.desk-keyboard-split')).toHaveCSS('opacity','1');
+  await page.getByRole('button',{name:'Close dialogue',exact:true}).click();
   await key.click();
   await expect(left).toHaveCSS('animation-name','desk-keyboard-join-left');
   await expect(page.locator('.desk-keyboard-flat-right')).toHaveCSS('animation-name','desk-keyboard-join-right');

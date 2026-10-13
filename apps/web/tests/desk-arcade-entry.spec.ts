@@ -25,6 +25,7 @@ test('agents finish while the arcade stays open without stealing focus',async({p
   await page.goto('/');
   await page.getByRole('button',{name:'Skip intro',exact:true}).click();
   await page.getByRole('button',{name:'Yes, keep it'}).click();
+  await page.getByRole('button',{name:'Close dialogue',exact:true}).click();
   await page.getByRole('button',{name:'Inspect the old game controller',exact:true}).click();
   await page.getByRole('button',{name:'Start run',exact:true}).click();
   await expect(page.locator('.desk-page')).toHaveAttribute('data-api-status','done',{timeout:15000});

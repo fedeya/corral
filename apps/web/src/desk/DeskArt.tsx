@@ -1,15 +1,17 @@
-import { useId } from 'react';
+import { useEffect, useId, useState } from 'react';
 import { DeskKeyboard } from './DeskKeyboard';
 import './DeskArt.css';
 
 export interface DeskArtProps {
   lit?: boolean;
+  onLightning?: () => void;
   rocketLaunched?: boolean;
   plantBloom?: boolean;
   steam?: boolean;
   visitorVisible?: boolean;
   windowGift?: boolean;
   keyboardEvolved?: boolean;
+  backdrop?: { x: number; y: number; width: number; height: number };
 }
 
 const ink = '#182128';
@@ -17,8 +19,16 @@ const cream = '#e0d6b2';
 const olive = '#77926b';
 
 /** Original pixel illustration. All coordinates share the parent's 1600 × 1100 world. */
-export function DeskArt({ lit = true, rocketLaunched = false, plantBloom = false, steam = false, visitorVisible = false, windowGift = false, keyboardEvolved = false }: DeskArtProps) {
+export function DeskArt({ onLightning, lit = true, rocketLaunched = false, plantBloom = false, steam = false, visitorVisible = false, windowGift = false, keyboardEvolved = false, backdrop = { x: 0, y: 0, width: 1600, height: 1100 } }: DeskArtProps) {
   const id = useId().replace(/:/g, '');
+  const [hidden, setHidden] = useState(() => document.hidden);
+  useEffect(() => {
+    const sync = () => setHidden(document.hidden);
+    document.addEventListener('visibilitychange', sync);
+    return () => document.removeEventListener('visibilitychange', sync);
+  }, []);
+  // Even-odd holes leave the night sky and monitor status light emissive.
+  const roomShade = `M${backdrop.x} ${backdrop.y}h${backdrop.width}v${backdrop.height}h${-backdrop.width}z M1308 96h224v366h-224z M1178 621h8v4h-8z`;
   const keyboardPort=keyboardEvolved?560:710;
   const cables=[
     {id:'keyboard',d:`M1030 620v64l-8 8h-60l-8 8v64l-8 8H${keyboardPort+8}l-8 8v33`},
@@ -26,8 +36,17 @@ export function DeskArt({ lit = true, rocketLaunched = false, plantBloom = false
     {id:'device',d:'M1070 620v86l8 8h62l8 8v22l8 8h206l8 8v24'},
   ];
   return (
-    <svg className={`desk-art${lit ? ' desk-art--lit' : ''}${rocketLaunched ? ' desk-art--launched' : ''}${plantBloom ? ' desk-art--bloom' : ''}${steam ? ' desk-art--steam' : ''}`} viewBox="0 0 1600 1100" width="1600" height="1100" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+    <svg className={`desk-art${lit ? ' desk-art--lit' : ''}${rocketLaunched ? ' desk-art--launched' : ''}${plantBloom ? ' desk-art--bloom' : ''}${steam ? ' desk-art--steam' : ''}`} data-hidden={hidden} viewBox="0 0 1600 1100" width="1600" height="1100" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
       <defs>
+        <radialGradient id={`${id}-lamp-warmth`}>
+          <stop offset="0" stopColor="#bc934c" stopOpacity="1" />
+          <stop offset=".5" stopColor="#bc934c" stopOpacity=".45" />
+          <stop offset="1" stopColor="#bc934c" stopOpacity="0" />
+        </radialGradient>
+        <linearGradient id={`${id}-lamp-pool`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#d8b76e" stopOpacity=".8" />
+          <stop offset="1" stopColor="#d8b76e" stopOpacity="0" />
+        </linearGradient>
         <clipPath id={`${id}-window-glass`}><rect x="1308" y="96" width="224" height="366" /></clipPath>
         <pattern id={`${id}-wall`} width="80" height="64" patternUnits="userSpaceOnUse">
           <rect width="80" height="64" fill="#29353d" />
@@ -46,11 +65,11 @@ export function DeskArt({ lit = true, rocketLaunched = false, plantBloom = false
       </defs>
 
       {/* A quiet wall: deliberately hand-placed flecks, not photographic noise. */}
-      <rect x="-8000" y="-8000" width="17600" height="19000" fill={ink} />
-      <rect x="-8000" y="-8000" width="17600" height="8748" fill={`url(#${id}-wall)`} />
-      <path className="desk-art-wall-warmth" d="M0 0h620v744H0z" fill="#bc934c" />
-      <rect x="-8000" y="704" width="17600" height="12" fill="#1d2b31" />
-      <rect x="-8000" y="716" width="17600" height="12" fill="#47504a" />
+      <rect {...backdrop} fill={ink} />
+      <rect x={backdrop.x} y={backdrop.y} width={backdrop.width} height={748 - backdrop.y} fill={`url(#${id}-wall)`} />
+      <ellipse className="desk-art-wall-warmth" cx="200" cy="492" rx="420" ry="400" fill={`url(#${id}-lamp-warmth)`} />
+      <rect x={backdrop.x} y="704" width={backdrop.width} height="12" fill="#1d2b31" />
+      <rect x={backdrop.x} y="716" width={backdrop.width} height="12" fill="#47504a" />
 
       {/* Observatory window, stepped constellations, distant apartment lights. */}
       <path d="M1300 80h240v8h12v390h-12v12h-240v-12h-12V88h12z" fill="#1a242c" />
@@ -68,8 +87,26 @@ export function DeskArt({ lit = true, rocketLaunched = false, plantBloom = false
       <path d="M1312 420h24v-52h40v24h32v-64h40v36h24v-16h36v64h20v50h-216z" fill="#24323a" />
       {[1344,1360,1416,1432,1484,1500].map((x,i) => <g className="desk-art-apartment-light" style={{animationDuration:`${14+i*3}s`,animationDelay:`${-i*2.3}s`}} key={x} fill={i % 2 ? '#8b7c55' : '#4d6161'}><rect x={x} y={i % 2 ? 408 : 380} width="8" height="12" /><rect x={x} y="436" width="8" height="8" /></g>)}
       <g clipPath={`url(#${id}-window-glass)`}>
+        <g className="desk-art-storm">
+          <rect x="1308" y="96" width="224" height="366" fill="#0c1722" opacity=".6" />
+          {/* Distant, forked bolt stays outside, behind the rain and window frame. */}
+          <g className="desk-art-lightning-bolt" fill="none" strokeLinejoin="bevel"
+            onAnimationStart={event => { if (event.animationName === 'desk-storm-bolt' && !lit && !hidden) onLightning?.(); }}
+            onAnimationIteration={event => { if (event.animationName === 'desk-storm-bolt' && !lit && !hidden) onLightning?.(); }}>
+            <path d="M1384 92l-28 54 24-6-36 66 24-8-32 72 20-6-16 66" stroke="#829eaf" strokeWidth="8" opacity=".35" />
+            <path d="M1384 92l-28 54 24-6-36 66 24-8-32 72 20-6-16 66M1360 178l-24 10 8 24-24 26" stroke="#c6d8df" strokeWidth="3" />
+          </g>
+          <g className="desk-art-rain" stroke="#738c99" strokeWidth="2" opacity=".45">
+            {/* Each drop wraps above/below the clip, never while visible. Negative
+                phases keep the window populated without a shared sheet seam. */}
+            {Array.from({length: 40}, (_, i) => <path className="desk-art-rain-drop" key={i}
+              style={{animationDuration:`${1200 + i % 7 * 170}ms`,animationDelay:`${-(i * 397 % 2310)}ms`,opacity:.45 + i % 4 * .14}}
+              d={`M${1328 + i * 37 % 220} 60l-2 ${12 + i % 5 * 3}`} />)}
+          </g>
+        </g>
         {windowGift && <path className="desk-art-window-gift" d="m1370 344 8-20 8 20 22 2-16 14 5 22-19-12-19 12 5-22-16-14z" fill="none" stroke="#e0c591" strokeWidth="4" opacity=".85" />}
         <g className="desk-art-visitor" data-visible={visitorVisible}>
+          <g className="desk-art-visitor-friendly">
           <path d="M1440 460v-48h16v-20h48v20h16v48z" fill="#3e525d" />
           <path d="M1452 356h12v-16h8v16h20v-16h8v16h12v40h-12v12h-48v-12h-8v-32h8z" fill="#8caa9f" />
           <path d="M1452 368h52v28h-52z" fill="#b9c2a9" />
@@ -77,6 +114,8 @@ export function DeskArt({ lit = true, rocketLaunched = false, plantBloom = false
           <rect x="1464" y="376" width="4" height="4" fill={cream} /><rect x="1488" y="376" width="4" height="4" fill={cream} />
           <path d="M1474 391h8v4h-8zM1458 448h16v10h-16zM1490 448h16v10h-16z" fill="#d7c8a3" />
           <path d="M1512 416h8v-12h8v-20h8v40h-8v8h-16z" fill="#8caa9f" />
+          </g>
+          <path className="desk-art-visitor-silhouette" d="M1440 460v-48h16v-20h-4v-32h12v-16h8v16h20v-16h8v16h12v32h-8v20h16v48z" fill="#070e15" />
         </g>
       </g>
       <path d="M1300 264h240v12h-240zM1412 96h12v366h-12z" fill="#46514e" />
@@ -145,7 +184,7 @@ export function DeskArt({ lit = true, rocketLaunched = false, plantBloom = false
       <path d="M364 621h24m8 0h24m8 0h24" stroke="#2b383a" strokeWidth="3" />
 
       {/* Lamp: angular shade, articulated arm, warm stepped pool. */}
-      <path className="desk-art-lamp-halo" d="M152 492h116l24 40h16v64h20v64h24v64H48v-64h24v-64h24v-64h32z" fill="#d8b76e" />
+      <path className="desk-art-lamp-halo" d="M160 492h80v40h32v64h24v64h24v64H80v-64h24v-64h24v-64h32z" fill={`url(#${id}-lamp-pool)`} />
       <path d="M156 740h96v8h20v12H136v-12h20z" fill={ink} />
       <path d="M156 736h88v8h20v8H144v-8h12z" fill="#778074" />
       <path d="M200 730V614h-8v-12h-28v-12h-12v-92h16v84h28v12h20v136z" fill="#19272b" />
@@ -272,6 +311,9 @@ export function DeskArt({ lit = true, rocketLaunched = false, plantBloom = false
       <path d="M286 904h32m-32 12h40m-40 12h24m-24 12h36" stroke="#8a8f75" strokeWidth="3" />
       <path d="M306 980h28v4h8v20h-8v4h-28v-4h-8v-20h8zM1188 1032h32v4h8v20h-8v4h-32v-4h-8v-20h8z" fill="none" stroke="#815d40" strokeWidth="3" opacity=".65" />
       <path d="M552 980h116v4H552zM584 988h52v4h-52z" fill="#b9915e" />
+      {/* Room-only ambience: live monitor, device and all controls are separate siblings. */}
+      <path className="desk-art-room-darkness" d={roomShade} fill="#081322" fillRule="evenodd" />
+      <rect className="desk-art-lightning" {...backdrop} fill="#b1c9dc" />
     </svg>
   );
 }

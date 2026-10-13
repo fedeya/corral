@@ -11,7 +11,7 @@ for(const width of [1440,390]) test(`Fefe has a menu link and signed book note a
   await page.getByLabel('Desk menu',{exact:true}).click();
   await page.getByRole('button',{name:'Skip intro',exact:true}).click();
   await page.getByRole('button',{name:'Read the desk books',exact:true}).click();
-  await expect(page.locator('.desk-author-note')).toContainText('Still trying to understand how everything works.');
+  await expect(page.locator('.desk-author-note')).toContainText('I made this desk around the things I like: coding, physics, space, and figuring out how things work.');
   await expect(page.locator('.desk-author-note')).toContainText('Fefe');
 });
 

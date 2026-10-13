@@ -43,7 +43,9 @@ test('music waits for a trusted activation, shares the master across props and R
   await expect.poll(() => page.evaluate(() => (window as unknown as { musicProbe: MusicProbe }).musicProbe.live)).toBe(1);
   expect(await page.evaluate(() => (window as unknown as { musicProbe: MusicProbe }).musicProbe.starts)).toEqual([{ state: 'running', duration: 24 }]);
   await page.getByRole('button', { name: 'Ask the rubber duck', exact: true }).click();
+  await page.getByRole('button', { name: 'Close dialogue', exact: true }).click();
   await page.getByRole('button', { name: 'Play a short chiptune', exact: true }).click();
+  await page.getByRole('button', { name: 'Close dialogue', exact: true }).click();
   await page.getByRole('button', { name: 'Stop the chiptune', exact: true }).click();
   expect(await page.evaluate(() => (window as unknown as { musicProbe: MusicProbe }).musicProbe.live)).toBe(1);
   expect(await page.evaluate(() => (window as unknown as { musicProbe: MusicProbe }).musicProbe.contexts.length)).toBe(1);

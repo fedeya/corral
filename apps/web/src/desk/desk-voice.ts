@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { createDeskSynth, type DeskSound } from './desk-sfx';
 import { createDeskMusic } from './desk-music';
+import { createDeskStorm } from './desk-storm';
 export type { DeskSound } from './desk-sfx';
 
 /** Armed by default, but nothing is allocated until a trusted activation. */
@@ -8,6 +9,8 @@ export function useDeskVoice() {
   const context = useRef<AudioContext | null>(null);
   const synth = useRef<ReturnType<typeof createDeskSynth> | null>(null);
   const music = useRef<ReturnType<typeof createDeskMusic> | null>(null);
+  const storm = useRef<ReturnType<typeof createDeskStorm> | null>(null);
+  const raining = useRef(false);
   const desired = useRef(true);
   const mounted = useRef(true);
   const generation = useRef(0);
@@ -18,19 +21,32 @@ export function useDeskVoice() {
   const [unavailable, setUnavailable] = useState(false);
 
   const startMusic = useCallback(() => {
-    if (mounted.current && desired.current && armed.current && !document.hidden && context.current?.state === 'running') music.current?.start();
+    if (mounted.current && desired.current && armed.current && !document.hidden && context.current?.state === 'running') {
+      music.current?.start();
+      if (raining.current) storm.current?.start();
+    }
+  }, []);
+  const setStorm = useCallback((active: boolean) => {
+    raining.current = active;
+    if (active) startMusic(); else storm.current?.stop();
+  }, [startMusic]);
+  const lightning = useCallback(() => {
+    // Never queue weather behind a pending resume: that bolt has already passed.
+    if (mounted.current && desired.current && armed.current && raining.current && !document.hidden && context.current?.state === 'running' && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) storm.current?.lightning();
   }, []);
   const stopEffects = useCallback(() => {
     generation.current++;
     synth.current?.stopEffects();
     // Replay resets the score, but must not permanently silence the ambience.
     music.current?.stop(true);
+    storm.current?.stop(true);
     startMusic();
   }, [startMusic]);
   const close = useCallback(() => {
     generation.current++;
     synth.current?.dispose(); synth.current = null;
     music.current?.dispose(); music.current = null;
+    storm.current?.dispose(); storm.current = null;
     const current = context.current; context.current = null; pendingResume.current = null;
     if (current && current.state !== 'closed') void current.close().catch(() => {});
   }, []);
@@ -51,6 +67,7 @@ export function useDeskVoice() {
       current = context.current ?? new AudioContext(); context.current = current;
       synth.current ??= createDeskSynth(current, current.destination);
       music.current ??= createDeskMusic(current, current.destination);
+      storm.current ??= createDeskStorm(current, current.destination);
     } catch { close(); setReady(false); setUnavailable(true); return Promise.resolve(false); }
     let timeout: ReturnType<typeof setTimeout>;
     // A blocked WebKit resume can stay pending rather than reject. Let the
@@ -80,7 +97,7 @@ export function useDeskVoice() {
     const visibility = () => {
       if (document.hidden) {
         generation.current++;
-        synth.current?.stopEffects(); music.current?.stop(true);
+        synth.current?.stopEffects(); music.current?.stop(true); storm.current?.stop(true);
       } else if (context.current && armed.current && desired.current) void unlock();
     };
     // Capture completion before React's click changes/removes the entry target.
@@ -119,5 +136,11 @@ export function useDeskVoice() {
     if (!desired.current || !mounted.current || document.hidden || context.current?.state !== 'running') return;
     synth.current?.blip(index);
   }, []);
-  return { enabled, ready, unavailable, toggle, blip, play, stopEffects };
+  useEffect(() => {
+    const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const change = () => { if (motion.matches) { storm.current?.stop(true); startMusic(); } };
+    motion.addEventListener('change', change);
+    return () => motion.removeEventListener('change', change);
+  }, [startMusic]);
+  return { enabled, ready, unavailable, toggle, blip, play, stopEffects, setStorm, lightning };
 }

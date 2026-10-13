@@ -48,9 +48,29 @@
   transition: opacity 300ms ease;
 }
 
-.desk-art--lit .desk-art-wall-warmth { opacity: .045; }
+.desk-art--lit .desk-art-wall-warmth { opacity: .09; }
 .desk-art--lit .desk-art-lamp-halo { opacity: .065; }
 .desk-art--lit .desk-art-bulb { opacity: 1; }
+
+/* Plain bounded fills, never blur/filter the camera-sized SVG. */
+.desk-art-room-darkness { opacity:.52; transition:opacity 650ms ease; }
+.desk-art--lit .desk-art-room-darkness { opacity:0; }
+.desk-art-storm { opacity:1; transition:opacity 650ms ease; }
+.desk-art--lit .desk-art-storm { opacity:0; }
+.desk-art-visitor-friendly { opacity:0; transition:opacity 650ms ease; }
+.desk-art-visitor-silhouette { opacity:1; transition:opacity 650ms ease; }
+.desk-art--lit .desk-art-visitor-friendly { opacity:1; }
+.desk-art--lit .desk-art-visitor-silhouette { opacity:0; }
+.desk-art-lightning, .desk-art-lightning-bolt { opacity:0; }
+.desk-art:not(.desk-art--lit)[data-hidden=false] .desk-art-lightning { animation:desk-storm-lightning 19s 7s ease-in-out infinite; }
+.desk-art:not(.desk-art--lit)[data-hidden=false] .desk-art-lightning-bolt { animation:desk-storm-bolt 19s 7s ease-in-out infinite; }
+.desk-art-rain { visibility:hidden; }
+.desk-art:not(.desk-art--lit)[data-hidden=false] .desk-art-rain { visibility:visible; }
+.desk-art:not(.desk-art--lit)[data-hidden=false] .desk-art-rain-drop { animation-name:desk-storm-rain; animation-timing-function:linear; animation-iteration-count:infinite; }
+@keyframes desk-storm-rain { from { transform:translate(0,0); } to { transform:translate(-20px,440px); } }
+/* One soft pulse, under 10% brightness, separated by eighteen seconds of calm. */
+@keyframes desk-storm-lightning { 0%,5%,100% { opacity:0; } 1.5% { opacity:.09; } }
+@keyframes desk-storm-bolt { 0%,5%,100% { opacity:0; } 1.5% { opacity:.8; } }
 
 .desk-art-rocket {
   transform: translateY(0);
@@ -92,6 +112,14 @@
 @media (prefers-reduced-motion: reduce) {
   .desk-art-star,.desk-art-moon,.desk-art-apartment-light { animation:none; }
   .desk-art-visitor { transition:none; }
+  .desk-art .desk-art-room-darkness,
+  .desk-art .desk-art-storm,
+  .desk-art .desk-art-visitor-friendly,
+  .desk-art .desk-art-visitor-silhouette { transition:none; }
+  .desk-art:not(.desk-art--lit)[data-hidden=false] .desk-art-lightning,
+  .desk-art:not(.desk-art--lit)[data-hidden=false] .desk-art-lightning-bolt,
+  .desk-art:not(.desk-art--lit)[data-hidden=false] .desk-art-rain-drop { animation:none; }
+  .desk-art:not(.desk-art--lit)[data-hidden=false] .desk-art-rain { visibility:hidden; }
   .desk-art .desk-art-rocket,
   .desk-art .desk-art-wall-warmth,
   .desk-art .desk-art-lamp-halo,

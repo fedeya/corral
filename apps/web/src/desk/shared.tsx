@@ -39,7 +39,7 @@ export function InstallCommands({ className = "" }: { className?: string }) {
 }
 
 export function SetupNotes() {
-  return <p className="xp-setup-notes">Requires Stream Deck +, its desktop app, <a href="https://herdr.dev">herdr</a>, <a href="https://ghostty.org">Ghostty</a> and <a href="https://bun.sh">Bun</a> on macOS. Add Agent slot to your keys and Agents strip to all four dials. Ghostty and the herdr path are currently hard-coded. Kingdom art is a separate download. <a href={`${GITHUB}#install`}>Full setup ↗</a></p>;
+  return <p className="xp-setup-notes">Requires Stream Deck +, its desktop app, <a href="https://herdr.dev">herdr</a>, <a href="https://ghostty.org">Ghostty</a> and <a href="https://bun.sh">Bun</a> on macOS. Add Agent slot to your keys and Agents strip to all four dials. Kingdom art is a separate download. <a href={`${GITHUB}#install`}>Full setup ↗</a></p>;
 }
 
 export function ArtCredits() {

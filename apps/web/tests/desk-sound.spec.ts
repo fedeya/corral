@@ -26,18 +26,25 @@ test.beforeEach(async ({ page }) => {
 });
 
 test('one gesture-unlocked master owns cassette, effects and mute', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto(harness ?? '/?concept=desk');
   expect(await page.evaluate(probe).then(s => s.contexts.length)).toBe(0);
   await page.getByRole('button', { name: 'Skip intro', exact: true }).click();
   await expect.poll(() => page.evaluate(() => (window as unknown as { soundProbe: AudioProbe }).soundProbe.contexts.length)).toBe(1);
+  // Keep the 2.45s automatic cassette completion from racing slow WebKit
+  // transport while testing manual stop. Native AudioContext still runs.
+  await page.clock.install({ time: new Date(0) });
+  await page.clock.pauseAt(new Date(60_000));
   await page.getByRole('button', { name: harness ? 'cassette' : 'Play a short chiptune', exact: true }).click();
   await expect.poll(() => page.evaluate(() => (window as unknown as { soundProbe: AudioProbe }).soundProbe.sources)).toBeGreaterThan(0);
   expect(await page.evaluate(() => (window as unknown as { soundProbe: AudioProbe }).soundProbe.contexts.length)).toBe(1);
+  if (!harness) await page.getByRole('button', { name: 'Close dialogue', exact: true }).click();
   await page.getByRole('button', { name: harness ? 'cassette-stop' : 'Stop the chiptune', exact: true }).click();
   expect(await page.evaluate(() => (window as unknown as { soundProbe: AudioProbe }).soundProbe.contexts[0].state)).toBe('running');
   await page.getByRole('button', { name: 'Mute desk sound', exact: true }).click();
   await expect.poll(() => page.evaluate(() => (window as unknown as { soundProbe: AudioProbe }).soundProbe.contexts.map(c => c.state))).toEqual(['closed']);
   const before = await page.evaluate(() => (window as unknown as { soundProbe: AudioProbe }).soundProbe.sources);
+  if (!harness) await page.getByRole('button', { name: 'Close dialogue', exact: true }).click();
   await page.getByRole('button', { name: harness ? 'duck' : 'Ask the rubber duck', exact: true }).click();
   expect(await page.evaluate(() => (window as unknown as { soundProbe: AudioProbe }).soundProbe.sources)).toBe(before);
 });
