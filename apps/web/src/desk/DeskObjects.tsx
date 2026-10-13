@@ -36,6 +36,7 @@ const descriptions: Record<ObjectId, string> = {
   physics: 'In a sealed elevator, can you tell gravity from acceleration? Drop a pencil.',
   window: 'The night shift has company.',
   keyboard: 'Now you have a real keyboard.',
+  zac: 'Not ready to host yet.',
 };
 
 export function DeskObjects({ mobile=false, scale, onOpenPage, onEffect, disabled = false, layout = 'scene', onMessage, onInteract, soundEnabled=true, onDuck, onArcade }: DeskObjectsProps) {
@@ -88,7 +89,8 @@ export function DeskObjects({ mobile=false, scale, onOpenPage, onEffect, disable
   function activate(id: ObjectId) {
     if (disabled) return;
     setDismissedHint(id);
-    if(id !== 'cassette') onInteract?.(id);
+    if(id !== 'cassette') onInteract?.(id === 'zac' ? 'tap' : id);
+    if(id === 'zac') { onEffect('zac'); return; }
     if(id === 'duck' && onDuck) { onDuck(); return; }
     if(id === 'controller' && onArcade) { onArcade(); return; }
     if (id === 'window') { onEffect('window'); return; }

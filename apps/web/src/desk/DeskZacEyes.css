@@ -1,0 +1,14 @@
+[data-zac-eyes="awake"][data-hidden="false"] {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: desk-zac-wake 5s steps(1,end) 1;
+}
+@keyframes desk-zac-wake {
+  0%, 12%, 16%, 28%, 44%, 60%, 76%, 100% { transform: none; }
+  13%, 15% { transform: scaleY(.25); }
+  30%, 42% { transform: translateX(3px); }
+  62%, 74% { transform: translateX(-3px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-zac-eyes="awake"][data-hidden="false"] { animation: none; }
+}
