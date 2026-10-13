@@ -90,7 +90,7 @@ export function DeskObjects({ mobile=false, scale, onOpenPage, onEffect, disable
     setDismissedHint(id);
     if(id !== 'cassette') onInteract?.(id);
     if(id === 'duck' && onDuck) { onDuck(); return; }
-    if(id === 'controller' && onArcade) { onArcade(); say(descriptions.controller,'PLAYER ONE',id); return; }
+    if(id === 'controller' && onArcade) { onArcade(); return; }
     if (id === 'window') { onEffect('window'); return; }
     if (id === 'keyboard') { onEffect('keyboard'); return; }
     if (id === 'cassette') { void toggleTune(); return; }
