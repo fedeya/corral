@@ -11,7 +11,7 @@ for(const width of [1440,390]) test(`Fefe has a menu link and signed book note a
   await page.getByLabel('Desk menu',{exact:true}).click();
   await page.getByRole('button',{name:'Skip intro',exact:true}).click();
   await page.getByRole('button',{name:'Read the desk books',exact:true}).click();
-  await expect(page.locator('.desk-author-note')).toContainText('Still trying to understand how everything works.');
+  await expect(page.locator('.desk-author-note')).toContainText('I made this desk around the things I like: coding, physics, space, and figuring out how things work.');
   await expect(page.locator('.desk-author-note')).toContainText('Fefe');
 });
 
@@ -23,7 +23,7 @@ test('the night window stays uncluttered without losing its visitor and star kee
   await expect(page.locator('.desk-art-book-signature')).toContainText('Fefe');
   const window=page.getByRole('button',{name:'Look through the window',exact:true});
   await window.click();
-  await expect(page.locator('.desk-dialogue')).toContainText('Different city. Same sky.');
+  await expect(page.locator('.desk-dialogue')).toContainText('Another late night. At least you’re not the only one awake.');
   await expect(page.locator('.desk-dialogue')).not.toContainText('Necochea');
   await expect(page.locator('.desk-art-visitor')).toHaveAttribute('data-visible','true');
   await window.click();

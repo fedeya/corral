@@ -24,7 +24,9 @@ for(const width of [320,390]) {
   await page.getByRole('button',{name:'Focus monitor ↗',exact:true}).click();
   const workspace=page.getByRole('region',{name:'Readable mobile monitor'});
   await expect(workspace).toBeVisible();
-  await expect(page.locator('.desk-scene')).toBeHidden();
+  // The world remains mounted for the camera handoff, but cannot steal input.
+  await expect(page.locator('.desk-scene')).toHaveCSS('pointer-events','none');
+  await expect(workspace).toHaveCSS('opacity','1');
   const box=await workspace.boundingBox();expect(box!.width).toBeGreaterThan(width-20);
   await expect(page.getByRole('button',{name:'Yes, keep it',exact:true})).toBeVisible();
   await page.getByRole('button',{name:'Yes, keep it',exact:true}).tap();

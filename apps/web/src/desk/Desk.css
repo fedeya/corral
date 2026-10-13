@@ -1,5 +1,5 @@
 .desk-page { --desk-ink:#252223; --desk-paper:#eee0c4; --desk-dialogue-space:0px; position:fixed; inset:0; height:100dvh; display:flex; flex-direction:column; overflow:hidden; background:#242328; color:#ded2bc; font-family:'IBM Plex Mono',monospace; }
-.desk-page[data-talk=true] { --desk-dialogue-space:146px; }
+/* Dialogue floats over the unchanged room; speech never resizes the camera. */
 .desk-page>main { flex:1; min-height:0; position:relative; }
 .desk-page * { box-sizing:border-box; }
 .desk-page button,.desk-page a { -webkit-tap-highlight-color:transparent; }
@@ -21,7 +21,7 @@
 .desk-header button span { margin-left:10px; color:#c7d89b; }
 .desk-page button:focus-visible,.desk-page a:focus-visible { outline:3px solid #f1d49b; outline-offset:4px; }
 .desk-experience { position:absolute; inset:0; background:#242328; }
-.desk-viewport { position:absolute; inset:0 0 var(--desk-dialogue-space); overflow:clip; width:100%; isolation:isolate; background:#242328; }
+.desk-viewport { position:absolute; inset:0; overflow:clip; width:100%; isolation:isolate; background:#242328; }
 .desk-world { position:relative; height:100%; overflow:hidden; }
 .desk-scene { position:absolute; top:50%; left:50%; width:1600px; height:1100px; transform-origin:0 0; transition:transform 1.5s cubic-bezier(.22,.74,.21,1); will-change:transform; }
 .desk-monitor-surround { position:absolute; inset:0; z-index:3; border:0; padding:0; background:transparent; cursor:zoom-out; }
@@ -55,19 +55,22 @@
 .desk-mobile-explore summary { font:11px 'IBM Plex Mono',monospace; color:#d3dab8; min-height:44px; display:list-item; align-content:center; cursor:pointer; margin-bottom:7px; }
 @media(max-width:1100px) { .desk-header>p { display:none; }.desk-brand>span { font-size:8px; } }
 @media(max-width:760px) {
- .desk-page[data-talk=true] { --desk-dialogue-space:188px; }
- .desk-header { padding:6px 10px; gap:4px; display:grid; grid-template-columns:1fr repeat(3,44px); min-height:0; }.desk-brand { font-size:15px; grid-column:1; grid-row:1; min-height:30px; }.desk-brand>span { display:none; }
- .desk-header nav { display:contents; }.desk-header button { font-size:9px; padding:0 9px; }
- .desk-header .desk-install { grid-column:2 / -1; grid-row:1; min-height:36px; }.desk-sound { grid-column:1; grid-row:2; text-align:left; }.desk-replay { grid-column:2; grid-row:2; }.desk-menu { grid-column:3; grid-row:2; }.desk-skip { grid-column:4; grid-row:2; font-size:0!important; }.desk-skip::after { content:'≫'; font-size:23px; }.desk-menu summary { font-size:9px; padding:0; justify-content:center; }
+
+ .desk-header { padding:4px 6px; gap:0; min-height:53px; }.desk-brand { font-size:12px; min-width:64px; min-height:44px; align-items:center; }.desk-brand>span { display:none; }
+ .desk-header nav { gap:0; flex-shrink:0; }.desk-header button { font-size:9px; padding:0; min-width:44px; }
+ .desk-header .desk-install { min-width:64px; padding:0 6px; font-size:0; }.desk-install::after { content:'Install'; font-size:10px; }.desk-header .desk-install span { display:none; }
+ .desk-header .desk-sound { width:44px; font-size:0; }.desk-sound::after { content:'♫'; font-size:22px; }.desk-sound[aria-pressed=false]::after { content:'♫'; opacity:.45; text-decoration:line-through; }
+ .desk-skip { width:44px; font-size:0!important; }.desk-skip::after { content:'≫'; font-size:23px; }.desk-menu summary { width:44px; font-size:9px; padding:0; justify-content:center; }
  .desk-viewport { height:auto; min-height:0; max-height:none; }
  .desk-page:not([data-view=closeup]) .desk-viewport { height:auto; min-height:0; }
  .desk-camera-controls { top:10px; right:12px; }.desk-camera-controls button { font-size:10px; padding:8px 10px; }
  .desk-room-notice { top:15px; left:12px; font-size:9px; max-width:calc(100% - 165px); }
  .desk-page[data-view=room] .desk-viewport { overflow:clip; touch-action:manipulation; }
  .desk-page[data-view=device] .desk-key::after { display:none; }
- .desk-page[data-view=monitor] .desk-scene { display:none; }
+ /* Keep the illustrated camera alive beneath the readable surface's handoff. */
+ .desk-page[data-view=monitor] .desk-scene { transition-duration:750ms; }
  .desk-page[data-view=monitor] .desk-viewport { background:#211e20; }
- .desk-mobile-workspace { position:absolute; inset:64px 6px calc(var(--desk-dialogue-space) + 6px); z-index:6; padding:0!important; display:flex; flex-direction:column; min-height:0; overflow:hidden; border:2px solid #75614d; border-radius:6px; background:#211e20; }
+ .desk-mobile-workspace { position:absolute; inset:64px 6px calc(var(--desk-dialogue-space) + 6px); z-index:6; padding:0!important; display:flex; flex-direction:column; min-height:0; overflow:hidden; border:2px solid #75614d; border-radius:6px; background:#211e20; transform-origin:50% 45%; animation:desk-monitor-arrive 750ms cubic-bezier(.22,.74,.21,1) both; }
  .desk-mobile-select { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:5px 10px; font-size:10px; background:#37302b; }
  .desk-mobile-select select { min-height:44px; border:1px solid #8b7558; background:#292522; color:#ead7b6; padding:6px 10px; font:11px 'IBM Plex Mono',monospace; }
  .desk-mobile-explore { position:absolute; top:66px; left:12px; right:12px; max-height:calc(100% - var(--desk-dialogue-space) - 90px); overflow:auto; z-index:10; background:#292522; border:1px solid #75614d; padding:6px 10px!important; margin:0; }
@@ -81,5 +84,5 @@
  .desk-mobile-agents button[aria-pressed=true] { border-color:#d0d59f; color:#eef0c7; }.desk-mobile-agents button span { margin-right:5px; color:#e5ca91; }.desk-mobile-agents button[data-status=done] span { color:#93c3ab; }
  .desk-footer { padding:26px 18px; flex-direction:column; gap:10px; }.desk-footer-links { justify-content:flex-start; gap:13px; }.desk-footer .xp-art-credits { text-align:left; }
 }
-@media(prefers-reduced-motion:reduce) { .desk-scene { transition:none; }.desk-device-call { animation:none; } }
-@media(max-height:580px) and (min-width:761px) { .desk-page[data-talk=true] { --desk-dialogue-space:132px; } }
+@keyframes desk-monitor-arrive { 0% { opacity:0; transform:translateY(18px) scale(.96); } 35% { opacity:.3; } 100% { opacity:1; transform:none; } }
+@media(prefers-reduced-motion:reduce) { .desk-scene,.desk-page[data-view=monitor] .desk-scene { transition:none; }.desk-device-call,.desk-mobile-workspace { animation:none; } }

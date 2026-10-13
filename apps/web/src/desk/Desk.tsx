@@ -32,19 +32,22 @@ export function Desk() {
   const voice = useDeskVoice();
   const [line, setLine] = useState<DeskLine | null>(null);
   const openingPending=useRef(false);
+  const [openingCameraReady, setOpeningCameraReady] = useState(true);
+  const [openingRun, setOpeningRun] = useState(0);
   const lineCounter = useRef(0);
   const duckStep = useRef(0);
   const askDuck = () => {
     const lines = ['What had you expected to happen, and where did reality first disagree?', 'What’s the smallest thing you can test?', 'You already know what to try, don’t you?'];
-    say(lines[duckStep.current % lines.length], 'RUBBER DUCK');
+    say(lines[duckStep.current % lines.length], 'RUBBER DUCK', 'duck');
     duckStep.current++;
   };
-  const say = (text:string, speaker='DESK NOTES') => setLine({ id:++lineCounter.current, speaker, text });
+  const say = (text:string, speaker='DESK NOTES', object?:import('./DeskPropArt').DeskObjectId) => setLine({ id:++lineCounter.current, speaker, text, object, objectLit:effects.lamp, keyboardEvolved:object==='keyboard'?!effects.keyboard:effects.keyboard, portrait:!object && (speaker.includes('CLAUDE CODE') || speaker==='CORRAL')?'goat':undefined });
   const [view, setView] = useState<View>('entry');
   const [app, setApp] = useState<'terminal' | 'browser' | 'arcade'>('terminal');
   const [browserPage, setBrowserPage] = useState<DeskBrowserPage>('preview');
   const [theme, setTheme] = useState<ThemeId>('farm');
   const [effects, setEffects] = useState({ lamp: true, rocket: false, plant: false, coffee: false, window:false, keyboard:false });
+  useEffect(() => { voice.setStorm(!effects.lamp); }, [effects.lamp, voice.setStorm]);
   const [windowGift,setWindowGift] = useState(false);
   const viewport = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ width: 1600, height: 1000 });
@@ -67,11 +70,21 @@ export function Desk() {
     if(app==='browser' && browserPage==='preview' && tour!=='first-help') setPreviewVisited(true);
   },[app,browserPage,tour]);
   useEffect(() => {
-    if (openingPending.current && (view==='closeup' || mobile && view==='room') && (voice.ready || voice.unavailable || !voice.enabled)) {
+    if (openingPending.current && openingCameraReady && view==='closeup' && (voice.ready || voice.unavailable || !voice.enabled)) {
       openingPending.current=false;
       setLine({id:++lineCounter.current,...openingLine});
     }
-  }, [voice.ready,voice.unavailable,voice.enabled,view,mobile]);
+  }, [voice.ready,voice.unavailable,voice.enabled,view,openingCameraReady,openingRun]);
+  useEffect(() => {
+    if (openingCameraReady || view !== 'closeup') return;
+    // Start speech as the camera settles, rather than after the whole move.
+    // Derive a bounded lead-in from CSS and retire it on navigation/replay.
+    const scene = viewport.current?.querySelector('.desk-scene');
+    const duration = scene ? parseFloat(getComputedStyle(scene).transitionDuration) * 1000 : 0;
+    const leadIn = Number.isFinite(duration) ? Math.min(duration * .6, 1000) : 900;
+    const timer = setTimeout(() => setOpeningCameraReady(true), leadIn);
+    return () => clearTimeout(timer);
+  }, [openingCameraReady, openingRun, view]);
   useLayoutEffect(() => {
     const element = viewport.current;
     if (!element) return;
@@ -89,8 +102,15 @@ export function Desk() {
 
   const mobileRoom = mobile && view==='room';
   const fit = Math.min(size.width / DESK_GEOMETRY.width, size.height / DESK_GEOMETRY.height);
-  const scale = view === 'device' ? Math.min(size.width * (mobile ? .9 : .58) / 300,size.height*.65/210) : view === 'closeup' ? Math.min(size.width * (mobile ? .78 : .52) / 300, size.height * .53 / 210) : view === 'monitor' && !mobile ? Math.min(size.width * .86 / 846, size.height * .85 / 482) : fit;
-  const target = view==='device'?{x:1260,y:889}: view === 'closeup' ? { x: 1260, y: 848 } : view === 'monitor' && !mobile ? { x: 785, y: 365 } : { x: 800, y: mobileRoom ? 380 : 550 };
+  // Cover every camera target at the widest (room) scale, including transitions.
+  // A fixed 17,600 × 19,000 SVG background made a huge composited paint layer.
+  const backdropLeft = Math.min(0, 785 - size.width / (2 * fit)) - 80;
+  const backdropTop = Math.min(0, 365 - size.height / (2 * fit)) - 80;
+  const backdrop = { x: backdropLeft, y: backdropTop,
+    width: Math.max(1600, 1260 + size.width / (2 * fit)) + 80 - backdropLeft,
+    height: Math.max(1100, 889 + size.height / (2 * fit)) + 80 - backdropTop };
+  const scale = view === 'device' ? Math.min(size.width * (mobile ? .9 : .58) / 300,size.height*.65/210) : view === 'closeup' ? Math.min(size.width * (mobile ? .78 : .52) / 300, size.height * .53 / 210) : view === 'monitor' ? Math.min(size.width * (mobile ? .94 : .86) / 846, size.height * .85 / 482) : fit;
+  const target = view==='device'?{x:1260,y:889}: view === 'closeup' ? { x: 1260, y: 848 } : view === 'monitor' ? { x: 785, y: 365 } : { x: 800, y: mobileRoom ? 720 : 550 };
   const sceneStyle = { transform: `scale(${scale}) translate(${-target.x}px, ${-target.y}px)`, '--desk-world-scale': scale } as CSSProperties;
   const zoomTarget=view==='device'?DESK_GEOMETRY.device:DESK_GEOMETRY.screen;
   const screenLeft=size.width/2+(zoomTarget.x-target.x)*scale;
@@ -99,11 +119,13 @@ export function Desk() {
   const screenBottom=screenTop+zoomTarget.height*scale;
   const surroundStyle = !mobile || view==='device' ? {clipPath:`polygon(evenodd,0 0,100% 0,100% 100%,0 100%,0 0,${screenLeft}px ${screenTop}px,${screenRight}px ${screenTop}px,${screenRight}px ${screenBottom}px,${screenLeft}px ${screenBottom}px,${screenLeft}px ${screenTop}px)`}:undefined;
   const enter = () => {
+    openingPending.current=true;
+    setLine(null);
+    setOpeningCameraReady(window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    setOpeningRun(current => current + 1);
     setView('closeup');
-    if(voice.ready || voice.unavailable || !voice.enabled) setLine({id:++lineCounter.current,...openingLine});
-    else openingPending.current=true;
   };
-  const showRoom = () => { openingPending.current=false;demo.reveal(); setView('room'); setLine(null); };
+  const showRoom = () => { openingPending.current=false;setOpeningCameraReady(true);demo.reveal(); setView('room'); setLine(null); };
   const focus = (index: number) => { voice.play('tap'); demo.focus(index); setApp('terminal'); setLine(null); if(mobile || view!=='device') setView(!shown && !mobile?'room':'monitor'); if(!shown && !mobile) say('There I am, in herdr. Tap the monitor for a closer look.', 'API / CLAUDE CODE'); };
   const nextAgent = () => {voice.play('dial'); demo.urgent(); setApp('terminal'); setLine(null); if(mobile || view!=='device') setView(!shown && !mobile?'room':'monitor'); };
   const openApp = (next:'terminal'|'browser'|'arcade') => {voice.play(next==='browser'?'browser':'tap');if(next==='terminal') demo.focus(demo.focused);setApp(next); setLine(null);};
@@ -118,23 +140,27 @@ export function Desk() {
   };
   const openPage = (page: DeskBrowserPage) => { if (!shown) showRoom(); if (mobile || view==='device') { setView('monitor'); setLine(null); } setBrowserPage(page); setApp('browser'); };
   const changeEffect = (effect: DeskEffect) => {
-    if (effect === 'window') {
-      if(effects.window) { setWindowGift(true); say('Back to the stars. Your neighbour left a little star on the glass. For the next night shift.', 'THE NIGHT WINDOW'); }
-      else say(windowGift ? 'You’re back. Your neighbour waves at the star. Different city. Same sky. — Fefe' : 'Someone is watching the night shift. A little wave. Different city. Same sky. — Fefe', 'THE NIGHT WINDOW');
+    if (effect === 'lamp') say(effects.lamp ? 'Lights out. The screens keep watch while the rain passes.' : 'Lights on. A little warmth for the next idea.', 'DESK NOTES', 'lamp');
+    if (effect === 'window' && !effects.lamp) {
+      say(effects.window ? 'The silhouette slips back into the rain. Just you, the screen, and the night shift.' : 'A quiet silhouette waits beyond the glass. Probably another night-shift neighbour sheltering from the rain.', 'THE NIGHT WINDOW', 'window');
     }
-    if (effect === 'keyboard') say(effects.keyboard ? 'Back to stock. Your wrists will remember this.' : 'Now you have a real keyboard.', 'KEYBOARD / ADVANTAGE 360');
+    if (effect === 'window' && effects.lamp) {
+      if(effects.window) { setWindowGift(true); say('Back to the stars. Your neighbour left a little star on the glass. For the next night shift.', 'THE NIGHT WINDOW', 'window'); }
+      else say(windowGift ? 'You’re back. Your neighbour waves at the star. Another late night. At least you’re not the only one awake.' : 'Another late night. At least you’re not the only one awake.', 'THE NIGHT WINDOW', 'window');
+    }
+    if (effect === 'keyboard') say(effects.keyboard ? 'Back to stock. Your wrists will remember this.' : 'Now you have a real keyboard.', 'KEYBOARD / ADVANTAGE 360', 'keyboard');
     setEffects(current => ({ ...current, [effect]: effect === 'rocket' ? true : !current[effect] }));
   };
-  const replay = () => {openingPending.current=false; celebrated.current=false; setCelebrating(false); voice.stopEffects(); demo.replay(); setTour('first-help'); setPreviewVisited(false); setView(mobile ? 'room' : 'closeup'); setApp('terminal'); setBrowserPage('preview'); setLine({ id:++lineCounter.current, ...openingLine }); };
+  const replay = () => {openingPending.current=false; celebrated.current=false; setCelebrating(false); voice.stopEffects(); demo.replay(); setTour('first-help'); setPreviewVisited(false); setApp('terminal'); setBrowserPage('preview'); enter(); };
   const blocked = demo.statuses.flatMap((status, index) => status === 'blocked' ? [DEMO_AGENTS[index].id] : []);
   const done = demo.statuses.flatMap((status, index) => status === 'done' ? [DEMO_AGENTS[index].id] : []);
   const notice = [...done.map(id => `${id} finished`), ...blocked.map(id => `${id} needs you`)].join(' · ');
   const computer = <DeskComputer completed={demo.completed} app={app} arcadeActive={view==='monitor' || !mobile && view==='room'} onSound={voice.play} page={browserPage} focused={demo.focused} statuses={demo.statuses} progress={demo.progress} onFocus={focus} onAnswer={answer} onApp={openApp} onPage={setBrowserPage} suggestPreview={tour==='preview' && !previewVisited} />;
 
 
-  return <div className="desk-page" data-view={view} data-api-status={demo.statuses[0]} data-theme={theme} data-talk={!!line} data-tour={tour}>
+  return <div className="desk-page" data-view={view} data-lamp={effects.lamp ? 'on' : 'off'} data-api-status={demo.statuses[0]} data-theme={theme} data-talk={!!line} data-entering={!openingCameraReady && view==='closeup'} data-tour={tour}>
     <header className="desk-header"><a className="desk-brand" href="./">CORRAL</a><p>A little life on your desk.</p><nav aria-label="Desk navigation">
-      <button type="button" className="desk-sound" aria-label={voice.enabled ? 'Mute desk sound' : 'Enable desk sound'} aria-pressed={voice.enabled} onClick={() => { void voice.toggle().then(enabled => { if(enabled && view!=='entry') setLine(current => current ? { ...current, id:++lineCounter.current } : view==='closeup' ? { id:++lineCounter.current, ...openingLine } : null); }); }}>{voice.unavailable ? 'No audio' : voice.enabled ? 'Sound on' : 'Sound off'}</button>
+      <button type="button" className="desk-sound" aria-label={voice.enabled ? 'Mute desk sound' : 'Enable desk sound'} aria-pressed={voice.enabled} onClick={() => { void voice.toggle().then(enabled => { if(enabled && view!=='entry' && !openingPending.current) setLine(current => current ? { ...current, id:++lineCounter.current } : view==='closeup' ? { id:++lineCounter.current, ...openingLine } : null); }); }}>{voice.unavailable ? 'No audio' : voice.enabled ? 'Sound on' : 'Sound off'}</button>
       <button type="button" className="desk-replay" aria-label="Replay" title="Restart the scene" onClick={replay}>↺</button>
       <details className="desk-menu"><summary aria-label="Desk menu">Menu</summary><div><button type="button" onClick={() => openPage('about')}>About & credits</button><button type="button" onClick={() => openPage('source')}>Source & themes</button><a href="https://fedeminaya.com" target="_blank" rel="noreferrer">Made by Fefe ↗</a></div></details>
       {!shown && <button className="desk-skip" type="button" aria-label="Skip intro" title="Skip intro" onClick={showRoom}>Skip intro</button>}
@@ -146,7 +172,7 @@ export function Desk() {
           {(view==='monitor' && !mobile || view==='device') && <DeskMonitorSurround cameraKey={`${view}:${scale}:${size.width}:${size.height}`} style={surroundStyle} onExit={zoomMonitor} label={view==='device'?'Back to the desk from the Stream Deck surround':undefined} />}
           <div className="desk-ambient-wall" aria-hidden="true" style={{position:'absolute',inset:0,background:'#29353d'}} />
           <div className="desk-world"><div className="desk-scene" style={sceneStyle} inert={view==='entry'}>
-            <DeskArt lit={effects.lamp} rocketLaunched={effects.rocket} plantBloom={effects.plant} steam={effects.coffee} visitorVisible={effects.window} windowGift={windowGift} keyboardEvolved={effects.keyboard} />
+            <DeskArt mobile={mobile} onLightning={voice.lightning} backdrop={backdrop} lit={effects.lamp} rocketLaunched={effects.rocket} plantBloom={effects.plant} steam={effects.coffee} visitorVisible={effects.window} windowGift={windowGift} keyboardEvolved={effects.keyboard} />
             {view==='room' && !mobile && <DeskMonitorFrame scale={scale} disabled={!shown} zoomed={false} suggested={tour==='first-help' && shown} onToggle={zoomMonitor} />}
             {(!mobile || view==='room') && <div className="desk-screen-aperture" inert={mobile || !shown || view==='device'}>{shown && computer}</div>}
             {mobileRoom && <button className="desk-mobile-monitor-hit" type="button" aria-label="Focus illustrated monitor" onClick={zoomMonitor} style={{left:DESK_GEOMETRY.screen.x,top:DESK_GEOMETRY.screen.y,width:DESK_GEOMETRY.screen.width,height:DESK_GEOMETRY.screen.height}} />}

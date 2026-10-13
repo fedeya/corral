@@ -49,10 +49,12 @@ test('cassette is opt-in, stoppable, and ends by itself', async ({ page }) => {
   const stop = page.getByRole('button', { name: 'Stop the chiptune', exact: true });
   await expect(stop).toHaveAttribute('aria-pressed', 'true');
   await expect.poll(states).toEqual(voiceStates);
+  if (!harness) await page.getByRole('button', { name: 'Close dialogue', exact: true }).click();
   await stop.click();
   await expect(cassette).toHaveAttribute('aria-pressed', 'false');
   await expect(page.locator('.desk-objects-status')).toContainText('Silence');
   await expect.poll(states).toEqual(voiceStates);
+  if (!harness) await page.getByRole('button', { name: 'Close dialogue', exact: true }).click();
   await cassette.click();
   await expect(cassette).toHaveAttribute('aria-pressed', 'false', { timeout: 6000 });
   await expect.poll(states).toEqual(voiceStates);

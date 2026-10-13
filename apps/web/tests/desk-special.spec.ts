@@ -7,6 +7,7 @@ test('the rubber duck walks through a debugging conversation and remembers acros
   const duck=page.getByRole('button',{name:'Ask the rubber duck',exact:true});
   await duck.click();
   await expect(page.locator('.desk-dialogue')).toContainText('expected');
+  await page.getByRole('button',{name:'Close dialogue',exact:true}).click();
   await duck.click();
   await expect(page.locator('.desk-dialogue')).toContainText('smallest thing you can test');
   await page.locator('.desk-monitor-frame [data-edge=bottom]').click();
