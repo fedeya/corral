@@ -14,6 +14,7 @@ export interface DeskArtProps {
   visitorVisible?: boolean;
   windowGift?: boolean;
   keyboardEvolved?: boolean;
+  zacAwake?: boolean;
   backdrop?: { x: number; y: number; width: number; height: number };
 }
 
@@ -21,7 +22,7 @@ const ink = '#182128';
 const cream = '#e0d6b2';
 
 /** Original pixel illustration. All coordinates share the parent's 1600 × 1100 world. */
-export function DeskArt({ mobile = false, onLightning, lit = true, rocketLaunched = false, plantBloom = false, steam = false, visitorVisible = false, windowGift = false, keyboardEvolved = false, backdrop = { x: 0, y: 0, width: 1600, height: 1100 } }: DeskArtProps) {
+export function DeskArt({ mobile = false, onLightning, lit = true, rocketLaunched = false, plantBloom = false, steam = false, visitorVisible = false, windowGift = false, keyboardEvolved = false, zacAwake = false, backdrop = { x: 0, y: 0, width: 1600, height: 1100 } }: DeskArtProps) {
   const id = useId().replace(/:/g, '');
   const [hidden, setHidden] = useState(() => document.hidden);
   useEffect(() => {
@@ -184,6 +185,7 @@ export function DeskArt({ mobile = false, onLightning, lit = true, rocketLaunche
       <DeskPropArt object="floppy" />
       <DeskPropArt object="cassette" />
       <DeskPropArt object="controller" />
+      <DeskPropArt object="zac" zacAwake={zacAwake} />
       {/* Pencil, folded list and a couple of honest coffee rings. */}
       <path d="M282 854h48v4h8v4h-64z" fill="#d2ac62" /><path d="M274 854h8v8h-8z" fill="#26363a" />
       <path d="M280 892h56v72h-56z" fill="#c9bc96" />

@@ -41,12 +41,12 @@ export function Desk() {
     say(lines[duckStep.current % lines.length], 'RUBBER DUCK', 'duck');
     duckStep.current++;
   };
-  const say = (text:string, speaker='DESK NOTES', object?:import('./DeskPropArt').DeskObjectId) => setLine({ id:++lineCounter.current, speaker, text, object, objectLit:effects.lamp, keyboardEvolved:object==='keyboard'?!effects.keyboard:effects.keyboard, portrait:!object && (speaker.includes('CLAUDE CODE') || speaker==='CORRAL')?'goat':undefined });
+  const say = (text:string, speaker='DESK NOTES', object?:import('./DeskPropArt').DeskObjectId) => setLine({ id:++lineCounter.current, speaker, text, object, objectLit:effects.lamp, keyboardEvolved:object==='keyboard'?!effects.keyboard:effects.keyboard, zacAwake:object==='zac'?!effects.zac:effects.zac, portrait:!object && (speaker.includes('CLAUDE CODE') || speaker==='CORRAL')?'goat':undefined });
   const [view, setView] = useState<View>('entry');
   const [app, setApp] = useState<'terminal' | 'browser' | 'arcade'>('terminal');
   const [browserPage, setBrowserPage] = useState<DeskBrowserPage>('preview');
   const [theme, setTheme] = useState<ThemeId>('farm');
-  const [effects, setEffects] = useState({ lamp: true, rocket: false, plant: false, coffee: false, window:false, keyboard:false });
+  const [effects, setEffects] = useState({ lamp: true, rocket: false, plant: false, coffee: false, window:false, keyboard:false, zac:false });
   useEffect(() => { voice.setStorm(!effects.lamp); }, [effects.lamp, voice.setStorm]);
   const [windowGift,setWindowGift] = useState(false);
   const viewport = useRef<HTMLDivElement>(null);
@@ -140,6 +140,7 @@ export function Desk() {
   };
   const openPage = (page: DeskBrowserPage) => { if (!shown) showRoom(); if (mobile || view==='device') { setView('monitor'); setLine(null); } setBrowserPage(page); setApp('browser'); };
   const changeEffect = (effect: DeskEffect) => {
+    if (effect === 'zac') say('Not ready to host yet.', 'ZAC / PROTOTYPE', 'zac');
     if (effect === 'lamp') say(effects.lamp ? 'Lights out. The screens keep watch while the rain passes.' : 'Lights on. A little warmth for the next idea.', 'DESK NOTES', 'lamp');
     if (effect === 'window' && !effects.lamp) {
       say(effects.window ? 'The silhouette slips back into the rain. Just you, the screen, and the night shift.' : 'A quiet silhouette waits beyond the glass. Probably another night-shift neighbour sheltering from the rain.', 'THE NIGHT WINDOW', 'window');
@@ -151,7 +152,7 @@ export function Desk() {
     if (effect === 'keyboard') say(effects.keyboard ? 'Back to stock. Your wrists will remember this.' : 'Now you have a real keyboard.', 'KEYBOARD / ADVANTAGE 360', 'keyboard');
     setEffects(current => ({ ...current, [effect]: effect === 'rocket' ? true : !current[effect] }));
   };
-  const replay = () => {openingPending.current=false; celebrated.current=false; setCelebrating(false); voice.stopEffects(); demo.replay(); setTour('first-help'); setPreviewVisited(false); setApp('terminal'); setBrowserPage('preview'); enter(); };
+  const replay = () => {openingPending.current=false; celebrated.current=false; setCelebrating(false); voice.stopEffects(); setEffects(current => ({...current, zac:false})); demo.replay(); setTour('first-help'); setPreviewVisited(false); setApp('terminal'); setBrowserPage('preview'); enter(); };
   const blocked = demo.statuses.flatMap((status, index) => status === 'blocked' ? [DEMO_AGENTS[index].id] : []);
   const done = demo.statuses.flatMap((status, index) => status === 'done' ? [DEMO_AGENTS[index].id] : []);
   const notice = [...done.map(id => `${id} finished`), ...blocked.map(id => `${id} needs you`)].join(' · ');
@@ -172,7 +173,7 @@ export function Desk() {
           {(view==='monitor' && !mobile || view==='device') && <DeskMonitorSurround cameraKey={`${view}:${scale}:${size.width}:${size.height}`} style={surroundStyle} onExit={zoomMonitor} label={view==='device'?'Back to the desk from the Stream Deck surround':undefined} />}
           <div className="desk-ambient-wall" aria-hidden="true" style={{position:'absolute',inset:0,background:'#29353d'}} />
           <div className="desk-world"><div className="desk-scene" style={sceneStyle} inert={view==='entry'}>
-            <DeskArt mobile={mobile} onLightning={voice.lightning} backdrop={backdrop} lit={effects.lamp} rocketLaunched={effects.rocket} plantBloom={effects.plant} steam={effects.coffee} visitorVisible={effects.window} windowGift={windowGift} keyboardEvolved={effects.keyboard} />
+            <DeskArt mobile={mobile} onLightning={voice.lightning} backdrop={backdrop} lit={effects.lamp} rocketLaunched={effects.rocket} plantBloom={effects.plant} steam={effects.coffee} visitorVisible={effects.window} windowGift={windowGift} keyboardEvolved={effects.keyboard} zacAwake={effects.zac} />
             {view==='room' && !mobile && <DeskMonitorFrame scale={scale} disabled={!shown} zoomed={false} suggested={tour==='first-help' && shown} onToggle={zoomMonitor} />}
             {(!mobile || view==='room') && <div className="desk-screen-aperture" inert={mobile || !shown || view==='device'}>{shown && computer}</div>}
             {mobileRoom && <button className="desk-mobile-monitor-hit" type="button" aria-label="Focus illustrated monitor" onClick={zoomMonitor} style={{left:DESK_GEOMETRY.screen.x,top:DESK_GEOMETRY.screen.y,width:DESK_GEOMETRY.screen.width,height:DESK_GEOMETRY.screen.height}} />}

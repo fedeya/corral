@@ -4,7 +4,7 @@ import type { Species } from './shared';
 import './DeskDialogue.css';
 import { DeskObjectPortrait } from './DeskObjectPortrait';
 import type { DeskObjectId } from './DeskPropArt';
-export type DeskLine = { id:number; speaker:string; text:string; portrait?:Species; object?:DeskObjectId; objectLit?:boolean; keyboardEvolved?:boolean };
+export type DeskLine = { id:number; speaker:string; text:string; portrait?:Species; object?:DeskObjectId; objectLit?:boolean; keyboardEvolved?:boolean; zacAwake?:boolean };
 export function DeskDialogue({line,onDismiss,onBlip}:{line:DeskLine;onDismiss:()=>void;onBlip:(index:number)=>void}) {
   const [progress,setProgress]=useState({id:line.id,count:0});
   const [reduced,setReduced]=useState(()=>window.matchMedia('(prefers-reduced-motion: reduce)').matches);
@@ -30,7 +30,7 @@ export function DeskDialogue({line,onDismiss,onBlip}:{line:DeskLine;onDismiss:()
     return()=>clearTimeout(timer);
   },[line.id,line.text,count,reduced,typing,onBlip]);
   return <section className="desk-dialogue" aria-label="Desk dialogue">
-    <div className="desk-dialogue-portrait">{line.object ? <DeskObjectPortrait object={line.object} lit={line.objectLit} keyboardEvolved={line.keyboardEvolved}/> : line.portrait ? <span aria-hidden="true"><Critter species={line.portrait} size={80} animated={typing} /></span> : <span className="desk-dialogue-spark">✦</span>}</div>
+    <div className="desk-dialogue-portrait">{line.object ? <DeskObjectPortrait object={line.object} lit={line.objectLit} keyboardEvolved={line.keyboardEvolved} zacAwake={line.zacAwake}/> : line.portrait ? <span aria-hidden="true"><Critter species={line.portrait} size={80} animated={typing} /></span> : <span className="desk-dialogue-spark">✦</span>}</div>
     <div className="desk-dialogue-body"><span className="desk-dialogue-speaker">{line.speaker}</span>
       <span className="desk-sr-only desk-dialogue-message" role="status" aria-live="polite" aria-atomic="true">{line.text}</span>
       <button type="button" className="desk-dialogue-text" aria-label={typing ? 'Complete dialogue' : 'Dismiss dialogue'} onClick={advance}>

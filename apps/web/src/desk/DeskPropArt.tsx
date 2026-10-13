@@ -1,10 +1,27 @@
 import { DeskKeyboard } from './DeskKeyboard';
-import type { DESK_OBJECTS } from './desk-contract';
+import { DeskZacEyes } from './DeskZacEyes';
+import { ZAC_HEAD, type DESK_OBJECTS } from './desk-contract';
 export type DeskObjectId = (typeof DESK_OBJECTS)[number]['id'];
 const ink='#182128',cream='#e0d6b2',olive='#77926b';
 /** Shared original prop fragments: no neighbouring room paint. */
-export function DeskPropArt({object,lit=true,keyboardEvolved=false}:{object:DeskObjectId;lit?:boolean;keyboardEvolved?:boolean}) {
+export function DeskPropArt({object,lit=true,keyboardEvolved=false,zacAwake=false}:{object:DeskObjectId;lit?:boolean;keyboardEvolved?:boolean;zacAwake?:boolean}) {
   switch(object) {
+    case 'zac': return <g data-prop-art="zac" data-awake={zacAwake} transform={`translate(${ZAC_HEAD.x} ${ZAC_HEAD.y})`}>
+      {/* Original little workbench head, drawn on the room's stepped pixel grid. */}
+      <path d="M8 88h82v6H8z" fill="#352c29" />
+      <path d="M36 76h28v14H36z" fill={ink} />
+      <path d="M40 78h20v10H40z" fill="#859083" />
+      <path d="M20 8h56v8h12v16h8v28h-8v16H76v8H20v-8h-8V60H4V32h8V16h8z" fill={ink} />
+      <path d="M20 16h56v8h4v44h-4v8H20v-8h-4V24h4z" fill="#b5a583" />
+      <path d="M20 16h56v8H24v12h-8V24h4z" fill={cream} />
+      <path d="M72 24h8v44h-4v8H24v-8h48z" fill="#8b957c" />
+      <path d="M8 36h8v20H8zM80 36h12v20H80z" fill="#697065" />
+      <path d="M28 32h36v4h8v24h-8v4H28v-4h-8V36h8z" fill="#26333b" />
+      <DeskZacEyes awake={zacAwake}/>
+      <path d="M40 56h12v4H40z" fill="#859083" />
+      <path d="M28 88h44v6H28z" fill={ink} />
+      <path d="M32 88h36v2H32z" fill="#8b957c" />
+    </g>;
     case 'poster': return <g data-prop-art="poster">
       <path d="M84 74h188v224H84z" fill="#19232a" />
       <rect x="92" y="82" width="172" height="208" fill="#b5a583" />

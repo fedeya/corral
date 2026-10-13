@@ -4,8 +4,10 @@ export const DESK_GEOMETRY = {
   device: { x: 1110, y: 784, width: 300, height: 210 },
 } as const;
 export type DeskBrowserPage = 'preview' | 'install' | 'source' | 'about';
-export type DeskEffect = 'lamp' | 'rocket' | 'plant' | 'coffee' | 'window' | 'keyboard';
+export type DeskEffect = 'lamp' | 'rocket' | 'plant' | 'coffee' | 'window' | 'keyboard' | 'zac';
+export const ZAC_HEAD = { x: 294, y: 748, width: 98, height: 104 } as const;
 export const DESK_OBJECTS = [
+  { id: 'zac', label: 'Wake the Zac prototype', ...ZAC_HEAD },
   { id: 'lamp', label: 'Switch the desk lamp', x: 135, y: 415, width: 140, height: 350 },
   { id: 'coffee', label: 'Take a mate break', x: 365, y: 880, width: 90, height: 130 },
   { id: 'duck', label: 'Ask the rubber duck', x: 995, y: 875, width: 85, height: 80 },

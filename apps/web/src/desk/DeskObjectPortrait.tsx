@@ -1,5 +1,6 @@
 import {DeskPropArt,type DeskObjectId} from './DeskPropArt';
 const portraits:Record<DeskObjectId,{label:string;box:string}>={
+  zac:{label:'Zac prototype',box:'290 744 106 112'},
   duck:{label:'Rubber duck',box:'994 880 86 72'},
   coffee:{label:'Yerba mate',box:'364 854 90 144'},
   lamp:{label:'Desk lamp',box:'64 420 212 344'},
@@ -14,7 +15,7 @@ const portraits:Record<DeskObjectId,{label:string;box:string}>={
   keyboard:{label:'Mechanical keyboard',box:'440 796 542 166'},
   window:{label:'Window neighbour',box:'1432 332 108 136'},
 };
-export function DeskObjectPortrait({object,lit=true,keyboardEvolved=false}:{object:DeskObjectId;lit?:boolean;keyboardEvolved?:boolean}) {
+export function DeskObjectPortrait({object,lit=true,keyboardEvolved=false,zacAwake=false}:{object:DeskObjectId;lit?:boolean;keyboardEvolved?:boolean;zacAwake?:boolean}) {
   const {label,box}=portraits[object];
-  return <svg className="desk-dialogue-object-art" role="img" aria-label={`${object==='window'&&!lit?'Night silhouette':label} portrait`} viewBox={box} preserveAspectRatio="xMidYMid meet" focusable="false"><DeskPropArt object={object} lit={lit} keyboardEvolved={keyboardEvolved}/></svg>;
+  return <svg className="desk-dialogue-object-art" role="img" aria-label={`${object==='window'&&!lit?'Night silhouette':label} portrait`} viewBox={box} preserveAspectRatio="xMidYMid meet" focusable="false"><DeskPropArt object={object} lit={lit} keyboardEvolved={keyboardEvolved} zacAwake={zacAwake}/></svg>;
 }
