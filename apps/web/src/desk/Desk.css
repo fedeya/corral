@@ -19,7 +19,8 @@
 .desk-menu>div { position:absolute; right:0; top:46px; width:200px; background:#302925; border:1px solid #907655; box-shadow:4px 5px #17161a; padding:8px; }
 .desk-menu a,.desk-menu button { width:100%; min-height:44px; padding:10px!important; color:#e5d7bb!important; background:transparent!important; text-align:left; border:0!important; }
 .desk-header button span { margin-left:10px; color:#c7d89b; }
-.desk-page button:focus-visible,.desk-page a:focus-visible { outline:3px solid #f1d49b; outline-offset:4px; }
+.desk-page :is(button,a,input,select,textarea,summary,[tabindex]):focus-visible { outline:3px solid #f1d49b; outline-offset:2px; }
+.desk-page .desk-browser-document :is(button,a,input,select,textarea,[tabindex]):focus-visible { outline-color:#58452c; }
 .desk-experience { position:absolute; inset:0; background:#242328; }
 .desk-viewport { position:absolute; inset:0; overflow:clip; width:100%; isolation:isolate; background:#242328; }
 .desk-world { position:relative; height:100%; overflow:hidden; }
@@ -85,4 +86,8 @@
  .desk-footer { padding:26px 18px; flex-direction:column; gap:10px; }.desk-footer-links { justify-content:flex-start; gap:13px; }.desk-footer .xp-art-credits { text-align:left; }
 }
 @keyframes desk-monitor-arrive { 0% { opacity:0; transform:translateY(18px) scale(.96); } 35% { opacity:.3; } 100% { opacity:1; transform:none; } }
-@media(prefers-reduced-motion:reduce) { .desk-scene,.desk-page[data-view=monitor] .desk-scene { transition:none; }.desk-device-call,.desk-mobile-workspace { animation:none; } }
+/* Scoped safety net includes portraits and future decorative effects; canvas
+   sprites keep their existing static-paint/no-RAF reduced-motion path. */
+@media(prefers-reduced-motion:reduce) {
+ .desk-page *, .desk-page *::before, .desk-page *::after { animation:none!important; transition:none!important; scroll-behavior:auto!important; }
+}

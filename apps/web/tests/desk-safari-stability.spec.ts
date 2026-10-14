@@ -72,7 +72,7 @@ test('repeated entry, cameras, props, mute and visibility do not reload or leak 
   for (let cycle = 0; cycle < 12; cycle++) {
     await page.getByRole('button', { name: 'Zoom in on the Stream Deck', exact: true }).tap({ force: true });
     await expect(page.locator('.desk-page')).toHaveAttribute('data-view', 'device');
-    await page.getByRole('button', { name: 'Desk key api', exact: true }).tap({ force: true });
+    await page.getByRole('button', { name: /^Desk key api —/, exact: true }).tap({ force: true });
     await expect(page.locator('.desk-page')).toHaveAttribute('data-view', 'monitor');
     await page.getByRole('button', { name: 'Open arcade', exact: true }).tap({ force: true });
     await page.getByRole('button', { name: 'Open terminal', exact: true }).tap({ force: true });
@@ -120,7 +120,7 @@ test('animated camera stress stays in one document with sound muted', async ({ p
     await page.waitForTimeout(1700);
     await page.getByRole('button', { name: 'Zoom in on the Stream Deck', exact: true }).tap();
     await page.waitForTimeout(1700);
-    await page.getByRole('button', { name: 'Desk key api', exact: true }).tap();
+    await page.getByRole('button', { name: /^Desk key api —/, exact: true }).tap();
     await expect(page.locator('.desk-page')).toHaveAttribute('data-view', 'monitor');
     await page.getByRole('button', { name: 'Back to the desk ↙', exact: true }).tap();
     await expect(page.locator('.desk-page')).toHaveAttribute('data-view', 'room');

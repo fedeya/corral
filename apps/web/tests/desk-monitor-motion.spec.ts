@@ -11,7 +11,7 @@ for (const reducedMotion of ['no-preference', 'reduce'] as const) test(`mobile k
   await page.waitForTimeout(reducedMotion === 'reduce' ? 0 : 700);
   const scene = page.locator('.desk-scene');
   const before = await scene.evaluate(element => getComputedStyle(element).transform);
-  await page.getByRole('button', { name: 'Help agent api', exact: true }).tap();
+  await page.getByRole('button', { name: /^Help agent api —/, exact: true }).tap();
   const panel = page.getByRole('region', { name: 'Readable mobile monitor' });
   await expect(panel).toBeVisible();
   const appearance = () => panel.evaluate(element => ({ opacity: Number(getComputedStyle(element).opacity), transform: getComputedStyle(element).transform, animations: element.getAnimations().filter(animation => animation.playState === 'running').length }));

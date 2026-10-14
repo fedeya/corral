@@ -5,7 +5,7 @@ test('the device reveals a whole illustrated workstation without forcing interru
   const desk = page.locator('.desk-page');
   await expect(desk).toHaveAttribute('data-view', 'entry', { timeout: 3000 });
   await page.getByRole('button',{name:'Step inside',exact:true}).click();
-  await page.getByRole('button', { name: 'Help agent api', exact: true }).click();
+  await page.getByRole('button', { name: /^Help agent api —/, exact: true }).click();
   await expect(desk).toHaveAttribute('data-view', 'room');
   const terminal = page.getByRole('region', { name: 'Coding agent demo terminal' });
   await expect(terminal).toContainText('Claude Code');
@@ -19,7 +19,7 @@ test('the device reveals a whole illustrated workstation without forcing interru
   const noticeBox=await page.locator('.desk-room-notice').boundingBox();
   expect(noticeBox!.width).toBeLessThanOrEqual(1);
   expect(noticeBox!.height).toBeLessThanOrEqual(1);
-  await expect(page.getByRole('button',{name:'Desk key web',exact:true})).toHaveAttribute('data-status','blocked');
+  await expect(page.getByRole('button',{name:/^Desk key web —/,exact:true})).toHaveAttribute('data-status','blocked');
   await page.getByRole('button', { name: 'Push Corral dial 1', exact: true }).click();
   await expect(page.locator('.desk-computer')).toHaveAttribute('data-app', 'terminal');
   await expect(terminal).toContainText('Codex');

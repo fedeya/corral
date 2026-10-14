@@ -5,9 +5,9 @@
 .desk-notes-layout nav { display:flex; flex-direction:column; gap:2px; border-right:1px solid #c9bba0; padding-right:12px; }
 .desk-notes-layout nav button { display:flex; align-items:center; gap:10px; text-align:left; border:0; border-bottom:1px solid #d5c8ac; background:transparent; padding:12px 7px; color:#6d5a43; min-height:52px; font-size:11px; }
 .desk-notes-layout nav button:hover,.desk-notes-layout nav button[aria-pressed=true] { color:#372d26; background:#dac8a4; }
-.desk-notes-layout nav small { display:block; font-size:8px; margin-bottom:5px; letter-spacing:.4px; color:#837252; }
+.desk-notes-layout nav small { display:block; font-size:8px; margin-bottom:5px; letter-spacing:.4px; color:#625033; }
 .desk-note-glyph { font-size:25px; min-width:28px; color:#937449; }
-.desk-note-topic { font-size:9px; letter-spacing:1px; color:#8a7655; }
+.desk-note-topic { font-size:9px; letter-spacing:1px; color:#625033; }
 .desk-notes-layout article h3 { font:32px/1.1 'VT323',monospace; margin:10px 0; color:#403328; }
 .desk-notes-layout article p { font-size:12px; line-height:1.8; }
 .desk-notes-layout .desk-note-summary { font-size:11px; color:#877052; }

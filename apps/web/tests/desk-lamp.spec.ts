@@ -33,7 +33,7 @@ for (const width of [390, 1440]) {
    await page.getByRole('button',{name:'Zoom in on the Stream Deck',exact:true}).click();
    await page.screenshot({path:info.outputPath('dark-device.png')});
   }
-  await page.getByRole('button',{name:'Desk key api',exact:true}).click();
+  await page.getByRole('button',{name:/^Desk key api —/,exact:true}).click();
   await expect(page.locator('.desk-page')).toHaveAttribute('data-view','monitor');
   await expect(page.getByRole('button',{name:'Open terminal',exact:true})).toBeVisible();
   await page.screenshot({path:info.outputPath(`dark-monitor-${width}.png`)});

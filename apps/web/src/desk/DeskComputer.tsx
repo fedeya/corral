@@ -20,7 +20,7 @@ type Props = {
 
 
 export function DeskComputer({ app, page, focused, statuses, progress, onFocus, onAnswer, onApp, onPage, suggestPreview=false, arcadeActive=false, onSound,completed=[] }: Props) {
-  return <section className="desk-computer" aria-label="Desk monitor" data-app={app}>
+  return <section className="desk-computer" tabIndex={-1} aria-label="Desk monitor" aria-description={`${app === 'terminal' ? 'Terminal' : app === 'browser' ? 'Browser' : 'Arcade'} application. Tab to use its controls.`} data-app={app}>
     <div className="desk-computer-menubar"><span>corral desktop <small>INTERACTIVE DEMO</small></span></div>
     <div className="desk-app-content"><div className="desk-app-window" hidden={app!=='terminal'}><AgentTerminal completed={completed.includes(focused)} focused={focused} statuses={statuses} progress={progress} onFocus={onFocus} onAnswer={onAnswer} /></div><section className="desk-browser" aria-label="Demo browser" hidden={app!=='browser'}>
       <div className="desk-browser-tabs">{(['preview', 'install', 'source', 'about'] as const).map(tab => <button type="button" key={tab} aria-pressed={page === tab} onClick={() => onPage(tab)}>{tab === 'preview' ? 'Field notes' : tab === 'install' ? 'Install Corral' : tab === 'source' ? 'Source' : 'Desk notes'}</button>)}</div>

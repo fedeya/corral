@@ -45,7 +45,7 @@ export function DeskDialogue({line,onDismiss,onBlip}:{line:DeskLine;onDismiss:()
   return <section ref={dialogue} tabIndex={-1} className="desk-dialogue" data-keyboard-origin={Boolean(keyboardOrigin.current)} aria-label="Desk dialogue">
     <div className="desk-dialogue-portrait">{line.object ? <DeskObjectPortrait object={line.object} lit={line.objectLit} keyboardEvolved={line.keyboardEvolved} zacAwake={line.zacAwake}/> : line.portrait ? <span aria-hidden="true"><Critter species={line.portrait} size={80} animated={typing} /></span> : <span className="desk-dialogue-spark">✦</span>}</div>
     <div className="desk-dialogue-body"><span className="desk-dialogue-speaker">{line.speaker}</span>
-      <span className="desk-sr-only desk-dialogue-message" role="status" aria-live="polite" aria-atomic="true">{line.text}</span>
+
       <button type="button" className="desk-dialogue-text" aria-label={typing ? 'Complete dialogue' : 'Dismiss dialogue'} onClick={advance}>
         <span className="desk-dialogue-typed" data-typing={typing} aria-hidden="true">{line.text.slice(0,count)}{typing && <i className="desk-dialogue-cursor" />}</span><span className="desk-dialogue-continue" aria-hidden="true">{typing ? '···' : '▾'}</span>
       </button>

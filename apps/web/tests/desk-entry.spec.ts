@@ -15,7 +15,7 @@ test('Step inside starts the room soundtrack before the first spoken dialogue',a
   await expect(page.locator('.desk-dialogue')).toContainText('Psst');
   await expect.poll(()=>page.evaluate(()=>(window as unknown as {entryAudio:{blips:number}}).entryAudio.blips)).toBeGreaterThan(0);
   expect(await page.evaluate(()=>(window as unknown as {entryAudio:{starts:string[]}}).entryAudio.starts.every(state=>state==='running'))).toBe(true);
-  await page.getByRole('button',{name:'Help agent api',exact:true}).click();
+  await page.getByRole('button',{name:/^Help agent api —/,exact:true}).click();
   await expect(page.locator('.desk-page')).toHaveAttribute('data-view',page.viewportSize()!.width<=760?'monitor':'room');
 });
 
