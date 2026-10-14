@@ -153,6 +153,7 @@ export function Desk() {
     return () => window.removeEventListener('keydown', keydown);
   }, [line, view, demo.reveal]);
   const focus = (index: number) => { voice.play('tap'); demo.focus(index); setApp('terminal'); setLine(null); if(mobile || view!=='device') setView(!shown && !mobile?'room':'monitor'); if(!shown && !mobile) say('There I am, in herdr. Tap the monitor for a closer look.', 'API / CLAUDE CODE'); };
+  const focusRoom = (index: number) => { demo.focus(index); setApp('terminal'); setLine(null); setView('room'); };
   const nextAgent = () => {voice.play('dial'); demo.urgent(); setApp('terminal'); setLine(null); if(mobile || view!=='device') setView(!shown && !mobile?'room':'monitor'); };
   const openApp = (next:'terminal'|'browser'|'arcade') => {voice.play(next==='browser'?'browser':'tap');if(next==='terminal') demo.focus(demo.focused);setApp(next); setLine(null);};
   const openArcade = () => { setApp('arcade'); setView('monitor'); setLine(null); };
@@ -203,7 +204,7 @@ export function Desk() {
             {view==='room' && !mobile && <DeskMonitorFrame scale={scale} disabled={!shown} zoomed={false} suggested={tour==='first-help' && shown} onToggle={zoomMonitor} />}
             {(!mobile || view==='room') && <div className="desk-screen-aperture" inert={mobile || !shown || view==='device'}>{shown && computer}</div>}
             {mobileRoom && <button className="desk-mobile-monitor-hit" type="button" aria-label="Focus illustrated monitor" onClick={zoomMonitor} style={{left:DESK_GEOMETRY.screen.x,top:DESK_GEOMETRY.screen.y,width:DESK_GEOMETRY.screen.width,height:DESK_GEOMETRY.screen.height}} />}
-            <DeskDevice active={view==='room' || view==='device' || view==='closeup'} celebrating={celebrating} statuses={demo.statuses} focused={demo.focused} theme={theme} closeup={!shown} interactive={view!=='monitor' && !mobileRoom} scale={scale} onFocus={focus} onUrgent={nextAgent} onTheme={() => setTheme(current => current === 'farm' ? 'kingdom' : 'farm')} onZoom={!mobile && view==='room'?zoomDevice:undefined} />
+            <DeskDevice active={view==='room' || view==='device' || view==='closeup'} celebrating={celebrating} statuses={demo.statuses} focused={demo.focused} theme={theme} closeup={!shown} interactive={view!=='monitor' && !mobileRoom} scale={scale} onFocus={focus} onFocusRoom={!mobile && view==='device'?focusRoom:undefined} onUrgent={nextAgent} onTheme={() => setTheme(current => current === 'farm' ? 'kingdom' : 'farm')} onZoom={!mobile && view==='room'?zoomDevice:undefined} />
             {mobileRoom && <button className="desk-mobile-device-hit" type="button" aria-label="Zoom in on the Stream Deck" onClick={zoomDevice} style={{left:DESK_GEOMETRY.device.x,top:DESK_GEOMETRY.device.y,width:DESK_GEOMETRY.device.width,height:Math.max(DESK_GEOMETRY.device.height,44/scale)}} />}
             <DeskObjects mobile={mobileRoom} scale={scale} onOpenPage={openPage} onEffect={changeEffect} onMessage={say} onInteract={voice.play} onDuck={askDuck} onArcade={openArcade} soundEnabled={voice.enabled && !voice.unavailable} disabled={!shown || view === 'monitor' || view==='device'} />
           </div></div>

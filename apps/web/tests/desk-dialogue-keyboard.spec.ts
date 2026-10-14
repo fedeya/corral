@@ -9,9 +9,31 @@ test('Space completes then dismisses dialogue without reactivating the focused p
   await page.keyboard.press('Space');
   await expect(page.locator('.desk-dialogue-typed')).toHaveAttribute('data-typing','false');
   await expect(page.locator('.desk-dialogue-typed')).toContainText('expected');
+  await expect(duck).toHaveCSS('outline-style','none');
+  await expect(page.locator('.desk-dialogue')).toBeFocused();
+  await page.keyboard.press('Space');
+  await expect(page.locator('.desk-dialogue')).toHaveCount(0);
+  await expect(duck).not.toBeFocused();
+  await expect(duck).toHaveCSS('outline-style','none');
+});
+
+test('keyboard-opened dialogue returns visible focus to its prop after Space dismissal',async({page})=>{
+  await page.goto('/');
+  await page.getByRole('button',{name:'Skip intro',exact:true}).click();
+  const duck=page.getByRole('button',{name:'Ask the rubber duck',exact:true});
+  await duck.focus();
+  await page.keyboard.press('Tab');
+  await page.keyboard.press('Shift+Tab');
+  await expect(duck).toBeFocused();
+  await expect(duck).toHaveCSS('outline-style','solid');
+  await page.keyboard.press('Enter');
+  await page.keyboard.press('Space');
+  await expect(page.locator('.desk-dialogue-typed')).toHaveAttribute('data-typing','false');
+  await expect(page.locator('.desk-dialogue')).toBeFocused();
   await page.keyboard.press('Space');
   await expect(page.locator('.desk-dialogue')).toHaveCount(0);
   await expect(duck).toBeFocused();
+  await expect(duck).toHaveCSS('outline-style','solid');
 });
 
 test('Space stays an ordinary character inside field notes while a dialogue is open',async({page})=>{
