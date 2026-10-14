@@ -72,7 +72,11 @@ test('dialogue has one persistent full-line announcement independent of typewrit
   await expect(announcement).toHaveText('Psst… I’m adding keyboard shortcuts. Need your call on one thing. Tap my little !');
   await expect(page.locator('.desk-dialogue-typed')).toHaveAttribute('data-typing', 'true');
   await expect(page.locator('.desk-dialogue [role=status]')).toHaveCount(0);
-  await page.keyboard.press('Space'); await expect(page.locator('.desk-key').first()).toBeFocused();
+  await page.keyboard.press('Space');
+  await expect(page.locator('.desk-dialogue')).toBeFocused();
+  await expect(page.locator('.desk-dialogue')).toHaveCSS('outline-style', 'none');
+  await expect(page.locator('.desk-dialogue-typed')).toHaveAttribute('data-typing', 'false');
+  await expect(announcement).toHaveText('Psst… I’m adding keyboard shortcuts. Need your call on one thing. Tap my little !');
 });
 
 test('reduced motion disables zoom-surround fades too', async ({ page }) => {
