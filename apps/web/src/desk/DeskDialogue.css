@@ -1,4 +1,8 @@
 .desk-dialogue { position:absolute; bottom:14px; left:50%; translate:-50% 0; width:min(900px,calc(100% - 36px)); height:120px; display:flex; gap:18px; padding:15px 48px 15px 15px; background:#292522; color:#efe4cf; border:3px solid #bda47c; box-shadow:0 0 0 3px #211c1b,5px 6px #15131588,inset 0 0 0 2px #4d4035; z-index:12; }
+/* Space parks focus on this non-Tab region to avoid reactivating a prop. */
+.desk-dialogue:focus { outline:none; }
+.desk-dialogue[data-keyboard-origin=true]:focus-visible { outline:2px solid #f1d49b; outline-offset:-7px; }
+.desk-page .desk-dialogue-text:focus-visible,.desk-page .desk-dialogue-close:focus-visible { outline:2px solid #f1d49b; outline-offset:-2px; }
 .desk-dialogue-portrait { display:grid; place-items:center; width:84px; height:84px; flex-shrink:0; background:#3b322b; border:2px solid #76624e; overflow:hidden; }
 .desk-dialogue-spark { color:#d9b77c; font:46px 'VT323',monospace; }
 .desk-dialogue-body { flex:1; min-width:0; display:flex; flex-direction:column; }

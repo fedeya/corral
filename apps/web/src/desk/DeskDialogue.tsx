@@ -42,7 +42,7 @@ export function DeskDialogue({line,onDismiss,onBlip}:{line:DeskLine;onDismiss:()
     const timer=setTimeout(()=>{const next=count+1;setProgress({id:line.id,count:next});if(next%3===0 && /\S/.test(line.text[next-1])) onBlip(next);},32);
     return()=>clearTimeout(timer);
   },[line.id,line.text,count,reduced,typing,onBlip]);
-  return <section ref={dialogue} tabIndex={-1} className="desk-dialogue" aria-label="Desk dialogue">
+  return <section ref={dialogue} tabIndex={-1} className="desk-dialogue" data-keyboard-origin={Boolean(keyboardOrigin.current)} aria-label="Desk dialogue">
     <div className="desk-dialogue-portrait">{line.object ? <DeskObjectPortrait object={line.object} lit={line.objectLit} keyboardEvolved={line.keyboardEvolved} zacAwake={line.zacAwake}/> : line.portrait ? <span aria-hidden="true"><Critter species={line.portrait} size={80} animated={typing} /></span> : <span className="desk-dialogue-spark">✦</span>}</div>
     <div className="desk-dialogue-body"><span className="desk-dialogue-speaker">{line.speaker}</span>
       <span className="desk-sr-only desk-dialogue-message" role="status" aria-live="polite" aria-atomic="true">{line.text}</span>
