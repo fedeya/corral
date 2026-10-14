@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import type { CSSProperties } from 'react';
 import { TitleWorld } from './TitleWorld';
 import { DEMO_AGENTS } from './desk-demo';
@@ -5,12 +6,14 @@ import type { DemoStatus } from './desk-demo';
 import type { ThemeId } from './shared';
 import './DeskDevice.css';
 
-type Props = { active: boolean; celebrating?: boolean; statuses: DemoStatus[]; focused: number; theme: ThemeId; closeup: boolean; interactive: boolean; scale: number; onFocus: (index: number) => void; onUrgent: () => void; onTheme: () => void; onZoom?:()=>void };
-export function DeskDevice({ active, celebrating=false, statuses, focused, theme, closeup, interactive, scale, onFocus, onUrgent, onTheme, onZoom }: Props) {
+type Props = { active: boolean; celebrating?: boolean; statuses: DemoStatus[]; focused: number; theme: ThemeId; closeup: boolean; interactive: boolean; scale: number; onFocus: (index: number) => void; onFocusRoom?: (index: number) => void; onUrgent: () => void; onTheme: () => void; onZoom?:()=>void };
+export function DeskDevice({ active, celebrating=false, statuses, focused, theme, closeup, interactive, scale, onFocus, onFocusRoom, onUrgent, onTheme, onZoom }: Props) {
+  // dblclick is a MouseEvent even for compatibility events from touch/pen.
+  const pointerType = useRef<string | null>(null);
   return <section className="desk-device" inert={!interactive} aria-label="Corral on the illustrated Stream Deck Plus" style={{ '--desk-key-hit': `${Math.max(52, 44 / scale)}px` } as CSSProperties}>
     <div className="desk-device-wordmark"><strong>CORRAL</strong><span>STREAM DECK +</span></div>
     {onZoom && <button type="button" className="desk-device-zoom" aria-label="Zoom in on the Stream Deck" onClick={onZoom}><span aria-hidden="true">↗</span></button>}
-    <div className="desk-device-keys">{DEMO_AGENTS.map((agent, index) => <button type="button" key={agent.id} disabled={!interactive || closeup && index !== 0} onClick={() => onFocus(index)} aria-label={closeup && index === 0 ? 'Help agent api' : `Desk key ${agent.id}`} aria-pressed={focused === index && !closeup} data-celebrating={celebrating && index===0} data-status={statuses[index]} className="desk-key">
+    <div className="desk-device-keys">{DEMO_AGENTS.map((agent, index) => <button type="button" key={agent.id} disabled={!interactive || closeup && index !== 0} onPointerDown={event => { pointerType.current = event.pointerType; }} onClick={() => onFocus(index)} onDoubleClick={() => { if(pointerType.current === 'mouse') onFocusRoom?.(index); }} aria-label={closeup && index === 0 ? 'Help agent api' : `Desk key ${agent.id}`} aria-pressed={focused === index && !closeup} data-celebrating={celebrating && index===0} data-status={statuses[index]} className="desk-key">
       <TitleWorld active={active} variant={index} theme={theme} needsHelp={statuses[index] === 'blocked'} resting={statuses[index] === 'idle' || statuses[index] === 'done'} />
       <span className="desk-key-name">{agent.id}</span>{statuses[index] === 'blocked' && <span className="desk-key-alert" aria-hidden="true">!</span>}{statuses[index] === 'done' && <span className="desk-key-check" aria-hidden="true">✓</span>}
     </button>)}</div>
