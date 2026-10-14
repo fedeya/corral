@@ -42,13 +42,13 @@
 .desk-browser-tabs { display:flex; flex-shrink:0; background:#314139; padding:7px 9px 0; gap:4px; }
 .desk-browser-tabs button { background:#3c4b42; color:#c7d0b8; border:0; padding:8px 17px; font-size:11px; }
 .desk-browser-tabs button[aria-pressed=true] { color:#2c3b32; background:#e7dfc8; }
-.desk-address { display:flex; gap:10px; align-items:center; flex-shrink:0; margin:8px 13px; padding:5px 10px; border:1px solid #b9b49b; color:#66715a; background:#f1ebd7; font-size:10px; }
+.desk-address { display:flex; gap:10px; align-items:center; flex-shrink:0; margin:8px 13px; padding:5px 10px; border:1px solid #b9b49b; color:#566149; background:#f1ebd7; font-size:10px; }
 .desk-address>span:last-child { margin-left:auto; font-size:8px; color:#7c8270; }
 .desk-browser-document { flex:1; min-height:0; overflow:auto; padding:18px 25px 24px; overscroll-behavior:contain; }
 .desk-browser h2 { font:400 29px/1.2 'VT323',monospace; color:#283c32; margin:8px 0 14px; letter-spacing:.2px; }
 .desk-browser p { font:12px/1.8 'IBM Plex Mono',monospace; margin:8px 0 16px; max-width:650px; }
 .desk-browser a { color:#37563f; text-decoration:underline; text-underline-offset:3px; }
-.desk-browser-eyebrow { font-size:9px; letter-spacing:1px; color:#6c7259; }
+.desk-browser-eyebrow { font-size:9px; letter-spacing:1px; color:#566149; }
 .desk-browser-note { color:#787c64; font-size:10px!important; }
 .desk-browser-link { display:inline-flex; align-items:center; min-height:44px; margin:7px 0 14px; padding:10px 15px; background:#324637; border:0; color:#ebe7c8!important; text-decoration:none!important; }
 .desk-browser .xp-install { margin-top:20px; border:1px solid #707e60; background:#25372a; color:#e2e7c4; }

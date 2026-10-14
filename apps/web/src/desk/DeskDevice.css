@@ -12,6 +12,7 @@
 .desk-device .desk-key[aria-pressed=true] { border-color:#a8b794; box-shadow:0 0 0 1px #c6cfaa; }.desk-device .desk-key:not(:disabled):hover { border-color:#dacd97; }
 .desk-device .desk-key:focus-visible { outline:3px solid #faeab0; outline-offset:3px; }
 .desk-device .reveal-world-screen { position:static; transform:none; display:block; width:100%; height:100%; image-rendering:pixelated; border-radius:0; }
+.desk-key-status { position:absolute; top:2px; left:3px; font:6px 'IBM Plex Mono',monospace; color:#eee0c4; background:#10261e; padding:1px; }
 .desk-key-name { position:absolute; bottom:2px; left:4px; font:7px 'IBM Plex Mono',monospace; color:#b2c59b; text-shadow:1px 1px #11261e; }
 .desk-key-alert { position:absolute; right:3px; top:2px; padding:0 4px; background:#dfc390; color:#4b312a; font:15px 'VT323',monospace; box-shadow:2px 2px #080e1255; animation:desk-attention 1.8s steps(2) infinite; }
 .desk-key-check { position:absolute; right:4px; top:3px; color:#daeec3; font-size:12px; }

@@ -33,7 +33,7 @@ test('a background completion leaves the browser alone and opening that agent cl
   await page.getByRole('button',{name:'Skip intro',exact:true}).click();
   await page.getByRole('button',{name:'Open browser',exact:true}).click();
   await page.clock.fastForward(26000);
-  const auth=page.getByRole('button',{name:'Desk key auth',exact:true});
+  const auth=page.getByRole('button',{name:/^Desk key auth —/,exact:true});
   await expect(auth).toHaveAttribute('data-status','done');
   await expect(page.locator('.desk-page')).toHaveAttribute('data-view','room');
   await expect(page.locator('.desk-computer')).toHaveAttribute('data-app','browser');

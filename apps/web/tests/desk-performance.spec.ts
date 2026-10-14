@@ -43,7 +43,7 @@ test('TitleWorld retires RAF under reduced motion, off camera and hidden, then r
   expect(await pending()).toBe(0);
   await page.emulateMedia({ reducedMotion: 'no-preference' });
   await expect.poll(pending).toBe(8);
-  await page.getByRole('button', { name: 'Desk key api', exact: true }).click();
+  await page.getByRole('button', { name: /^Desk key api —/, exact: true }).click();
   await expect(page.locator('.desk-page')).toHaveAttribute('data-view', 'monitor');
   await expect.poll(pending).toBe(0);
   await page.getByRole('button', { name: 'Back to the desk ↙', exact: true }).click();

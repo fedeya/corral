@@ -43,6 +43,17 @@ export function Desk() {
   };
   const say = (text:string, speaker='DESK NOTES', object?:import('./DeskPropArt').DeskObjectId) => setLine({ id:++lineCounter.current, speaker, text, object, objectLit:effects.lamp, keyboardEvolved:object==='keyboard'?!effects.keyboard:effects.keyboard, zacAwake:object==='zac'?!effects.zac:effects.zac, portrait:!object && (speaker.includes('CLAUDE CODE') || speaker==='CORRAL')?'goat':undefined });
   const [view, setView] = useState<View>('entry');
+  const focusOrigin = useRef<{ element: HTMLElement; label: string | null } | null>(null);
+  const previousCamera = useRef<View>('entry');
+  const previousApp = useRef('terminal');
+  const changeView = (next: View) => {
+    if (next !== view && next !== 'room') {
+      const element = document.activeElement;
+      focusOrigin.current = element instanceof HTMLElement && element !== document.body
+        ? { element, label: element.getAttribute('aria-label') } : null;
+    }
+    setView(next);
+  };
   const [app, setApp] = useState<'terminal' | 'browser' | 'arcade'>('terminal');
   const [browserPage, setBrowserPage] = useState<DeskBrowserPage>('preview');
   const [theme, setTheme] = useState<ThemeId>('farm');
@@ -100,6 +111,35 @@ export function Desk() {
     return () => clearTimeout(timer);
   }, [effects.rocket]);
 
+  useLayoutEffect(() => {
+    const cameraChanged = previousCamera.current !== view;
+    const appChanged = previousApp.current !== app;
+    previousCamera.current = view;
+    previousApp.current = app;
+    // Status/progress updates never move reading focus. Arcade owns its game focus.
+    if (!cameraChanged && !appChanged || view === 'entry') return;
+    const root = viewport.current?.closest('.desk-page');
+    if (!root) return;
+    const eligible = (element: HTMLElement | null): element is HTMLElement => !!element &&
+      element.isConnected && !element.closest('[inert],[hidden]') &&
+      !element.matches(':disabled') && element.getClientRects().length > 0;
+    let target: HTMLElement | null = null;
+    if (view === 'room' && cameraChanged) {
+      const origin = focusOrigin.current;
+      target = origin?.element ?? null;
+      // Frame/overview controls remount when leaving zoom; recover their identity.
+      if (!eligible(target) && origin?.label) target = Array.from(root.querySelectorAll<HTMLElement>('[aria-label]'))
+        .find(element => element.getAttribute('aria-label') === origin.label && eligible(element)) ?? null;
+      if (!eligible(target)) target = root.querySelector<HTMLElement>('.desk-camera-controls button,.desk-monitor-frame');
+      focusOrigin.current = null;
+    } else if ((view === 'device' || view === 'closeup') && cameraChanged) {
+      target = root.querySelector<HTMLElement>('.desk-key:not(:disabled)');
+    } else if ((view === 'monitor' || view === 'room') && app !== 'arcade') {
+      target = root.querySelector<HTMLElement>('.desk-computer');
+    }
+    if (eligible(target)) target.focus({ preventScroll: true });
+  }, [view, app]);
+
   const mobileRoom = mobile && view==='room';
   const fit = Math.min(size.width / DESK_GEOMETRY.width, size.height / DESK_GEOMETRY.height);
   // Cover every camera target at the widest (room) scale, including transitions.
@@ -123,7 +163,7 @@ export function Desk() {
     setLine(null);
     setOpeningCameraReady(window.matchMedia('(prefers-reduced-motion: reduce)').matches);
     setOpeningRun(current => current + 1);
-    setView('closeup');
+    changeView('closeup');
   };
   const showRoom = () => { openingPending.current=false;setOpeningCameraReady(true);demo.reveal(); setView('room'); setLine(null); };
   useLayoutEffect(() => {
@@ -152,19 +192,19 @@ export function Desk() {
     window.addEventListener('keydown', keydown);
     return () => window.removeEventListener('keydown', keydown);
   }, [line, view, demo.reveal]);
-  const focus = (index: number) => { voice.play('tap'); demo.focus(index); setApp('terminal'); setLine(null); if(mobile || view!=='device') setView(!shown && !mobile?'room':'monitor'); if(!shown && !mobile) say('There I am, in herdr. Tap the monitor for a closer look.', 'API / CLAUDE CODE'); };
-  const nextAgent = () => {voice.play('dial'); demo.urgent(); setApp('terminal'); setLine(null); if(mobile || view!=='device') setView(!shown && !mobile?'room':'monitor'); };
+  const focus = (index: number) => { voice.play('tap'); demo.focus(index); setApp('terminal'); setLine(null); if(mobile || view!=='device') changeView(!shown && !mobile?'room':'monitor'); if(!shown && !mobile) say('There I am, in herdr. Tap the monitor for a closer look.', 'API / CLAUDE CODE'); };
+  const nextAgent = () => {voice.play('dial'); demo.urgent(); setApp('terminal'); setLine(null); if(mobile || view!=='device') changeView(!shown && !mobile?'room':'monitor'); };
   const openApp = (next:'terminal'|'browser'|'arcade') => {voice.play(next==='browser'?'browser':'tap');if(next==='terminal') demo.focus(demo.focused);setApp(next); setLine(null);};
-  const openArcade = () => { setApp('arcade'); setView('monitor'); setLine(null); };
-  const zoomMonitor = () => {voice.play('monitor');setView(view==='monitor'||view==='device'?'room':'monitor'); setLine(null);};
-  const zoomDevice = () => {voice.play('monitor');setView('device');setLine(null);};
+  const openArcade = () => { setApp('arcade'); changeView('monitor'); setLine(null); };
+  const zoomMonitor = () => {voice.play('monitor');changeView(view==='monitor'||view==='device'?'room':'monitor'); setLine(null);};
+  const zoomDevice = () => {voice.play('monitor');changeView('device');setLine(null);};
   const answer = () => {
     if(demo.statuses[demo.focused]!=='blocked') return;
     voice.play('answer');demo.answer();
     if(demo.focused===0) {setTour('preview');say('Got it. I’ll handle the rest. Go read something in the browser.', 'API / CLAUDE CODE');}
     else if(demo.focused===1) {setTour('free');say('That’s Corral. Your agents work. You stay in your flow.', 'CORRAL');}
   };
-  const openPage = (page: DeskBrowserPage) => { if (!shown) showRoom(); if (mobile || view==='device') { setView('monitor'); setLine(null); } setBrowserPage(page); setApp('browser'); };
+  const openPage = (page: DeskBrowserPage) => { if (!shown) showRoom(); if (mobile || view==='device') { changeView('monitor'); setLine(null); } setBrowserPage(page); setApp('browser'); };
   const changeEffect = (effect: DeskEffect) => {
     if (effect === 'zac') say('Not ready to host yet.', 'ZAC / PROTOTYPE', 'zac');
     if (effect === 'lamp') say(effects.lamp ? 'Lights out. The screens keep watch while the rain passes.' : 'Lights on. A little warmth for the next idea.', 'DESK NOTES', 'lamp');
@@ -212,6 +252,7 @@ export function Desk() {
         </div>
         {shown && <p className="desk-room-notice desk-sr-only" role="status" aria-live="polite">{notice}</p>}
         {shown && (mobile || view==='monitor' || view==='device') && <div className="desk-camera-controls"><button type="button" onClick={zoomMonitor}>{view === 'monitor' || view==='device' ? 'Back to the desk ↙' : 'Focus monitor ↗'}</button></div>}
+        <span className="desk-sr-only desk-dialogue-message" role="status" aria-atomic="true">{line?.text ?? ''}</span>
         {line && <DeskDialogue line={line} onDismiss={() => setLine(null)} onBlip={voice.blip} />}
       </section>
       {mobile && view === 'monitor' && <section className="desk-mobile-workspace" aria-label="Readable mobile monitor"><label className="desk-mobile-select">Agent<select aria-label="Focused agent" value={demo.focused} onChange={event => focus(Number(event.target.value))}>{DEMO_AGENTS.map((agent,index) => <option key={agent.id} value={index}>{agent.id} / {demo.statuses[index]}</option>)}</select></label>{computer}</section>}

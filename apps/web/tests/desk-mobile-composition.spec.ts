@@ -17,7 +17,7 @@ for (const width of [320,390]) {
    const b=(await key.boundingBox())!;expect(b.width).toBeGreaterThanOrEqual(43.9);expect(b.height).toBeGreaterThanOrEqual(43.9);
    expect(await key.evaluate(el=>{const r=el.getBoundingClientRect();return el.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2));})).toBe(true);
   }
-  await page.getByRole('button',{name:'Desk key web',exact:true}).tap();
+  await page.getByRole('button',{name:/^Desk key web —/,exact:true}).tap();
   await expect(page.getByRole('region',{name:'Readable mobile monitor'})).toBeVisible();
   await expect(page.getByRole('combobox',{name:'Focused agent'})).toHaveValue('1');
   await page.getByRole('button',{name:'Back to the desk ↙',exact:true}).tap();

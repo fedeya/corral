@@ -4,7 +4,7 @@ test('the desk guides an uninterrupted preview-to-attention-to-agent loop',async
   test.setTimeout(45000);
   await page.goto('/?concept=desk');
   await page.getByRole('button',{name:'Step inside',exact:true}).click();
-  await page.getByRole('button',{name:'Help agent api',exact:true}).click();
+  await page.getByRole('button',{name:/^Help agent api —/,exact:true}).click();
   await page.locator('.desk-monitor-frame [data-edge=bottom]').click();
   await expect(page.locator('.desk-page')).toHaveAttribute('data-view','monitor');
   await page.getByRole('button',{name:'Yes, keep it'}).click();
@@ -21,7 +21,7 @@ test('the desk guides an uninterrupted preview-to-attention-to-agent loop',async
   await expect(page.locator('.desk-page')).toHaveAttribute('data-view',camera!);
   await expect(page.getByRole('searchbox',{name:'Search field notes'})).toHaveValue('gravity');
   await page.getByRole('button',{name:'Back to the desk from the monitor surround'}).click({position:{x:8,y:180}});
-  await page.getByRole('button',{name:'Desk key web',exact:true}).click();
+  await page.getByRole('button',{name:/^Desk key web —/,exact:true}).click();
   await expect(page.getByRole('region',{name:'Coding agent demo terminal'})).toHaveAttribute('data-focused','web');
   await page.getByRole('button',{name:'Yes, keep it'}).click();
   await expect(page.locator('.desk-dialogue')).toContainText('Your agents work. You stay in your flow.');
