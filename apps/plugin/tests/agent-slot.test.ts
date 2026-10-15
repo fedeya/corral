@@ -1,4 +1,4 @@
-import { test, mock, afterAll } from "bun:test";
+import { test, mock, afterAll, spyOn } from "bun:test";
 import assert from "node:assert/strict";
 import { mkdtempSync, copyFileSync, chmodSync, writeFileSync, readFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
@@ -172,12 +172,19 @@ test("SDK short release never focuses a pane that vanished while pressed", async
 	assert.equal(state.agentAt(0)?.paneId, "A", "test setup must finish refreshing the new roster before keyDown");
 	writeFileSync(process.env.CORRAL_TEST_FOCUS!, "");
 	const alerts = keys[0]!.alerts;
-	await plugin.dispatch("onKeyDown", keys[0]);
-	roster(["B"]);
-	await refreshFixture();
-	await plugin.dispatch("onKeyUp", keys[0]);
-	assert.equal(focuses(), "");
-	assert.equal(keys[0]!.alerts, alerts + 1);
+	// Real subprocess polls can outlast the hold threshold; keep this gesture explicitly short.
+	const clock = spyOn(performance, "now").mockReturnValue(0);
+	try {
+		await plugin.dispatch("onKeyDown", keys[0]);
+		roster(["B"]);
+		await refreshFixture();
+		clock.mockReturnValue(100);
+		await plugin.dispatch("onKeyUp", keys[0]);
+		assert.equal(focuses(), "");
+		assert.equal(keys[0]!.alerts, alerts + 1);
+	} finally {
+		clock.mockRestore();
+	}
 });
 test("SDK two-device strips focus only agents on that device's resolved keys", async () => {
 	roster(["A", "B"]);
