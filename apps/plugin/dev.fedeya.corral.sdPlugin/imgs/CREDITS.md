@@ -1,6 +1,3 @@
-action-cloud.svg and src/cloud-render.ts cloud character: original Corral pixel art, MIT project license.
-No Cursor logo or third-party cloud artwork is used.
-
 goat-sheet.png: "LPC Goat" by bluecarrot16 (https://opengameart.org/content/lpc-goat),
 based on "LPC Style Farm Animals" by Daniel Eddeland (daneeklu). License: CC-BY 3.0 / GPL 2.0+.
 

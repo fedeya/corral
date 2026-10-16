@@ -87,6 +87,12 @@ async function handlerFixture() {
 	const { readFileSync, writeFileSync } = await import("node:fs");
 	const root = process.env.CORRAL_PET_ROOT!;
 	const scenario = process.env.CORRAL_PET_SCENARIO;
+	if (scenario === "legacy-cloud-env") {
+		// Old launch configuration must not reserve a dead strip region or make requests.
+		process.env.CURSOR_CLOUD_AGENT_ID = "bc-synthetic";
+		process.env.CURSOR_API_KEY = "synthetic-not-a-credential";
+		globalThis.fetch = Object.assign(async () => { throw new Error("No network in a local strip fixture"); }, { preconnect: globalThis.fetch.preconnect });
+	}
 	mock.module(process.env.CORRAL_PET_SDK!, () => ({
 		SingletonAction: class {},
 		default: { logger: { warn() {}, error() {} }, settings: { getGlobalSettings: async () => ({}), setGlobalSettings: async () => {} } },
@@ -209,6 +215,7 @@ function runHandler(scenario = "hold") {
 }
 
 test("real touch handler pets instead of focusing or changing canonical state", () => runHandler());
+test("left strip remains pettable with legacy cloud launch configuration", () => runHandler("legacy-cloud-env"));
 test("real hold handler ignores a stale pane absent from the live roster", () => runHandler("stale"));
 test("real long touch works in Showcase while short touch still cannot focus", () => runHandler("showcase"));
 test("short touch retains the original herdr focus path", () => runHandler("short"));

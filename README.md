@@ -113,17 +113,8 @@ Disconnected/held touches cannot focus; Showcase keeps the safe alias but disabl
 
 Long-touch a visible character to show three original pixel hearts for one second. Short touches retain their usual
 focus behavior. Petting also works in Showcase, never changes an agent's state, and stays local to the touched device.
-Effects expire without replaying and are cleared when a pane disappears or the theme changes. Passive cloud and
-beacon overlays take precedence over characters underneath them.
-
-### Optional Cursor Cloud Agent
-
-Add the **Cursor Cloud Agent** key to monitor one existing remote agent. Provide `CURSOR_CLOUD_AGENT_ID` and
-`CURSOR_API_KEY` to the plugin's launch environment; see [configuration and current API contract](apps/plugin/CURSOR-CLOUD.md).
-The key and a passive cloud in the left strip segment follow the latest run independently of local herdr, with
-read-only polling and backoff. Releasing the dedicated key revalidates and opens only that configured Cursor page.
-Showcase hides the cloud name and blocks opening. Disconnects show **UNKNOWN**, never a retained success.
-No tasks are created, cancelled or approved. Authenticated API access and physical hardware need separate verification.
+Effects expire without replaying and are cleared when a pane disappears or the theme changes. The attention beacon
+takes precedence over characters underneath it.
 
 ## Showcase / Vidriera (camera mode)
 

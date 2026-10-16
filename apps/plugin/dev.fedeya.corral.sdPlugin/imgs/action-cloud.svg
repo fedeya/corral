@@ -1,7 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 36 36" shape-rendering="crispEdges">
-<!-- Original Corral stepped cloud critter; no Cursor trademark artwork. -->
-<rect width="36" height="36" rx="3" fill="#1d2b53"/>
-<path fill="#76c8ff" d="M15 8h6v2h4v2h2v2h3v2h2v8h-2v2h-5v2h-4v3h-3v-3h-3v3h-3v-5H6v-2H4v-8h2v-2h5v-2h2v-2h2z"/>
-<path fill="#1d2b53" d="M11 18h2v3h-2zm12 0h2v3h-2z"/>
-<path fill="#fff1e8" d="M17 3h2v3h-2zm-2 3h6v1h-6z"/>
-</svg>
