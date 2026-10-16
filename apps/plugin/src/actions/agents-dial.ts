@@ -8,6 +8,8 @@ import streamDeck, {
 	type WillDisappearEvent,
 } from "@elgato/streamdeck";
 import { type Agent, focusAgent } from "../herdr";
+import { cursorCloud, type CursorCloud } from "../cursor-cloud";
+import { drawCloudStrip } from "../cloud-render";
 import { drawText, drawTextCentered, FONT_3X5, FONT_5X7, textWidth } from "../pixel";
 import { P } from "../render";
 import { HEIGHT, SEGMENT, WIDTH, type Scene } from "../scene";
@@ -20,6 +22,7 @@ export class AgentsDial extends SingletonAction {
 	override readonly manifestId = "dev.fedeya.corral.dial";
 
 	#unsubscribe: (() => void) | null = null;
+	#uncloud: (() => void) | null = null;
 	#images = new Map<string, string>();
 	#lastStep = -1;
 	#lastAgents: unknown = null;
@@ -27,11 +30,15 @@ export class AgentsDial extends SingletonAction {
 	#lastLook = "";
 	#lastLayout = "";
 	#scenes = new Map<string, { themeId: string; scene: Scene }>();
+	constructor(readonly cloud: CursorCloud = cursorCloud) {
+		super();
+	}
 
 	override onWillAppear(): void {
 		this.#lastStep = -1;
 		this.#images.clear();
 		this.#unsubscribe ??= state.subscribe(() => this.#render());
+		this.#uncloud ??= this.cloud.subscribe(() => this.#render());
 		this.#render();
 	}
 
@@ -44,6 +51,8 @@ export class AgentsDial extends SingletonAction {
 			if (this.#dials().length === 0) {
 				this.#unsubscribe?.();
 				this.#unsubscribe = null;
+				this.#uncloud?.();
+				this.#uncloud = null;
 				this.#images.clear();
 			}
 		});
@@ -61,9 +70,12 @@ export class AgentsDial extends SingletonAction {
 	}
 
 	override async onTouchTap(ev: TouchTapEvent): Promise<void> {
+		const column = ev.action.coordinates.column;
+		const [, tapY] = ev.payload.tapPos;
+		// Passive cloud UI never falls through to a local animal, including long touches.
+		if (this.cloud.snapshot.configured && column === 0 && tapY >= 40 && tapY <= 65) return;
 		if (!state.canFocus) return;
 		this.#render();
-		const column = ev.action.coordinates.column;
 		const scene = this.#scene(ev.action.device.id);
 		scene.render(state.error ? [] : state.visible(ev.action.device.id), Math.floor(state.frame / 2));
 		await this.#focus(ev.action, scene.agentAt(column * SEGMENT + ev.payload.tapPos[0]));
@@ -103,7 +115,7 @@ export class AgentsDial extends SingletonAction {
 
 		// The corral animates at half the key frame rate; data changes still render immediately.
 		const step = Math.floor(state.frame / 2);
-		const look = `${state.theme.id}:${state.themeBanner}:${state.layoutVersion}:${state.showcase}:${state.error}`;
+		const look = `${state.theme.id}:${state.themeBanner}:${state.layoutVersion}:${state.showcase}:${state.error}:${this.cloud.version}`;
 		const layout = JSON.stringify(dials.map(({ id, device, coordinates }) => [id, device.id, coordinates.column, coordinates.row]));
 		if (step === this.#lastStep && state.agents === this.#lastAgents && state.page === this.#lastPage && look === this.#lastLook && layout === this.#lastLayout) {
 			return;
@@ -135,6 +147,8 @@ export class AgentsDial extends SingletonAction {
 				scene.rect(x, 64, w, 2, P.yellow);
 				drawTextCentered(scene, banner, 38, 3, P.white, P.black, FONT_5X7);
 			}
+
+			drawCloudStrip(scene, this.cloud.snapshot, state.showcase);
 
 			for (const action of dials.filter((a) => a.device.id === deviceId)) {
 				const column = Math.max(0, Math.min(3, action.coordinates.column));

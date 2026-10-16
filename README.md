@@ -86,6 +86,15 @@ one ordered key roster/page (device ID, then row and column); each device's stri
 animation and tap targets. A pane can be pinned once across that roster. Duplicate pane/action IDs are first-wins.
 Multi-actions and keys without physical coordinates are excluded.
 
+### Optional Cursor Cloud Agent
+
+Add the **Cursor Cloud Agent** key to monitor one existing remote agent. Provide `CURSOR_CLOUD_AGENT_ID` and
+`CURSOR_API_KEY` to the plugin's launch environment; see [configuration and current API contract](apps/plugin/CURSOR-CLOUD.md).
+The key and a passive cloud in the left strip segment follow the latest run independently of local herdr, with
+read-only polling and backoff. Releasing the dedicated key revalidates and opens only that configured Cursor page.
+Showcase hides the cloud name and blocks opening. Disconnects show **UNKNOWN**, never a retained success.
+No tasks are created, cancelled or approved. Authenticated API access and physical hardware need separate verification.
+
 ## Showcase / Vidriera (camera mode)
 
 Drag the optional **Showcase / Vidriera** action from the Corral category onto a spare key. Press it before filming.
