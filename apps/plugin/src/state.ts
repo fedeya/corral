@@ -21,6 +21,7 @@ let themeIndex = 0;
 let themeChangedAt = 0;
 let themeLoaded = false;
 const listeners = new Set<() => void>();
+const presentationListeners = new Set<() => void>();
 const showcase = new Showcase();
 let focusBlockedUntil = 0;
 let focusEpoch = 0;
@@ -29,6 +30,11 @@ export type Slot = { column: number; row: number };
 export type Visible = Slot & { agent: Agent };
 
 export const state = {
+	/** Presentation-only controls must work without starting the local herdr poll. */
+	subscribePresentation(listener: () => void): () => void {
+		presentationListeners.add(listener);
+		return () => { presentationListeners.delete(listener); };
+	},
 	get showcase() {
 		return showcase.active;
 	},
@@ -108,6 +114,17 @@ export const state = {
 	visible(deviceId?: string): Visible[] {
 		return layout.visible(deviceId).map((slot) => ({ ...slot, agent: showcase.project(slot.agent)! }));
 	},
+	/** Projected, distinct blocked panes absent from this device's actual resolved keys. */
+	offscreenBlocked(deviceId: string): Agent[] {
+		if (error) return [];
+		const visible = new Set(this.visible(deviceId).map(({ agent }) => agent.paneId));
+		const seen = new Set<string>();
+		return agents.flatMap((agent) => {
+			if (seen.has(agent.paneId)) return [];
+			seen.add(agent.paneId);
+			return agent.status === "blocked" && !visible.has(agent.paneId) ? [showcase.project(agent)!] : [];
+		});
+	},
 	turnPage(delta: number) {
 		layout.turnPage(delta);
 		notify();
@@ -128,6 +145,7 @@ export const state = {
 
 function notify() {
 	for (const listener of listeners) listener();
+	for (const listener of presentationListeners) listener();
 }
 
 function refresh(): Promise<void> {

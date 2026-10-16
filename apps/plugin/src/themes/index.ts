@@ -1,14 +1,24 @@
 import type { Agent } from "../herdr";
+import { loadMascotPack } from "../mascot-pack";
 import { Canvas, drawText, drawTextCentered, FONT_3X5, hasImage } from "../pixel";
 import { P, SIZE, shade, showcaseMarker } from "../render";
 import { farm } from "./farm";
+import { createGuestTheme } from "./guest";
 import { KINGDOM_PROBE, kingdom } from "./kingdom";
+import { ramen } from "./ramen";
 import type { Theme } from "./types";
 
 export type { Theme } from "./types";
 
-/** Themes whose art is present; kingdom sprites are local-only (see themes/kingdom.ts). */
-export const THEMES: Theme[] = [farm, ...(hasImage(KINGDOM_PROBE) ? [kingdom] : [])];
+/** Load once per plugin lifetime, outside the native bundle; invalid/missing data leaves built-ins intact. */
+const mascot = loadMascotPack();
+/** Farm and original Ramen are built in; other themes require valid local artwork. */
+export const THEMES: Theme[] = [
+	farm,
+	ramen,
+	...(hasImage(KINGDOM_PROBE) ? [kingdom] : []),
+	...(mascot.pack ? [createGuestTheme(mascot.pack)] : []),
+];
 
 const cache = new Map<string, string>();
 

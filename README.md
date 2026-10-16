@@ -49,6 +49,20 @@ night.
 
 <img src="docs/media/farm.gif" alt="Farm theme" width="640">
 
+### Ramen / Cocina
+
+An included, original pixel-art kitchen: chefs carry steaming stockpots while working, open recipe books when
+blocked, and serve finished ramen with a checkmark. Idle chefs put their utensils away; unknown states show `?`.
+Aprons keep the agent's identity colour. No downloaded sprites or invented cooking-progress percentages.
+See [Ramen theme](docs/ramen-theme.md).
+
+### Invitado: your own mascot
+
+Install a local two-frame, five-status PNG atlas and attribution JSON, restart Corral, and **INVITADO** joins the theme
+cycle. The original MIT **Luma** example is included under `examples/mascot-packs/luma`; follow
+[mascot pack installation and format](docs/mascot-packs.md). Packs are data only, live outside the plugin bundle,
+and cannot execute code. Invalid or missing packs leave the built-in themes available.
+
 Want to make one? See **[Adding a theme](docs/adding-a-theme.md)**. It's one file, and there's a working template to
 start from.
 
@@ -59,6 +73,7 @@ start from.
 | **Tap a key** | On release, focus that agent in herdr and bring the terminal forward |
 | **Hold a key for at least 500 ms, then release** | Pin/unpin that agent to that physical action key, without focusing |
 | **Tap the touch strip** | Focus the critter you tapped |
+| **Long-touch a character on the strip** | Pet it: one second of pixel hearts, without focusing or changing task state |
 | **Push any dial** | Jump to the agent that needs you most |
 | **Turn dials 1–3** | Page through agents when there are more than keys |
 | **Turn dial 4** | Switch theme |
@@ -85,6 +100,30 @@ keys configured anywhere, the strip retains its first-eight-agent preview and pa
 one ordered key roster/page (device ID, then row and column); each device's strip shows only its own keys, with separate
 animation and tap targets. A pane can be pinned once across that roster. Duplicate pane/action IDs are first-wins.
 Multi-actions and keys without physical coordinates are excluded.
+
+### Offscreen attention beacon
+
+The rightmost strip segment shows a beacon when blocked agents are absent from that device's current keys,
+including when every key is pinned. The count includes distinct hidden panes, and the displayed target stays stable
+across priority reordering. Tap the beacon to focus exactly that still-blocked hidden agent without moving pins or
+pages. If the target disappeared or became visible, the tap does not silently redirect to another agent.
+Disconnected/held touches cannot focus; Showcase keeps the safe alias but disables opening.
+
+### Petting
+
+Long-touch a visible character to show three original pixel hearts for one second. Short touches retain their usual
+focus behavior. Petting also works in Showcase, never changes an agent's state, and stays local to the touched device.
+Effects expire without replaying and are cleared when a pane disappears or the theme changes. Passive cloud and
+beacon overlays take precedence over characters underneath them.
+
+### Optional Cursor Cloud Agent
+
+Add the **Cursor Cloud Agent** key to monitor one existing remote agent. Provide `CURSOR_CLOUD_AGENT_ID` and
+`CURSOR_API_KEY` to the plugin's launch environment; see [configuration and current API contract](apps/plugin/CURSOR-CLOUD.md).
+The key and a passive cloud in the left strip segment follow the latest run independently of local herdr, with
+read-only polling and backoff. Releasing the dedicated key revalidates and opens only that configured Cursor page.
+Showcase hides the cloud name and blocks opening. Disconnects show **UNKNOWN**, never a retained success.
+No tasks are created, cancelled or approved. Authenticated API access and physical hardware need separate verification.
 
 ## Showcase / Vidriera (camera mode)
 

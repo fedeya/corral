@@ -16,6 +16,16 @@
 	"Nodejs": { "Version": "20" },
 	"Actions": [
 		{
+			"UUID": "dev.fedeya.corral.cloud",
+			"Name": "Cursor Cloud Agent",
+			"Tooltip": "Read-only cloud run monitor; release to open your configured Cursor agent (disabled in Showcase)",
+			"Icon": "imgs/action-cloud",
+			"Controllers": ["Keypad"],
+			"SupportedInMultiActions": false,
+			"UserTitleEnabled": false,
+			"States": [{ "Image": "imgs/action-cloud", "ShowTitle": false }]
+		},
+		{
 			"UUID": "dev.fedeya.corral.showcase",
 			"Name": "Showcase / Vidriera",
 			"Tooltip": "Camera-safe labels and no terminal focusing; press again to resume",

@@ -8,6 +8,9 @@ import streamDeck, {
 	type WillDisappearEvent,
 } from "@elgato/streamdeck";
 import { type Agent, focusAgent } from "../herdr";
+import { cursorCloud, type CursorCloud } from "../cursor-cloud";
+import { drawCloudStrip } from "../cloud-render";
+import { type BlockedBeacon, OffscreenBeacon, beaconContains, drawBlockedBeacon } from "../offscreen-beacon";
 import { drawText, drawTextCentered, FONT_3X5, FONT_5X7, textWidth } from "../pixel";
 import { P } from "../render";
 import { HEIGHT, SEGMENT, WIDTH, type Scene } from "../scene";
@@ -20,6 +23,7 @@ export class AgentsDial extends SingletonAction {
 	override readonly manifestId = "dev.fedeya.corral.dial";
 
 	#unsubscribe: (() => void) | null = null;
+	#uncloud: (() => void) | null = null;
 	#images = new Map<string, string>();
 	#lastStep = -1;
 	#lastAgents: unknown = null;
@@ -27,11 +31,17 @@ export class AgentsDial extends SingletonAction {
 	#lastLook = "";
 	#lastLayout = "";
 	#scenes = new Map<string, { themeId: string; scene: Scene }>();
+	#beacon = new OffscreenBeacon();
+	#renderedBeacons = new Map<string, BlockedBeacon>();
+	constructor(readonly cloud: CursorCloud = cursorCloud) {
+		super();
+	}
 
 	override onWillAppear(): void {
 		this.#lastStep = -1;
 		this.#images.clear();
 		this.#unsubscribe ??= state.subscribe(() => this.#render());
+		this.#uncloud ??= this.cloud.subscribe(() => this.#render());
 		this.#render();
 	}
 
@@ -44,6 +54,8 @@ export class AgentsDial extends SingletonAction {
 			if (this.#dials().length === 0) {
 				this.#unsubscribe?.();
 				this.#unsubscribe = null;
+				this.#uncloud?.();
+				this.#uncloud = null;
 				this.#images.clear();
 			}
 		});
@@ -61,12 +73,40 @@ export class AgentsDial extends SingletonAction {
 	}
 
 	override async onTouchTap(ev: TouchTapEvent): Promise<void> {
+		const deviceId = ev.action.device.id;
+		const column = ev.action.coordinates.column;
+		const [tapX, tapY] = ev.payload.tapPos;
+		if (!Number.isFinite(tapX) || !Number.isFinite(tapY) || tapX < 0 || tapX >= SEGMENT || tapY < 0 || tapY >= HEIGHT) return;
+		if (ev.action.device.isConnected === false) return;
+		const x = column * SEGMENT + tapX;
+		// Passive cloud UI never falls through to a local animal, including long touches.
+		if (this.cloud.snapshot.configured && column === 0 && tapY >= 40 && tapY <= 65) return;
+		// Resolve the banner the user saw BEFORE rendering can replace a vanished target.
+		const beacon = this.#renderedBeacons.get(deviceId);
+		if (beacon && beaconContains(x, tapY)) {
+			if (ev.payload.hold || !state.canFocus || state.error) return;
+			const agent = state.offscreenBlocked(deviceId).find((agent) => agent.paneId === beacon.agent.paneId);
+			if (agent) await this.#focus(ev.action, agent);
+			return; // A stale/disabled banner must never fall through to a character or another pane.
+		}
+		// Petting is presentation-only and remains available in Showcase.
+		if (ev.payload.hold) {
+			if (state.error) return;
+			const scene = this.#scene(deviceId);
+			scene.render(state.visible(deviceId), Math.floor(state.frame / 2), undefined, state.showcase);
+			const agent = scene.agentAt(x);
+			if (agent && state.agents.some((a) => a.paneId === agent.paneId)) {
+				scene.pet(agent.paneId);
+				this.#lastStep = -1;
+				this.#render();
+			}
+			return;
+		}
 		if (!state.canFocus) return;
 		this.#render();
-		const column = ev.action.coordinates.column;
-		const scene = this.#scene(ev.action.device.id);
-		scene.render(state.error ? [] : state.visible(ev.action.device.id), Math.floor(state.frame / 2));
-		await this.#focus(ev.action, scene.agentAt(column * SEGMENT + ev.payload.tapPos[0]));
+		const scene = this.#scene(deviceId);
+		scene.render(state.error ? [] : state.visible(deviceId), Math.floor(state.frame / 2), undefined, state.showcase);
+		await this.#focus(ev.action, scene.agentAt(x));
 	}
 
 	async #focus(action: DialAction<JsonObject>, agent: Agent | undefined): Promise<void> {
@@ -103,7 +143,7 @@ export class AgentsDial extends SingletonAction {
 
 		// The corral animates at half the key frame rate; data changes still render immediately.
 		const step = Math.floor(state.frame / 2);
-		const look = `${state.theme.id}:${state.themeBanner}:${state.layoutVersion}:${state.showcase}:${state.error}`;
+		const look = `${state.theme.id}:${state.themeBanner}:${state.layoutVersion}:${state.showcase}:${state.error}:${this.cloud.version}`;
 		const layout = JSON.stringify(dials.map(({ id, device, coordinates }) => [id, device.id, coordinates.column, coordinates.row]));
 		if (step === this.#lastStep && state.agents === this.#lastAgents && state.page === this.#lastPage && look === this.#lastLook && layout === this.#lastLayout) {
 			return;
@@ -135,6 +175,15 @@ export class AgentsDial extends SingletonAction {
 				scene.rect(x, 64, w, 2, P.yellow);
 				drawTextCentered(scene, banner, 38, 3, P.white, P.black, FONT_5X7);
 			}
+
+			drawCloudStrip(scene, this.cloud.snapshot, state.showcase);
+			const beacon = this.#beacon.select(deviceId, state.offscreenBlocked(deviceId));
+			this.#renderedBeacons.delete(deviceId);
+			if (beacon && dials.some((action) => action.device.id === deviceId && action.coordinates.column === 3)) {
+				drawBlockedBeacon(scene, beacon, step);
+				this.#renderedBeacons.set(deviceId, beacon);
+			}
+
 
 			for (const action of dials.filter((a) => a.device.id === deviceId)) {
 				const column = Math.max(0, Math.min(3, action.coordinates.column));
