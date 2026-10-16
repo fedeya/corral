@@ -74,6 +74,11 @@ const TAG_MAX_TEXT = SEGMENT / 2 - 14;
 // Top-row keys tag on the upper line, bottom-row keys on the lower one, so neighbouring tags never line up.
 const TAG_Y = [2, 19];
 
+// Original pixel hearts, kept below both tag lines and above the actor's head.
+const HEART = [".##.##.", "#++#++#", "#h++++#", ".#+++#.", "..#+#..", "...#..."];
+const HEART_COLORS = { "#": hex("#903452"), "+": hex("#ff719c"), h: hex("#ffe3ed") };
+const HEARTS = [[-15, 3, 1], [0, 0, 2], [17, 5, 1]] as const;
+
 /**
  * Tags follow their figure across the whole segment; tags sharing a line live in different segments,
  * so they never overlap.
@@ -106,14 +111,17 @@ function tag(c: Canvas, p: Placed, head: number, frame: number, part: "pin" | "l
 export type Scene = {
 	/** Same skin, independent walkers and hit targets for another device. */
 	fork(): Scene;
+	/** A scene-local, one-second affection effect; never changes the agent. */
+	pet(paneId: string): void;
 	render(visible: Visible[], frame: number, hour?: number, showcase?: boolean): Canvas;
 	/** Returns the agent nearest to a tap at scene coordinate x, within the tapped segment. */
 	agentAt(x: number): Agent | undefined;
 };
 
-export function createScene(skin: Skin): Scene {
+export function createScene(skin: Skin, now: () => number = () => performance.now()): Scene {
 	const walkers = new Map<string, Walker>();
 	const backgrounds = new Map<string, Canvas>();
+	const pets = new Map<string, number>();
 	let lastFrame = -1;
 	let placed: Placed[] = [];
 
@@ -124,6 +132,7 @@ export function createScene(skin: Skin): Scene {
 
 		const alive = new Set(visible.map((v) => v.agent.paneId));
 		for (const id of walkers.keys()) if (!alive.has(id)) walkers.delete(id);
+		for (const id of pets.keys()) if (!alive.has(id)) pets.delete(id);
 
 		for (const v of visible) {
 			const home = `${v.column}:${v.row}`;
@@ -167,9 +176,14 @@ export function createScene(skin: Skin): Scene {
 	}
 
 	return {
-		fork: () => createScene(skin),
+		fork: () => createScene(skin, now),
+		pet(paneId) {
+			if (placed.some((p) => p.agent.paneId === paneId)) pets.set(paneId, now());
+		},
 		render(visible, frame, hour = new Date().getHours(), showcase = false) {
 			simulate(visible, frame);
+			const time = now();
+			for (const [id, started] of pets) if (time - started >= 1000) pets.delete(id);
 			const c = new Canvas(WIDTH, HEIGHT);
 			backdrop(hour, frame).data.copy(c.data);
 			skin.overlay?.(c, hour, frame);
@@ -187,6 +201,16 @@ export function createScene(skin: Skin): Scene {
 			const heads = placed.map((p) => {
 				const w = walkers.get(p.agent.paneId)!;
 				return skin.drawActor(c, { agent: p.agent, x: p.x, feet: p.feet, dir: w.dir, arrived: w.arrived, seed: w.seed }, frame);
+			});
+			placed.forEach((p, i) => {
+				const started = pets.get(p.agent.paneId);
+				if (started === undefined) return;
+				const rise = Math.floor((time - started) / 80);
+				for (const [offset, lift, scale] of HEARTS) {
+					const x = Math.round(Math.max(p.column * SEGMENT + 3, Math.min((p.column + 1) * SEGMENT - 3 - 7 * scale, p.x + offset - 3 * scale)));
+					const y = Math.max(36, heads[i]! - 14 - rise - lift);
+					c.pattern(HEART, x, y, scale, HEART_COLORS);
+				}
 			});
 			for (const part of ["pin", "label"] as const) {
 				placed.forEach((p, i) => tag(c, p, heads[i]!, frame, part));

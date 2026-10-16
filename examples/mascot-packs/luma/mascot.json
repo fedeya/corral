@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "name": "Luma — pocket greenhouse lantern",
+  "author": "Corral contributors",
+  "license": "MIT",
+  "atlas": "mascot.png",
+  "frameWidth": 32,
+  "frameHeight": 32
+}

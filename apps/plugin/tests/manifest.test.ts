@@ -1,5 +1,15 @@
 import { test, expect } from "bun:test";
 import { readFileSync, existsSync } from "node:fs";
+test("native action catalog exposes only local agent controls and Showcase", () => {
+	const root = `${process.cwd()}/dev.fedeya.corral.sdPlugin`;
+	const manifest = JSON.parse(readFileSync(`${root}/manifest.json`, "utf8"));
+	expect(manifest.Actions.map((action: { UUID: string }) => action.UUID)).toEqual([
+		"dev.fedeya.corral.showcase",
+		"dev.fedeya.corral.slot",
+		"dev.fedeya.corral.dial",
+	]);
+});
+
 test("showcase is registered as an optional native key with original icon", () => {
 	const root = `${process.cwd()}/dev.fedeya.corral.sdPlugin`;
 	const manifest = JSON.parse(readFileSync(`${root}/manifest.json`, "utf8"));
