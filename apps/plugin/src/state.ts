@@ -21,6 +21,7 @@ let themeIndex = 0;
 let themeChangedAt = 0;
 let themeLoaded = false;
 const listeners = new Set<() => void>();
+const presentationListeners = new Set<() => void>();
 const showcase = new Showcase();
 let focusBlockedUntil = 0;
 let focusEpoch = 0;
@@ -29,6 +30,11 @@ export type Slot = { column: number; row: number };
 export type Visible = Slot & { agent: Agent };
 
 export const state = {
+	/** Presentation-only controls must work without starting the local herdr poll. */
+	subscribePresentation(listener: () => void): () => void {
+		presentationListeners.add(listener);
+		return () => { presentationListeners.delete(listener); };
+	},
 	get showcase() {
 		return showcase.active;
 	},
@@ -128,6 +134,7 @@ export const state = {
 
 function notify() {
 	for (const listener of listeners) listener();
+	for (const listener of presentationListeners) listener();
 }
 
 function refresh(): Promise<void> {
