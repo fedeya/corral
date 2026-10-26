@@ -269,6 +269,34 @@ export function drawTextCentered(
 	drawText(canvas, text, Math.round((canvas.width - textWidth(text, scale, font)) / 2), y, scale, color, shadow, font);
 }
 
+/** Draws text shifted left by `offset` inside [x, x + width), repeating it after `gap` pixels so it loops seamlessly. */
+export function drawTextScrolling(
+	canvas: Canvas,
+	text: string,
+	x: number,
+	y: number,
+	width: number,
+	offset: number,
+	gap: number,
+	scale: number,
+	color: RGB,
+	shadow?: RGB,
+	font: Font = FONT_5X7,
+): void {
+	const height = (glyph("A", font).length + 1) * scale;
+	const strip = new Canvas(width, height);
+	const cycle = textWidth(text, scale, font) + gap;
+	drawText(strip, text, -offset, 0, scale, color, shadow, font);
+	drawText(strip, text, cycle - offset, 0, scale, color, shadow, font);
+	for (let dy = 0; dy < height; dy++) {
+		for (let dx = 0; dx < width; dx++) {
+			const i = (dy * width + dx) * 4;
+			if (strip.data[i + 3] === 0) continue;
+			canvas.set(x + dx, y + dy, [strip.data[i]!, strip.data[i + 1]!, strip.data[i + 2]!]);
+		}
+	}
+}
+
 /** Single line, cut with ".." if it doesn't fit. */
 export function fitText(text: string, maxWidth: number, scale: number, font: Font = FONT_5X7): string {
 	if (textWidth(text, scale, font) <= maxWidth) return text;

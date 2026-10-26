@@ -4,6 +4,8 @@ import { PNG } from "pngjs";
 const { renderKey } = await import("../src/themes");
 const { farm } = await import("../src/themes/farm");
 const { Showcase } = await import("../src/showcase");
+const { textWidth, FONT_3X5 } = await import("../src/pixel");
+const textWidthOf = (text: string) => textWidth(text, 2, FONT_3X5);
 const agent = {
 	paneId: "secret-pane",
 	workspace: "PRIVATE",
@@ -57,6 +59,32 @@ test("camera marker renders a legible double-scale SHOWCASE caption", async () =
 	const x = Math.round((120 - w) / 2);
 	drawText(expected, "SHOWCASE", x, 107, 2, P.yellow, undefined, FONT_3X5);
 	expect(c.crop(x, 107, w, 10).data.equals(expected.crop(x, 107, w, 10).data)).toBe(true);
+});
+test("long labels loop a marquee, holding to read and taking turns line by line", async () => {
+	const { labelOffsets } = await import("../src/render");
+	const long = { ...agent, subtitle: "Backfill to skip extraction and more" };
+	expect(labelOffsets("PRIVATE", "Short", 50)).toEqual([0, 0]);
+	expect(labelOffsets("PRIVATE", long.subtitle, 15)).toEqual([0, 0]);
+	expect(labelOffsets("PRIVATE", long.subtitle, 18)).toEqual([0, 8]);
+	// Without a subtitle the workspace wraps to two lines first and only scrolls past that.
+	expect(labelOffsets("name-parser-revalidate", undefined, 20)).toEqual([0, 0]);
+	const huge = "citation-processor-v2/01-events-schema-and-more";
+	expect(labelOffsets(huge, undefined, 18)).toEqual([8, 0]);
+	// A word that would split across the two lines scrolls instead.
+	expect(labelOffsets("coding-agents-stream-json-simulated-user", undefined, 18)).toEqual([8, 0]);
+	// Both overflow: the workspace takes its lap first while the subtitle holds, then they swap, and it loops.
+	expect(labelOffsets("name-parser-revalidate", long.subtitle, 18)).toEqual([8, 0]);
+	const titleLap = 16 + Math.ceil((textWidthOf("name-parser-revalidate") + 24) / 4);
+	expect(labelOffsets("name-parser-revalidate", long.subtitle, titleLap + 18)).toEqual([0, 8]);
+	const subtitleLap = 16 + Math.ceil((textWidthOf(long.subtitle) + 24) / 4);
+	expect(labelOffsets("name-parser-revalidate", long.subtitle, titleLap + subtitleLap + 18)).toEqual([8, 0]);
+
+	const band = (a: typeof agent, frame: number) =>
+		Buffer.from(png(renderKey(farm, a, frame, null)).data.subarray(94 * 120 * 4, 106 * 120 * 4));
+	expect(band(long, 0).equals(band(long, 10))).toBe(true);
+	expect(band(long, 0).equals(band(long, 30))).toBe(false);
+	const short = { ...agent, subtitle: "Short" };
+	expect(band(short, 0).equals(band(short, 40))).toBe(true);
 });
 
 const png = (url: string) => PNG.sync.read(Buffer.from(url.split(",")[1]!, "base64"));

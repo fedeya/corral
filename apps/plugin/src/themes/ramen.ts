@@ -154,7 +154,7 @@ function drawKey(agent: Agent, frame: number): Canvas {
 		utensils(c, 81, 72, 2);
 		if (agent.status === "unknown") drawBubble(c, 90, 4, QUESTION, P.silver);
 	}
-	label(c, agent.workspace, THEME[agent.status].text, agent.subtitle);
+	label(c, agent.workspace, THEME[agent.status].text, agent.subtitle, frame);
 	frameBorder(c, agent.focused ? P.white : shade(THEME[agent.status].bg, 0.7), 3);
 	return c;
 }

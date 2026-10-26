@@ -1,7 +1,7 @@
 import type { Agent } from "../herdr";
 import { loadMascotPack } from "../mascot-pack";
 import { Canvas, drawText, drawTextCentered, FONT_3X5, hasImage } from "../pixel";
-import { P, SIZE, shade, showcaseMarker } from "../render";
+import { labelOffsets, P, SIZE, shade, showcaseMarker } from "../render";
 import { farm } from "./farm";
 import { createGuestTheme } from "./guest";
 import { KINGDOM_PROBE, kingdom } from "./kingdom";
@@ -40,7 +40,7 @@ export function renderKey(
 	const id = error
 		? `error:${error}`
 		: agent
-			? `${theme.id}:${agent.status}:${agent.identity}:${agent.workspace}:${agent.subtitle}:${agent.focused}:${theme.keyFrame(agent, frame)}`
+			? `${theme.id}:${agent.status}:${agent.identity}:${agent.workspace}:${agent.subtitle}:${labelOffsets(agent.workspace, agent.subtitle, frame)}:${agent.focused}:${theme.keyFrame(agent, frame)}`
 			: "empty";
 	const cacheId = `${showcase}:${id}:pin=${pinned}`;
 	const hit = cache.get(cacheId);

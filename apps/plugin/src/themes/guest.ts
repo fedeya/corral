@@ -29,7 +29,7 @@ export function createGuestTheme(pack: MascotPack): Theme {
 			mascot(c, agent, frame, 60, 66, 56);
 			if (agent.status === "blocked") drawBubble(c, 92, 2, BANG, P.red);
 			if (agent.status === "done") drawBubble(c, 92, 2, CHECK, P.forest);
-			label(c, agent.workspace, colors.text, agent.subtitle);
+			label(c, agent.workspace, colors.text, agent.subtitle, frame);
 			frameBorder(c, agent.focused ? P.white : colors.accent, 3);
 			return c;
 		},

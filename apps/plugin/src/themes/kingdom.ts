@@ -223,7 +223,7 @@ function drawKey(agent: Agent, frame: number): Canvas {
 			break;
 	}
 
-	label(c, agent.workspace, THEME[agent.status].text, agent.subtitle);
+	label(c, agent.workspace, THEME[agent.status].text, agent.subtitle, frame);
 	frameBorder(c, agent.focused ? P.white : isIdle(agent.status) ? hex("#1a1a20") : shade(THEME[agent.status].bg, 0.7), 3);
 	return c;
 }

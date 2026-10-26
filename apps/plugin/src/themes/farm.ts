@@ -67,7 +67,7 @@ function drawKey(agent: Agent, frame: number): Canvas {
 			break;
 	}
 
-	label(c, agent.workspace, theme.text, agent.subtitle);
+	label(c, agent.workspace, theme.text, agent.subtitle, frame);
 	if (agent.focused) frameBorder(c, P.white, 3);
 	return c;
 }
